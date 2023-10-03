@@ -2,15 +2,9 @@
  * @author Petraller <me@petraller.com>
  */
 
-import Game from "./Petrallengine";
-import "./Math"
-import Node from "./nodes/Node";
-import Color from "./structures/Color";
-import Sprite from "./nodes/Sprite";
-import Input from "./systems/Input";
-import Vec2 from "./structures/Vec2";
+import * as Petrallengine from './Petrallengine'
 
-Game.create();
+Petrallengine.Game.create();
 
 // function _TEST<T>(actual: T, expected: T) {
 //     if (expected !== actual) {
@@ -46,48 +40,48 @@ Game.create();
 //     color(c1, c2, Color.slerp);
 // }
 
-class MyMover extends Node {
+class MyMover extends Petrallengine.Node {
     onUpdate(): void {
-        if (Input.isKey("KeyW")) {
-            this.position.translate(Vec2.up);
+        if (Petrallengine.Input.isKey("KeyW")) {
+            this.position.translate(Petrallengine.Vec2.up);
         }
-        if (Input.isKey("KeyS")) {
-            this.position.translate(Vec2.down);
+        if (Petrallengine.Input.isKey("KeyS")) {
+            this.position.translate(Petrallengine.Vec2.down);
         }
-        if (Input.isKey("KeyA")) {
-            this.position.translate(Vec2.left);
+        if (Petrallengine.Input.isKey("KeyA")) {
+            this.position.translate(Petrallengine.Vec2.left);
         }
-        if (Input.isKey("KeyD")) {
-            this.position.translate(Vec2.right);
+        if (Petrallengine.Input.isKey("KeyD")) {
+            this.position.translate(Petrallengine.Vec2.right);
         }
-        if (Input.isKey("KeyQ")) {
+        if (Petrallengine.Input.isKey("KeyQ")) {
             this.rotation--;
         }
-        if (Input.isKey("KeyE")) {
+        if (Petrallengine.Input.isKey("KeyE")) {
             this.rotation++;
         }
     };
 }
 
-class MyRainbow extends Sprite {
+class MyRainbow extends Petrallengine.Sprite {
     t: number = 0;
 
     onCreate(): void {
-        this.color = Color.red;
+        this.color = Petrallengine.Color.red;
     }
 
     onUpdate(): void {
-        this.t += Game.FRAME_TIME;
+        this.t += Petrallengine.Game.FRAME_TIME;
         if (this.t > 1)
             this.t -= 1;
-        this.color = Color.fromHSV(this.t, 1, 1);
+        this.color = Petrallengine.Color.fromHSV(this.t, 1, 1);
     }
 }
 
-const myMover = Game.root.createChild(MyMover);
+const myMover = Petrallengine.Game.root.createChild(MyMover);
 const myRainbow = myMover.createChild(MyRainbow);
 myRainbow.image = "assets/sprites/enemy_A.png";
-const myChild = myMover.createChild(Sprite);
-myChild.position = Vec2.right.scale(32);
+const myChild = myMover.createChild(Petrallengine.Sprite);
+myChild.position = Petrallengine.Vec2.right.scale(32);
 myChild.image = "assets/sprites/ship_B.png";
-myChild.color = Color.red;
+myChild.color = Petrallengine.Color.red;
