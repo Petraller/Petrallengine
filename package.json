@@ -1,4 +1,12 @@
 {
+  "name": "petrallengine",
+  "version": "0.0.0",
+  "description": "A JavaScript/TypeScript 2D game engine for HTML canvas.",
+  "author": {
+    "name": "Petraller",
+    "email": "me@petraller.com",
+    "url": "https://petraller.com/"
+  },
   "scripts": {
     "clean": "rm ./dist/*.*",
     "build": "parcel build",
