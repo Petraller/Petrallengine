@@ -5,7 +5,7 @@
 // Adds two arrays for the given base (10 or 16), returning the result.
 // This turns out to be the only "primitive" operation we need.
 function add(x: number[], y: number[], base: number) {
-    let z = [];
+    let z: number[] = [];
     let n = Math.max(x.length, y.length);
     let carry = 0;
     let i = 0;
@@ -41,7 +41,7 @@ function multiplyByNumber(num: number, x: number[], base: number) {
 
 function parseToDigitsArray(str: string, base: number) {
     let digits = str.split('');
-    let ary = [];
+    let ary: number[] = [];
     for (let i = digits.length - 1; i >= 0; i--) {
         let n = parseInt(digits[i], base);
         if (isNaN(n)) return null;
