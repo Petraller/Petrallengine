@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "clean": "rm ./dist/*.*",
+    "build": "parcel build",
+    "dev": "parcel ./src/index.html"
+  },
+  "source": "./src/Petrallengine.ts",
+  "main": "./dist/Petrallengine.js",
+  "devDependencies": {
+    "parcel": "^2.9.3"
+  }
+}
