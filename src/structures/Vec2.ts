@@ -4,11 +4,12 @@
 
 import '../Math';
 import ICopyable from './ICopyable';
+import IEquatable from './IEquatable';
 
 /**
  * Representation of a 2D vector.
  */
-export default class Vec2 implements ICopyable {
+export default class Vec2 implements ICopyable, IEquatable {
     /** The x-component. */
     x: number = 0;
     /** The y-component. */
@@ -20,6 +21,8 @@ export default class Vec2 implements ICopyable {
     }
 
     copy = () => new Vec2(this.x, this.y);
+    copyFrom = (v: Vec2) => { this.x = v.x; this.y = v.y; return this; };
+    equals = (v: Vec2) => this.x === v.x && this.y === v.y;
 
     /**
      * Returns the squared length of this vector.
@@ -58,13 +61,6 @@ export default class Vec2 implements ICopyable {
      * @returns This vector after normalizing.
      */
     normalize = () => { const l = this.length(); return this.scale(l == 0 ? 0 : 1 / l); };
-
-    /**
-     * Copies the value of another vector.
-     * @param v The other vector.
-     * @returns This vector after copying.
-     */
-    copyFrom = (v: Vec2) => { this.x = v.x; this.y = v.y; return this; };
 
     /**
      * Translates this vector by another vector.
@@ -118,6 +114,10 @@ export default class Vec2 implements ICopyable {
     static get down() { return new Vec2(0, 1); }
     /** @returns The up vector. */
     static get up() { return new Vec2(0, -1); }
+    /** @returns The negative infinity vector. */
+    static get negativeInfinity() { return new Vec2(-Infinity, -Infinity); }
+    /** @returns The infinity vector. */
+    static get infinity() { return new Vec2(Infinity, Infinity); }
 
     /**
      * Adds two vectors component-wise.

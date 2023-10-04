@@ -6,7 +6,9 @@ import Color from '../structures/Color';
 import Drawable from './Drawable';
 import Vec2 from '../structures/Vec2';
 
-/** A node that draws an image on the canvas. */
+/**
+ * A node that draws an image on the canvas.
+*/
 export default class Sprite extends Drawable {
     private static bitmapStore: Map<string, ImageBitmap> = new Map<string, ImageBitmap>();
     private static workingCanvas = new OffscreenCanvas(256, 256);

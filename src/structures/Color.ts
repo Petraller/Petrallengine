@@ -4,11 +4,12 @@
 
 import '../Math';
 import ICopyable from './ICopyable';
+import IEquatable from './IEquatable';
 
 /**
  * Representation of a RGBA color.
  */
-export default class Color implements ICopyable {
+export default class Color implements ICopyable, IEquatable {
     /** The red component. */
     r: number = 0;
     /** The green component. */
@@ -26,6 +27,8 @@ export default class Color implements ICopyable {
     }
 
     copy = () => new Color(this.r, this.g, this.b, this.a);
+    copyFrom = (c: Color) => { this.r = c.r; this.g = c.g; this.b = c.b, this.a = c.a; return this; };
+    equals = (c: Color) => this.r == c.r && this.g == c.g && this.b == c.b && this.a == c.a;
 
     /**
      * Converts the color to its #RRGGBBAA hexadecimal string representation.
@@ -113,19 +116,6 @@ export default class Color implements ICopyable {
             c1.g * u + c2.g * v,
             c1.b * u + c2.b * v,
             c1.a * u + c2.a * v);
-    }
-
-    /**
-     * Determines if two colors are equal.
-     * @param c1 The first color.
-     * @param c2 The second color.
-     * @returns Whether two colors are equal.
-     */
-    static equal(c1: Color, c2: Color) {
-        return c1.r == c2.r &&
-            c1.g == c2.g &&
-            c1.b == c2.b &&
-            c1.a == c2.a;
     }
 
     /**

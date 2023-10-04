@@ -11,4 +11,11 @@ export default interface ICopyable {
      * @returns The copy of the object.
      */
     copy(): ICopyable;
+
+    /**
+     * Copies the value of another object.
+     * @param other The other object.
+     * @returns This object after copying.
+     */
+    copyFrom(other: ICopyable): ICopyable;
 }
