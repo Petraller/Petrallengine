@@ -45,7 +45,6 @@ export default class Node {
             console.warn(`Avoid calling \`new Node\`, call \`Petrallengine.root.createChild\` instead`);
             console.trace(`\`new Node\` call occured here:`);
         }
-        this.onCreate?.call(this);
     }
 
     toString() { return `${this.name}#${this.id}`; }
@@ -107,6 +106,7 @@ export default class Node {
     createChild<T extends Node>(type: Constructor<T>) {
         const node = new type(this.createChild);
         node.parent = this;
+        node.onCreate?.call(node);
         return node;
     }
 
