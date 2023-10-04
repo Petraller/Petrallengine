@@ -49,6 +49,8 @@ export default class Node {
         this.onCreate?.call(this);
     }
 
+    toString() { return `${this.name}#${this.id}`; }
+
     /** The enabled state of this node. */
     get isEnabled() { return this._isEnabled; }
     set isEnabled(value: boolean) {
@@ -64,6 +66,11 @@ export default class Node {
     /** The parent node of this node. */
     get parent() { return this._parent; }
     set parent(value: Node | null) {
+        if (value && value.isDescendantOf(this)) {
+            // Hey stop that. No circular hierarchy pls
+            console.error(`Making \`${value.toString()}\` a parent of \`${this.toString()}\` will create a circular hierarchy`);
+            return;
+        }
         if (this._parent) {
             const i = this._parent.children.indexOf(this);
             if (i !== -1) {
@@ -145,6 +152,21 @@ export default class Node {
                 return result;
         }
         return null;
+    }
+
+    /**
+     * Determines if this node is a descendent of another node.
+     * @param node The other node.
+     * @returns Whether this node is a descendant.
+     */
+    isDescendantOf(node: Node) {
+        let curr = this.parent;
+        while (curr !== null) {
+            if (curr === node)
+                return true;
+            curr = curr.parent;
+        }
+        return false;
     }
 
     /**

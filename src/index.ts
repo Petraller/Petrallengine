@@ -81,9 +81,13 @@ class MyRainbow extends Petrallengine.Sprite {
 }
 
 const myMover = Petrallengine.Game.root.createChild(MyMover);
+myMover.name = "MyMover";
 const myRainbow = myMover.createChild(MyRainbow);
+myRainbow.name = "MyRainbow";
 myRainbow.image = "assets/sprites/enemy_A.png";
 const myChild = myMover.createChild(Petrallengine.Sprite);
+myChild.name = "MyChild";
 myChild.position = Petrallengine.Vec2.right.scale(32);
 myChild.image = "assets/sprites/ship_B.png";
 myChild.color = Petrallengine.Color.red;
+myMover.parent = myChild;
