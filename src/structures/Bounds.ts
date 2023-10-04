@@ -26,11 +26,10 @@ export default class Bounds implements ICopyable, IEquatable {
     equals = (other: Bounds) => this.min.equals(other.min) && this.max.equals(other.max);
 
     /**
-     * Updates this bounds based on a set of vertices and an optional velocity.
+     * Updates this bounds based on a set of vertices.
      * @param vertices The vertices.
-     * @param velocity The velocity.
      */
-    setVertices = (vertices: Vec2[], velocity?: Vec2) => {
+    fromVertices = (vertices: Vec2[]) => {
         this.min = Vec2.infinity;
         this.max = Vec2.negativeInfinity;
 
@@ -45,17 +44,11 @@ export default class Bounds implements ICopyable, IEquatable {
             if (vertex.y < this.min.y)
                 this.min.y = vertex.y;
         }
-
-        // Extend
-        if (velocity) {
-            this.extend(velocity);
-        }
     };
 
     /**
-     * Updates this bounds to contain a set of bounds with an optional velocity.
+     * Updates this bounds to contain a set of bounds.
      * @param boundses The bounds.
-     * @param velocity The velocity.
      */
     envelop = (boundses: Bounds[], velocity?: Vec2) => {
         this.min = Vec2.infinity;
@@ -71,11 +64,6 @@ export default class Bounds implements ICopyable, IEquatable {
                 this.max.y = bounds.max.y;
             if (bounds.min.y < this.min.y)
                 this.min.y = bounds.min.y;
-        }
-
-        // Extend
-        if (velocity) {
-            this.extend(velocity);
         }
     };
 
