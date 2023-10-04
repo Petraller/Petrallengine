@@ -2,7 +2,7 @@
  * @author Petraller <me@petraller.com>
  */
 
-import * as Petrallengine from './Petrallengine'
+import * as Petrallengine from './Petrallengine';
 
 Petrallengine.Game.create();
 
@@ -43,16 +43,16 @@ Petrallengine.Game.create();
 class MyMover extends Petrallengine.Node {
     onUpdate(): void {
         if (Petrallengine.Input.isKey("KeyW")) {
-            this.position.translate(Petrallengine.Vec2.up);
+            this.position.translate(Petrallengine.Vec2.up.scale(100 * Petrallengine.Game.deltaTime));
         }
         if (Petrallengine.Input.isKey("KeyS")) {
-            this.position.translate(Petrallengine.Vec2.down);
+            this.position.translate(Petrallengine.Vec2.down.scale(100 * Petrallengine.Game.deltaTime));
         }
         if (Petrallengine.Input.isKey("KeyA")) {
-            this.position.translate(Petrallengine.Vec2.left);
+            this.position.translate(Petrallengine.Vec2.left.scale(100 * Petrallengine.Game.deltaTime));
         }
         if (Petrallengine.Input.isKey("KeyD")) {
-            this.position.translate(Petrallengine.Vec2.right);
+            this.position.translate(Petrallengine.Vec2.right.scale(100 * Petrallengine.Game.deltaTime));
         }
         if (Petrallengine.Input.isKey("KeyQ")) {
             this.rotation--;
@@ -71,9 +71,11 @@ class MyRainbow extends Petrallengine.Sprite {
     }
 
     onUpdate(): void {
-        this.t += Petrallengine.Game.FRAME_TIME;
-        if (this.t > 1)
+        this.t += Petrallengine.Game.deltaTime;
+        if (this.t > 1) {
             this.t -= 1;
+        }
+        console.log(Petrallengine.Game.deltaTime);
         this.color = Petrallengine.Color.fromHSV(this.t, 1, 1);
     }
 }

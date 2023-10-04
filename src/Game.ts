@@ -13,12 +13,17 @@ import Node from './nodes/Node';
  * Call `Petrallengine.create(MY_CANVAS_ELEMENT)` to start building your 2D browser application.
  */
 export default class Game {
+    /** The build number. */
     static readonly BUILD = 1;
+    /** The version. */
     static readonly VERSION = "0.0.1";
+    /** The number of scheduled frame updates per second. */
     static readonly FRAME_RATE = 60;
+    /** The scheduled interval between frame updates in seconds. */
     static readonly FRAME_TIME = 1 / Game.FRAME_RATE;
 
-    private static gameTime = 0;
+    private static _deltaTime = Game.FRAME_TIME;
+    private static _time = 0;
     private static rootNode: Node = new Node(Game);
 
     /** The root node of the whole game. */
@@ -123,16 +128,23 @@ export default class Game {
             const tEnd = Date.now();
             const dt = tEnd - tStart;
             const wait = Math.max(ft - dt, 0);
-            Game.gameTime += dt + wait;
+            Game._time += (Game._deltaTime = dt + wait);
             setTimeout(gameLoop, wait);
         };
         gameLoop();
     }
 
     /**
-     * Returns the total elapsed game time.
+     * Returns the total elapsed game time in seconds.
      */
     static get time() {
-        return Game.gameTime;
+        return Game._time / 1000;
+    }
+
+    /**
+     * Returns the actual elapsed time for the frame in seconds.
+     */
+    static get deltaTime() {
+        return Game._deltaTime / 1000;
     }
 };
