@@ -4,7 +4,7 @@
 
 export * from "./Snowflake";
 export { default as Game } from "./Game";
-export { default as Drawable } from "./nodes/Drawable";
+export { default as IDrawable } from "./nodes/IDrawable";
 export { default as Node } from "./nodes/Node";
 export { default as Sprite } from "./nodes/Sprite";
 export { default as Color } from "./structures/Color";

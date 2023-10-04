@@ -3,7 +3,7 @@
  */
 
 import Camera from './systems/Camera';
-import Drawable from './nodes/Drawable';
+import IDrawable from './nodes/IDrawable';
 import Input from './systems/Input';
 import Node from './nodes/Node';
 
@@ -109,8 +109,8 @@ export default class Game {
                 context.scale(node.scale.x, node.scale.y);
 
                 // Draw drawables
-                if (node instanceof Drawable) {
-                    node.onDraw?.call(node, context);
+                if ('onDraw' in node && node.onDraw instanceof Function) {
+                    node.onDraw.call(node, context);
                 }
 
                 // Iterate children
