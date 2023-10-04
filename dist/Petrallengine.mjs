@@ -123,6 +123,12 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
         /** The x-component. */ this.x = 0;
         /** The y-component. */ this.y = 0;
         this.copy = ()=>new $8ec4c8ffa911853c$export$2e2bcd8739ae039(this.x, this.y);
+        this.copyFrom = (other)=>{
+            this.x = other.x;
+            this.y = other.y;
+            return this;
+        };
+        this.equals = (other)=>this.x === other.x && this.y === other.y;
         /**
      * Returns the squared length of this vector.
      * @returns The squared length of this vector.
@@ -154,15 +160,6 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
      */ this.normalize = ()=>{
             const l = this.length();
             return this.scale(l == 0 ? 0 : 1 / l);
-        };
-        /**
-     * Copies the value of another vector.
-     * @param v The other vector.
-     * @returns This vector after copying.
-     */ this.copyFrom = (v)=>{
-            this.x = v.x;
-            this.y = v.y;
-            return this;
         };
         /**
      * Translates this vector by another vector.
@@ -214,23 +211,29 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
         this.x = x;
         this.y = y;
     }
-    /** @returns The zero vector. */ static get zero() {
+    /** The zero vector. */ static get zero() {
         return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(0, 0);
     }
-    /** @returns The unit vector. */ static get one() {
+    /** The unit vector. */ static get one() {
         return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(1, 1);
     }
-    /** @returns The right vector. */ static get right() {
+    /** The right vector. */ static get right() {
         return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(1, 0);
     }
-    /** @returns The left vector. */ static get left() {
+    /** The left vector. */ static get left() {
         return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(-1, 0);
     }
-    /** @returns The down vector. */ static get down() {
+    /** The down vector. */ static get down() {
         return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(0, 1);
     }
-    /** @returns The up vector. */ static get up() {
+    /** The up vector. */ static get up() {
         return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(0, -1);
+    }
+    /** The negative infinity vector. */ static get negativeInfinity() {
+        return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(-Infinity, -Infinity);
+    }
+    /** The infinity vector. */ static get infinity() {
+        return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(Infinity, Infinity);
     }
     static #_ = (()=>{
         /**
@@ -353,6 +356,15 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
      * @param t The amount to interpolate by.
      * @returns The interpolated vector.
      */ this.lerp = (v1, v2, t)=>new $8ec4c8ffa911853c$export$2e2bcd8739ae039(Math.lerp(v1.x, v2.x, t), Math.lerp(v1.y, v2.y, t));
+    })();
+    static #_13 = (()=>{
+        /**
+     * Linearly interpolates from one vector to another.
+     * @param v1 The first vector.
+     * @param v2 The second vector.
+     * @param t The amount to interpolate by.
+     * @returns The interpolated vector.
+     */ this.lerpComponents = (v1, v2, t)=>new $8ec4c8ffa911853c$export$2e2bcd8739ae039(Math.lerp(v1.x, v2.x, t.x), Math.lerp(v1.y, v2.y, t.y));
     })();
 }
 
@@ -620,21 +632,24 @@ class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
 
 class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
     static #_ = (()=>{
-        this.BUILD = 1;
+        /** The build number. */ this.BUILD = 1;
     })();
     static #_1 = (()=>{
-        this.VERSION = "0.0.1";
+        /** The version. */ this.VERSION = "0.0.1";
     })();
     static #_2 = (()=>{
-        this.FRAME_RATE = 60;
+        /** The number of scheduled frame updates per second. */ this.FRAME_RATE = 60;
     })();
     static #_3 = (()=>{
-        this.FRAME_TIME = 1 / $05bad183ec6d4f44$export$2e2bcd8739ae039.FRAME_RATE;
+        /** The scheduled interval between frame updates in seconds. */ this.FRAME_TIME = 1 / $05bad183ec6d4f44$export$2e2bcd8739ae039.FRAME_RATE;
     })();
     static #_4 = (()=>{
-        this.gameTime = 0;
+        this._deltaTime = $05bad183ec6d4f44$export$2e2bcd8739ae039.FRAME_TIME;
     })();
     static #_5 = (()=>{
+        this._time = 0;
+    })();
+    static #_6 = (()=>{
         this.rootNode = new (0, $3f8760cc7c29435c$export$2e2bcd8739ae039)($05bad183ec6d4f44$export$2e2bcd8739ae039);
     })();
     /** The root node of the whole game. */ static get root() {
@@ -708,15 +723,20 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
             const tEnd = Date.now();
             const dt = tEnd - tStart;
             const wait = Math.max(ft - dt, 0);
-            $05bad183ec6d4f44$export$2e2bcd8739ae039.gameTime += dt + wait;
+            $05bad183ec6d4f44$export$2e2bcd8739ae039._time += $05bad183ec6d4f44$export$2e2bcd8739ae039._deltaTime = dt + wait;
             setTimeout(gameLoop, wait);
         };
         gameLoop();
     }
     /**
-     * Returns the total elapsed game time.
+     * Returns the total elapsed game time in seconds.
      */ static get time() {
-        return $05bad183ec6d4f44$export$2e2bcd8739ae039.gameTime;
+        return $05bad183ec6d4f44$export$2e2bcd8739ae039._time / 1000;
+    }
+    /**
+     * Returns the actual elapsed time for the frame in seconds.
+     */ static get deltaTime() {
+        return $05bad183ec6d4f44$export$2e2bcd8739ae039._deltaTime / 1000;
     }
 }
 
@@ -735,6 +755,13 @@ class $65b04c82fca59f60$export$2e2bcd8739ae039 {
         /** The blue component. */ this.b = 0;
         /** The alpha component. */ this.a = 1;
         this.copy = ()=>new $65b04c82fca59f60$export$2e2bcd8739ae039(this.r, this.g, this.b, this.a);
+        this.copyFrom = (other)=>{
+            this.r = other.r;
+            this.g = other.g;
+            this.b = other.b, this.a = other.a;
+            return this;
+        };
+        this.equals = (other)=>this.r == other.r && this.g == other.g && this.b == other.b && this.a == other.a;
         /**
      * Converts the color to its #RRGGBBAA hexadecimal string representation.
      * @param hasAlpha Whether to include the alpha channel.
@@ -825,14 +852,6 @@ class $65b04c82fca59f60$export$2e2bcd8739ae039 {
             func(t)
         ];
         return new $65b04c82fca59f60$export$2e2bcd8739ae039(c1.r * u + c2.r * v, c1.g * u + c2.g * v, c1.b * u + c2.b * v, c1.a * u + c2.a * v);
-    }
-    /**
-     * Determines if two colors are equal.
-     * @param c1 The first color.
-     * @param c2 The second color.
-     * @returns Whether two colors are equal.
-     */ static equal(c1, c2) {
-        return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b && c1.a == c2.a;
     }
     static #_ = (()=>{
         /**

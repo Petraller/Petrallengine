@@ -50,17 +50,39 @@ export interface ICopyable {
      * @returns The copy of the object.
      */
     copy(): ICopyable;
+    /**
+     * Copies the value of another object.
+     * @param other The other object.
+     * @returns This object after copying.
+     */
+    copyFrom(other: ICopyable): ICopyable;
+}
+/**
+ * @author Petraller <me@petraller.com>
+ */
+/**
+ * Interface for equatable objects.
+ */
+interface IEquatable {
+    /**
+     * Determines if this object is equal to another.
+     * @param other The other object.
+     * @returns Whether the objects are equal.
+     */
+    equals(other: IEquatable): boolean;
 }
 /**
  * Representation of a 2D vector.
  */
-export class Vec2 implements ICopyable {
+export class Vec2 implements ICopyable, IEquatable {
     /** The x-component. */
     x: number;
     /** The y-component. */
     y: number;
     constructor(x: number, y: number);
     copy: () => Vec2;
+    copyFrom: (other: Vec2) => this;
+    equals: (other: Vec2) => boolean;
     /**
      * Returns the squared length of this vector.
      * @returns The squared length of this vector.
@@ -94,12 +116,6 @@ export class Vec2 implements ICopyable {
      */
     normalize: () => this;
     /**
-     * Copies the value of another vector.
-     * @param v The other vector.
-     * @returns This vector after copying.
-     */
-    copyFrom: (v: Vec2) => this;
-    /**
      * Translates this vector by another vector.
      * @param v The other vector.
      * @returns This vector after translating.
@@ -128,18 +144,22 @@ export class Vec2 implements ICopyable {
      * @returns This vector after inverting.
      */
     invert: () => this;
-    /** @returns The zero vector. */
+    /** The zero vector. */
     static get zero(): Vec2;
-    /** @returns The unit vector. */
+    /** The unit vector. */
     static get one(): Vec2;
-    /** @returns The right vector. */
+    /** The right vector. */
     static get right(): Vec2;
-    /** @returns The left vector. */
+    /** The left vector. */
     static get left(): Vec2;
-    /** @returns The down vector. */
+    /** The down vector. */
     static get down(): Vec2;
-    /** @returns The up vector. */
+    /** The up vector. */
     static get up(): Vec2;
+    /** The negative infinity vector. */
+    static get negativeInfinity(): Vec2;
+    /** The infinity vector. */
+    static get infinity(): Vec2;
     /**
      * Adds two vectors component-wise.
      *
@@ -249,6 +269,14 @@ export class Vec2 implements ICopyable {
      * @returns The interpolated vector.
      */
     static lerp: (v1: Vec2, v2: Vec2, t: number) => Vec2;
+    /**
+     * Linearly interpolates from one vector to another.
+     * @param v1 The first vector.
+     * @param v2 The second vector.
+     * @param t The amount to interpolate by.
+     * @returns The interpolated vector.
+     */
+    static lerpComponents: (v1: Vec2, v2: Vec2, t: Vec2) => Vec2;
 }
 /**
  * Static class for moving the viewport in the world space.
@@ -442,9 +470,13 @@ export class Input {
  * Call `Petrallengine.create(MY_CANVAS_ELEMENT)` to start building your 2D browser application.
  */
 export class Game {
+    /** The build number. */
     static readonly BUILD = 1;
+    /** The version. */
     static readonly VERSION = "0.0.1";
+    /** The number of scheduled frame updates per second. */
     static readonly FRAME_RATE = 60;
+    /** The scheduled interval between frame updates in seconds. */
     static readonly FRAME_TIME: number;
     /** The root node of the whole game. */
     static get root(): Node;
@@ -454,14 +486,18 @@ export class Game {
      */
     static create(target?: HTMLCanvasElement): void;
     /**
-     * Returns the total elapsed game time.
+     * Returns the total elapsed game time in seconds.
      */
     static get time(): number;
+    /**
+     * Returns the actual elapsed time for the frame in seconds.
+     */
+    static get deltaTime(): number;
 }
 /**
  * Representation of a RGBA color.
  */
-export class Color implements ICopyable {
+export class Color implements ICopyable, IEquatable {
     /** The red component. */
     r: number;
     /** The green component. */
@@ -472,6 +508,8 @@ export class Color implements ICopyable {
     a: number;
     constructor(r: number, g: number, b: number, a?: number);
     copy: () => Color;
+    copyFrom: (other: Color) => this;
+    equals: (other: Color) => boolean;
     /**
      * Converts the color to its #RRGGBBAA hexadecimal string representation.
      * @param hasAlpha Whether to include the alpha channel.
@@ -524,13 +562,6 @@ export class Color implements ICopyable {
      */
     static slerp(c1: Color, c2: Color, t: number): Color;
     /**
-     * Determines if two colors are equal.
-     * @param c1 The first color.
-     * @param c2 The second color.
-     * @returns Whether two colors are equal.
-     */
-    static equal(c1: Color, c2: Color): boolean;
-    /**
      * Creates a color from its hexadecimal string representation.
      * @param str The hexadecimal string representation.
      * @returns The color.
@@ -545,7 +576,9 @@ export class Color implements ICopyable {
      */
     static fromHSV: (h: number, s: number, v: number) => Color;
 }
-/** A node that draws an image on the canvas. */
+/**
+ * A node that draws an image on the canvas.
+*/
 export class Sprite extends Drawable {
     /** The normalized pivot. */
     pivot: Vec2;
