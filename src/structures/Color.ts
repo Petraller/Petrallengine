@@ -27,8 +27,8 @@ export default class Color implements ICopyable, IEquatable {
     }
 
     copy = () => new Color(this.r, this.g, this.b, this.a);
-    copyFrom = (c: Color) => { this.r = c.r; this.g = c.g; this.b = c.b, this.a = c.a; return this; };
-    equals = (c: Color) => this.r == c.r && this.g == c.g && this.b == c.b && this.a == c.a;
+    copyFrom = (other: Color) => { this.r = other.r; this.g = other.g; this.b = other.b, this.a = other.a; return this; };
+    equals = (other: Color) => this.r == other.r && this.g == other.g && this.b == other.b && this.a == other.a;
 
     /**
      * Converts the color to its #RRGGBBAA hexadecimal string representation.

@@ -21,8 +21,8 @@ export default class Vec2 implements ICopyable, IEquatable {
     }
 
     copy = () => new Vec2(this.x, this.y);
-    copyFrom = (v: Vec2) => { this.x = v.x; this.y = v.y; return this; };
-    equals = (v: Vec2) => this.x === v.x && this.y === v.y;
+    copyFrom = (other: Vec2) => { this.x = other.x; this.y = other.y; return this; };
+    equals = (other: Vec2) => this.x === other.x && this.y === other.y;
 
     /**
      * Returns the squared length of this vector.

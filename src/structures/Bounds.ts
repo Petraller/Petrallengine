@@ -22,8 +22,8 @@ export default class Bounds implements ICopyable, IEquatable {
     }
 
     copy = () => new Bounds(this.min, this.max);
-    copyFrom = (b: Bounds) => { this.min.copyFrom(b.min); this.max.copyFrom(b.max); return this; };
-    equals = (b: Bounds) => this.min.equals(b.min) && this.max.equals(b.max);
+    copyFrom = (other: Bounds) => { this.min.copyFrom(other.min); this.max.copyFrom(other.max); return this; };
+    equals = (other: Bounds) => this.min.equals(other.min) && this.max.equals(other.max);
 
     /**
      * Updates this bounds based on a set of vertices and an optional velocity.
