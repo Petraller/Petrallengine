@@ -44,7 +44,7 @@ interface Math {
 /**
  * Interface for copy-constructable objects
  */
-interface ICopyable {
+export interface ICopyable {
     /**
      * Constructs a copy of the object.
      * @returns The copy of the object.
