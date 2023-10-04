@@ -20,6 +20,7 @@ type Constructor<T> = { new(...args: any[]): T };
  */
 export default class Node {
     private _isEnabled: boolean = true;
+    private _rotation: number = 0;
     private _parent: Node | null = null;
 
     /** The unique Snowflake ID of this node. */
@@ -29,8 +30,6 @@ export default class Node {
     name: string = "New Node";
     /** The position of this node. */
     position: Vec2 = Vec2.zero;
-    /** The rotation in degrees of this node. */
-    rotation: number = 0;
     /** The scale of this node. */
     scale: Vec2 = Vec2.one;
     /** The children nodes of this node. */
@@ -62,6 +61,10 @@ export default class Node {
             this.onDisable?.call(this);
         }
     }
+    
+    /** The rotation in degrees of this node. */
+    get rotation() { return this._rotation; }
+    set rotation(value: number) { this._rotation = (value + 180) % 360 - 180; }
 
     /** The parent node of this node. */
     get parent() { return this._parent; }
