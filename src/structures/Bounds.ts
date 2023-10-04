@@ -25,6 +25,9 @@ export default class Bounds implements ICopyable, IEquatable {
     copyFrom = (other: Bounds) => { this.min.copyFrom(other.min); this.max.copyFrom(other.max); return this; };
     equals = (other: Bounds) => this.min.equals(other.min) && this.max.equals(other.max);
 
+    /** The size of the bounds. */
+    get size() { return Vec2.subtract(this.max, this.min); }
+
     /**
      * Updates this bounds based on a set of vertices.
      * @param vertices The vertices.
