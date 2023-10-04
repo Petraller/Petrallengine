@@ -48,17 +48,34 @@ export default class Bounds implements ICopyable, IEquatable {
 
         // Extend
         if (velocity) {
-            if (velocity.x > 0) {
-                this.max.x += velocity.x;
-            } else {
-                this.min.x += velocity.x;
-            }
+            this.extend(velocity);
+        }
+    };
 
-            if (velocity.y > 0) {
-                this.max.y += velocity.y;
-            } else {
-                this.min.y += velocity.y;
-            }
+    /**
+     * Updates this bounds to contain a set of bounds with an optional velocity.
+     * @param boundses The bounds.
+     * @param velocity The velocity.
+     */
+    envelop = (boundses: Bounds[], velocity?: Vec2) => {
+        this.min = Vec2.infinity;
+        this.max = Vec2.negativeInfinity;
+
+        // Iterate all bounds
+        for (const bounds of boundses) {
+            if (bounds.max.x > this.max.x)
+                this.max.x = bounds.max.x;
+            if (bounds.min.x < this.min.x)
+                this.min.x = bounds.min.x;
+            if (bounds.max.y > this.max.y)
+                this.max.y = bounds.max.y;
+            if (bounds.min.y < this.min.y)
+                this.min.y = bounds.min.y;
+        }
+
+        // Extend
+        if (velocity) {
+            this.extend(velocity);
         }
     };
 
@@ -106,6 +123,25 @@ export default class Bounds implements ICopyable, IEquatable {
         const o = Vec2.lerpComponents(this.min, this.max, origin);
         return this.translate(Vec2.subtract(pos, o));
     };
+
+    /**
+     * Extends this bounds by a vector.
+     * @param v The extension vector.
+     * @returns This bounds after extending.
+     */
+    extend = (v: Vec2) => {
+        if (v.x > 0) {
+            this.max.x += v.x;
+        } else {
+            this.min.x += v.x;
+        }
+        if (v.y > 0) {
+            this.max.y += v.y;
+        } else {
+            this.min.y += v.y;
+        }
+        return this;
+    }
 
     /** The zero bounds, [(0, 0), (0, 0)]. */
     static get zero() { return new Bounds(Vec2.zero, Vec2.zero); }
