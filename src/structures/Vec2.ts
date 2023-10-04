@@ -102,21 +102,21 @@ export default class Vec2 implements ICopyable, IEquatable {
      */
     invert = () => { this.x = 1 / this.x; this.y = 1 / this.y; return this; }
 
-    /** @returns The zero vector. */
+    /** The zero vector. */
     static get zero() { return new Vec2(0, 0); }
-    /** @returns The unit vector. */
+    /** The unit vector. */
     static get one() { return new Vec2(1, 1); }
-    /** @returns The right vector. */
+    /** The right vector. */
     static get right() { return new Vec2(1, 0); }
-    /** @returns The left vector. */
+    /** The left vector. */
     static get left() { return new Vec2(-1, 0); }
-    /** @returns The down vector. */
+    /** The down vector. */
     static get down() { return new Vec2(0, 1); }
-    /** @returns The up vector. */
+    /** The up vector. */
     static get up() { return new Vec2(0, -1); }
-    /** @returns The negative infinity vector. */
+    /** The negative infinity vector. */
     static get negativeInfinity() { return new Vec2(-Infinity, -Infinity); }
-    /** @returns The infinity vector. */
+    /** The infinity vector. */
     static get infinity() { return new Vec2(Infinity, Infinity); }
 
     /**
@@ -238,4 +238,13 @@ export default class Vec2 implements ICopyable, IEquatable {
      * @returns The interpolated vector.
      */
     static lerp = (v1: Vec2, v2: Vec2, t: number) => new Vec2(Math.lerp(v1.x, v2.x, t), Math.lerp(v1.y, v2.y, t));
+
+    /**
+     * Linearly interpolates from one vector to another.
+     * @param v1 The first vector.
+     * @param v2 The second vector.
+     * @param t The amount to interpolate by.
+     * @returns The interpolated vector.
+     */
+    static lerpComponents = (v1: Vec2, v2: Vec2, t: Vec2) => new Vec2(Math.lerp(v1.x, v2.x, t.x), Math.lerp(v1.y, v2.y, t.y));
 }
