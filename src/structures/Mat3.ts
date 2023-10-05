@@ -16,34 +16,34 @@ type Matrix = [Row, Row, Row]; /* your boat */
  */
 export default class Mat3 implements ICopyable, IEquatable {
     /** The matrix. */
-    m: Matrix = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+    private _m: Matrix = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
 
     constructor(m?: Matrix) {
         for (let r = 0; r < 3; ++r)
             for (let c = 0; c < 3; ++c)
-                this.m[r][c] = m ? m[r][c] : 0;
+                this._m[r][c] = m ? m[r][c] : 0;
     }
 
-    copy = () => new Mat3(this.m);
+    copy = () => new Mat3(this._m);
     copyFrom = (other: Mat3) => {
         for (let r = 0; r < 3; ++r)
             for (let c = 0; c < 3; ++c)
-                this.m[r][c] = other.m[r][c];
+                this._m[r][c] = other._m[r][c];
         return this;
     }
     equals = (other: Mat3) => {
         for (let r = 0; r < 3; ++r)
             for (let c = 0; c < 3; ++c)
-                if (this.m[r][c] !== other.m[r][c])
+                if (this._m[r][c] !== other._m[r][c])
                     return false;
         return true;
     }
 
     /** The determinant of this matrix. */
     get determinant() {
-        return this.m[0][0] * (this.m[1][1] * this.m[2][2] - this.m[1][2] * this.m[2][1]) +
-            this.m[0][1] * (this.m[1][2] * this.m[2][0] - this.m[1][0] * this.m[2][2]) +
-            this.m[0][2] * (this.m[1][0] * this.m[2][1] - this.m[1][1] * this.m[2][0]);
+        return this._m[0][0] * (this._m[1][1] * this._m[2][2] - this._m[1][2] * this._m[2][1]) +
+            this._m[0][1] * (this._m[1][2] * this._m[2][0] - this._m[1][0] * this._m[2][2]) +
+            this._m[0][2] * (this._m[1][0] * this._m[2][1] - this._m[1][1] * this._m[2][0]);
     }
 
     /** The translation component of the matrix. */
@@ -54,38 +54,34 @@ export default class Mat3 implements ICopyable, IEquatable {
 
     /**
      * Retrieves an element of the matrix.
-     * 
-     * Shorthand for `Mat3.m[r][c]`.
      * @param r The row index.
      * @param c The column index.
      * @returns The element.
      */
-    get = (r: number, c: number) => this.m[r][c];
+    get = (r: number, c: number) => this._m[r][c];
 
     /**
      * Sets an element of the matrix.
-     * 
-     * Shorthand for `Mat3.m[r][c] = value`.
      * @param r The row index.
      * @param c The column index.
      * @param value The value.
      * @returns This matrix after setting.
      */
-    set = (r: number, c: number, value: number) => { this.m[r][c] = value; return this; }
+    set = (r: number, c: number, value: number) => { this._m[r][c] = value; return this; }
 
     /**
      * Retrieves a row of the matrix.
      * @param r The row index.
      * @returns The row.
      */
-    getRow = (r: number): Row => [this.m[r][0], this.m[r][1], this.m[r][2]];
+    getRow = (r: number): Row => [this._m[r][0], this._m[r][1], this._m[r][2]];
 
     /**
      * Retrieves a column of the matrix.
      * @param c The column index.
      * @returns The column.
      */
-    getColumn = (c: number): Column => [this.m[0][c], this.m[1][c], this.m[2][c]];
+    getColumn = (c: number): Column => [this._m[0][c], this._m[1][c], this._m[2][c]];
 
     /**
      * Retrieves a minor of the matrix.
@@ -95,11 +91,11 @@ export default class Mat3 implements ICopyable, IEquatable {
      */
     private getMinor = (r: number, c: number): [[number, number], [number, number]] => [
         r == 0
-            ? [c == 0 ? this.m[1][1] : this.m[1][0], c == 2 ? this.m[1][1] : this.m[1][2]]
-            : [c == 0 ? this.m[0][1] : this.m[0][0], c == 2 ? this.m[0][1] : this.m[0][2]],
+            ? [c == 0 ? this._m[1][1] : this._m[1][0], c == 2 ? this._m[1][1] : this._m[1][2]]
+            : [c == 0 ? this._m[0][1] : this._m[0][0], c == 2 ? this._m[0][1] : this._m[0][2]],
         r == 2
-            ? [c == 0 ? this.m[1][1] : this.m[1][0], c == 2 ? this.m[1][1] : this.m[1][2]]
-            : [c == 0 ? this.m[2][1] : this.m[2][0], c == 2 ? this.m[2][1] : this.m[2][2]]
+            ? [c == 0 ? this._m[1][1] : this._m[1][0], c == 2 ? this._m[1][1] : this._m[1][2]]
+            : [c == 0 ? this._m[2][1] : this._m[2][0], c == 2 ? this._m[2][1] : this._m[2][2]]
     ];
 
     /**
@@ -131,7 +127,7 @@ export default class Mat3 implements ICopyable, IEquatable {
         let result = new Mat3();
         for (let r = 0; r < 3; ++r)
             for (let c = 0; c < 3; ++c)
-                result.m[r][c] = m1.m[r][c] + m2.m[r][c];
+                result._m[r][c] = m1._m[r][c] + m2._m[r][c];
         return result;
     }
 
@@ -147,7 +143,7 @@ export default class Mat3 implements ICopyable, IEquatable {
         let result = new Mat3();
         for (let r = 0; r < 3; ++r)
             for (let c = 0; c < 3; ++c)
-                result.m[r][c] = m.m[r][c] * n;
+                result._m[r][c] = m._m[r][c] * n;
         return result;
     }
 
@@ -164,7 +160,7 @@ export default class Mat3 implements ICopyable, IEquatable {
         for (let r = 0; r < 3; ++r)
             for (let c = 0; c < 3; ++c)
                 for (let i = 0; i < 3; ++i)
-                    result.m[r][c] += m1.m[r][i] * m2.m[i][c];
+                    result._m[r][c] += m1._m[r][i] * m2._m[i][c];
         return result;
     }
 
@@ -195,9 +191,9 @@ export default class Mat3 implements ICopyable, IEquatable {
      */
     static transpose = (m: Mat3) => {
         return new Mat3([
-            [m.m[0][0], m.m[1][0], m.m[2][0]],
-            [m.m[0][1], m.m[1][1], m.m[2][1]],
-            [m.m[0][2], m.m[1][2], m.m[2][2]]
+            [m._m[0][0], m._m[1][0], m._m[2][0]],
+            [m._m[0][1], m._m[1][1], m._m[2][1]],
+            [m._m[0][2], m._m[1][2], m._m[2][2]]
         ]);;
     }
 
@@ -211,7 +207,7 @@ export default class Mat3 implements ICopyable, IEquatable {
     static inverse = (m: Mat3) => {
         const det = m.determinant;
         if (det === 0) {
-            console.error(`Matrix ${m.m} is not invertible`);
+            console.error(`Matrix ${m._m} is not invertible`);
             return m;
         }
         return Mat3.multiply(new Mat3([

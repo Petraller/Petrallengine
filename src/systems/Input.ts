@@ -3,6 +3,7 @@
  */
 
 import Camera from './Camera';
+import Mat3 from '../structures/Mat3';
 import Vec2 from '../structures/Vec2';
 
 /**
@@ -30,7 +31,7 @@ export default class Input {
             Input.mouseStates.set(b, true);
             Input.mouseTransits.set(b, true);
         };
-        canvas.onmouseup = (ev) => {
+        canvas.onmouseup = canvas.onmouseleave = (ev) => {
             const b = ev.button;
             Input.mouseStates.set(b, false);
             Input.mouseTransits.set(b, true);
@@ -126,7 +127,7 @@ export default class Input {
      * Returns the position of the mouse in the canvas.
      * @returns The position of the mouse in the canvas.
      */
-    static getMousePosition() {
+    static get mousePosition() {
         return Input.mousePos;
     }
 
@@ -134,7 +135,7 @@ export default class Input {
      * Returns the normalized position of the mouse in the canvas.
      * @returns The normalized position of the mouse in the canvas.
      */
-    static getMousePositionNormalized() {
+    static get mousePositionNormalized() {
         return Vec2.multiplyComponents(Input.mousePos, new Vec2(1 / Input.canvas!.width, 1 / Input.canvas!.height));
     }
 
@@ -143,11 +144,12 @@ export default class Input {
      * @returns The position on the canvas of a world position.
      */
     static worldToCanvas(worldPos: Vec2) {
-        return worldPos.copy()
-            .scaleComponents(Camera.scale)
-            .rotate(-Camera.rotation)
-            .translate(Vec2.multiply(Camera.position, -1))
-            .translate(Vec2.fromObjWH(Input.canvas!).scale(0.5));
+        return Vec2.add(
+            Vec2.transform(
+                Mat3.makeTransformation(Vec2.multiply(Camera.position, -1), -Camera.rotation, Camera.scale),
+                worldPos),
+            Vec2.multiply(Vec2.fromObjWH(Input.canvas!), 0.5)
+        );
     }
 
     /**
@@ -155,10 +157,9 @@ export default class Input {
      * @returns The position in the world of a canvas position.
      */
     static canvasToWorld(canvasPos: Vec2) {
-        return canvasPos.copy()
-            .translate(Vec2.fromObjWH(Input.canvas!).scale(-0.5))
-            .translate(Camera.position)
-            .rotate(Camera.rotation)
-            .scaleComponents(Vec2.inverse(Camera.scale));
+        return Vec2.transform(
+            Mat3.inverse(Mat3.makeTransformation(Vec2.multiply(Camera.position, -1), -Camera.rotation, Camera.scale)),
+            Vec2.add(canvasPos, Vec2.multiply(Vec2.fromObjWH(Input.canvas!), -0.5))
+        );
     }
 }

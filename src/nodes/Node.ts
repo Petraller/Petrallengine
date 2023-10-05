@@ -26,6 +26,7 @@ export default class Node {
     private _scale: Vec2 = Vec2.one;
     private _parent: Node | null = null;
     private _transform: Mat3 = Mat3.identity;
+    private _globalTransform: Mat3 = Mat3.identity;
     private _isDirty = false;
 
     /** The unique Snowflake ID of this node. */
@@ -75,7 +76,10 @@ export default class Node {
     set scale(value: Vec2) { this._scale = value; this._isDirty = true; }
 
     /** The transformation matrix of this node. */
-    get transform() { return this._transform; }
+    get transform() { if (this._isDirty) this.recalculateTransformMatrix(); return this._transform; }
+
+    /** The global transformation matrix of this node. */
+    get globalTransform() { if (this._isDirty) this.recalculateTransformMatrix(); return this._globalTransform; }
 
     /** The parent node of this node. */
     get parent() { return this._parent; }
@@ -185,12 +189,24 @@ export default class Node {
     }
 
     /**
-     * Recalculates the transformation matrix and unsets the dirty flag.
+     * Recalculates the transformation matrices and unsets the dirty flag.
      */
     recalculateTransformMatrix() {
         if (!this._isDirty)
             return;
-        this._transform = Mat3.makeTransformation(this._position, this._rotation, this._scale);
+
+        console.log('recalc');
+
+        // Calculate
+        this._globalTransform = this._transform = Mat3.makeTransformation(this._position, this._rotation, this._scale);
+        if (this.parent)
+            this._globalTransform = Mat3.matrixMultiply(this.parent.globalTransform, this._transform);
+
+        // Dirty children
+        for (const child of this.children) {
+            child._isDirty = true;
+        }
+
         this._isDirty = false;
     }
 

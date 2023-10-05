@@ -11,19 +11,23 @@ import Mat3 from './Mat3';
  * Representation of a 2D vector.
  */
 export default class Vec2 implements ICopyable, IEquatable {
-    /** The x-component. */
-    x: number = 0;
-    /** The y-component. */
-    y: number = 0;
+    private _x: number = 0;
+    private _y: number = 0;
 
     constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+        this._x = x;
+        this._y = y;
     }
 
     copy = () => new Vec2(this.x, this.y);
-    copyFrom = (other: Vec2) => { this.x = other.x; this.y = other.y; return this; };
+    copyFrom = (other: Vec2) => { this._x = other.x; this._y = other.y; return this; };
     equals = (other: Vec2) => this.x === other.x && this.y === other.y;
+
+    /** The x-component. */
+    get x() { return this._x; }
+
+    /** The y-component. */
+    get y() { return this._y; }
 
     /** The squared length of this vector. */
     get sqrLength() { return this.x * this.x + this.y * this.y; }

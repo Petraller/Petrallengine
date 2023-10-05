@@ -104,6 +104,11 @@ export default class Game {
                 context.save();
 
                 // Apply node transforms
+                // context.transform(
+                //     node.globalTransform.get(0, 0), node.globalTransform.get(1, 0),
+                //     node.globalTransform.get(0, 1), node.globalTransform.get(1, 1),
+                //     node.globalTransform.get(0, 2), node.globalTransform.get(1, 2)
+                // );
                 context.translate(node.position.x, node.position.y);
                 context.rotate(node.rotation * Math.PI / 180);
                 context.scale(node.scale.x, node.scale.y);

@@ -43,25 +43,37 @@ P.Game.create();
 class MyMover extends P.Node {
     onUpdate(): void {
         if (P.Input.isKey("KeyW")) {
-            P.Camera.position = P.Vec2.add(P.Camera.position, P.Vec2.multiply(P.Vec2.up, (100 * P.Game.deltaTime)));
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.up, (100 * P.Game.deltaTime)));
         }
         if (P.Input.isKey("KeyS")) {
-            P.Camera.position = P.Vec2.add(P.Camera.position, P.Vec2.multiply(P.Vec2.down, (100 * P.Game.deltaTime)));
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.down, (100 * P.Game.deltaTime)));
         }
         if (P.Input.isKey("KeyA")) {
-            P.Camera.position = P.Vec2.add(P.Camera.position, P.Vec2.multiply(P.Vec2.left, (100 * P.Game.deltaTime)));
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.left, (100 * P.Game.deltaTime)));
         }
         if (P.Input.isKey("KeyD")) {
-            P.Camera.position = P.Vec2.add(P.Camera.position, P.Vec2.multiply(P.Vec2.right, (100 * P.Game.deltaTime)));
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.right, (100 * P.Game.deltaTime)));
         }
         if (P.Input.isKey("KeyQ")) {
-            P.Camera.rotation--;
+            this.rotation--;
         }
         if (P.Input.isKey("KeyE")) {
-            P.Camera.rotation++;
+            this.rotation++;
         }
-        if (P.Input.isMouse()) {
-            console.log(P.Input.canvasToWorld(P.Input.mousePosition));
+        if (P.Input.isKey("KeyZ")) {
+            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.left, P.Game.deltaTime));
+        }
+        if (P.Input.isKey("KeyX")) {
+            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.right, P.Game.deltaTime));
+        }
+        if (P.Input.isKey("KeyC")) {
+            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.up, P.Game.deltaTime));
+        }
+        if (P.Input.isKey("KeyV")) {
+            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.down, P.Game.deltaTime));
+        }
+        if (P.Input.isKeyPressed("Space")) {
+            console.log(this.globalTransform);
         }
     };
 }
@@ -73,6 +85,40 @@ class MyRainbow extends P.Sprite {
     }
 
     onUpdate(): void {
+        if (P.Input.isKey("ArrowUp")) {
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.up, (100 * P.Game.deltaTime)));
+        }
+        if (P.Input.isKey("ArrowDown")) {
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.down, (100 * P.Game.deltaTime)));
+        }
+        if (P.Input.isKey("ArrowLeft")) {
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.left, (100 * P.Game.deltaTime)));
+        }
+        if (P.Input.isKey("ArrowRight")) {
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.right, (100 * P.Game.deltaTime)));
+        }
+        if (P.Input.isKey("Comma")) {
+            this.rotation--;
+        }
+        if (P.Input.isKey("Period")) {
+            this.rotation++;
+        }
+        if (P.Input.isKey("KeyI")) {
+            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.left, P.Game.deltaTime));
+        }
+        if (P.Input.isKey("KeyO")) {
+            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.right, P.Game.deltaTime));
+        }
+        if (P.Input.isKey("KeyK")) {
+            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.up, P.Game.deltaTime));
+        }
+        if (P.Input.isKey("KeyL")) {
+            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.down, P.Game.deltaTime));
+        }
+        if (P.Input.isKeyPressed("Enter")) {
+            console.log(this.globalTransform);
+        }
+
         this.t += P.Game.deltaTime;
         if (this.t > 1) {
             this.t -= 1;
