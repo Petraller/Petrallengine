@@ -42,11 +42,12 @@ export default class Node {
     /**
      * Avoid calling `new Node`, call `Petrallengine.root.createChild` instead.
      */
-    constructor(flag?: any) {
+    constructor(flag?: any, name: string = "New Node") {
         if (!flag) {
             console.warn(`Avoid calling \`new Node\`, call \`Petrallengine.root.createChild\` instead`);
             console.trace(`\`new Node\` call occured here:`);
         }
+        this.name = name;
     }
 
     toString() { return `${this.name}#${this.id}`; }
@@ -108,10 +109,10 @@ export default class Node {
     get globalScale() { return this.globalTransform.scale; }
 
     /** The transformation matrix of this node. */
-    get transform() { if (this._isDirty) this.recalculateTransformMatrix(); return this._transform; }
+    get transform() { this.recalculateTransformMatrix(); return this._transform; }
 
     /** The global transformation matrix of this node. */
-    get globalTransform() { if (this._isDirty) this.recalculateTransformMatrix(); return this._globalTransform; }
+    get globalTransform() { this.recalculateTransformMatrix(); return this._globalTransform; }
 
     /** The parent node of this node. */
     get parent() { return this._parent; }
@@ -228,9 +229,11 @@ export default class Node {
             return;
 
         // Calculate
-        this._globalTransform = this._transform = Mat3.makeTransformation(this._position, this._rotation, this._scale);
+        this._transform = Mat3.makeTransformation(this._position, this._rotation, this._scale);
         if (this.parent)
             this._globalTransform = Mat3.matrixMultiply(this.parent.globalTransform, this._transform);
+        else
+            this._globalTransform = this._transform.copy();
 
         // Dirty children
         for (const child of this.children) {
