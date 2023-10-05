@@ -208,7 +208,8 @@ export default class Mat3 implements ICopyable, IEquatable {
     static inverse = (m: Mat3) => {
         const det = m.determinant;
         if (det === 0) {
-            throw `Matrix ${m.m} is not invertible`;
+            console.error(`Matrix ${m.m} is not invertible`);
+            return m;
         }
         return Mat3.multiply(new Mat3([
             [m.getCofactorDeterminant(0, 0), m.getCofactorDeterminant(1, 0), m.getCofactorDeterminant(2, 0)],
