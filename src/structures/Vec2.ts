@@ -38,6 +38,9 @@ export default class Vec2 implements ICopyable, IEquatable {
     /** The normalized form of this vector. */
     get normalized() { const l = this.length; return l == 0 ? Vec2.zero : Vec2.divide(this, l); };
 
+    /** A normal to this vector. */
+    get normal() { return new Vec2(-this.y, this.x); };
+
     /** The value of the minimum component of this vector. */
     get minComponent() { return this.x < this.y ? this.x : this.y; }
 
