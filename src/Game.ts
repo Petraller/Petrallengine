@@ -149,7 +149,7 @@ export default class Game {
             debugDraw(Game.rootNode);
 
             // Clear transition flags
-            input._endFrame();
+            input.endFrame();
 
             const tEnd = Date.now();
             const dt = tEnd - tStart;
