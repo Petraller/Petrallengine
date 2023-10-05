@@ -63,8 +63,6 @@ export default class Vec2 implements ICopyable, IEquatable {
 
     /**
      * Adds two vectors component-wise.
-     * 
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The sum vector.
@@ -73,8 +71,6 @@ export default class Vec2 implements ICopyable, IEquatable {
 
     /**
      * Multiplies a vector by a constant.
-     * 
-     * Does not modify the original vector.
      * @param v The vector.
      * @param n The constant
      * @returns The scaled vector.
@@ -83,8 +79,6 @@ export default class Vec2 implements ICopyable, IEquatable {
 
     /**
      * Multiplies two vectors component-wise.
-     * 
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The scaled vector.
@@ -93,8 +87,6 @@ export default class Vec2 implements ICopyable, IEquatable {
 
     /**
      * Subtracts one vector from another.
-     * 
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The difference vector.
@@ -103,8 +95,6 @@ export default class Vec2 implements ICopyable, IEquatable {
 
     /**
      * Divides a vector by a constant.
-     * 
-     * Does not modify the original vector.
      * @param v The vector.
      * @param n The constant.
      * @returns The scaled vector.
@@ -113,8 +103,6 @@ export default class Vec2 implements ICopyable, IEquatable {
 
     /**
      * Inverts a vector component-wise.
-     * 
-     * Does not modify the original vector.
      * @param v The vector.
      * @returns The inverted vector.
      */
@@ -122,8 +110,6 @@ export default class Vec2 implements ICopyable, IEquatable {
 
     /**
      * Dot multiplies two vectors.
-     * 
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The dot product.
@@ -132,8 +118,6 @@ export default class Vec2 implements ICopyable, IEquatable {
 
     /**
      * Cross multiplies two vectors.
-     * 
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The magnitude of the cross product.
@@ -159,8 +143,8 @@ export default class Vec2 implements ICopyable, IEquatable {
      * @returns The transformed vector.
      */
     static transform = (m: Mat3, v: Vec2) => {
-        const x = v.x * m.m[0][0] + v.y * m.m[0][1] + m.m[0][2];
-        const y = v.x * m.m[1][0] + v.y * m.m[1][1] + m.m[1][2];
+        const x = v.x * m.get(0, 0) + v.y * m.get(0, 1) + m.get(0, 2);
+        const y = v.x * m.get(1, 0) + v.y * m.get(1, 1) + m.get(1, 2);
         return new Vec2(x, y);
     };
 

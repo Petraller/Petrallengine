@@ -227,8 +227,6 @@ export default class Node {
         if (!this._isDirty)
             return;
 
-        console.log('recalc');
-
         // Calculate
         this._globalTransform = this._transform = Mat3.makeTransformation(this._position, this._rotation, this._scale);
         if (this.parent)

@@ -3,9 +3,9 @@
  */
 
 import Camera from './systems/Camera';
-import IDrawable from './nodes/IDrawable';
 import Input from './systems/Input';
 import Node from './nodes/Node';
+import { isDrawable } from './nodes/IDrawable';
 
 /**
  * Static class for Petrallengine.
@@ -21,6 +21,11 @@ export default class Game {
     static readonly FRAME_RATE = 60;
     /** The scheduled interval between frame updates in seconds. */
     static readonly FRAME_TIME = 1 / Game.FRAME_RATE;
+    /** Debug draw flags. */
+    static readonly DEBUG_DRAWS = {
+        colliders: true,
+        boundingBoxes: true,
+    };
 
     private static _deltaTime = Game.FRAME_TIME;
     private static _time = 0;
@@ -101,9 +106,8 @@ export default class Game {
                 if (!node.isEnabled)
                     return;
 
-                const useMyMatrices = true;
-
-                if (useMyMatrices) {
+                // Draw drawables
+                if (isDrawable(node)) {
                     context.save();
 
                     // Apply node transforms
@@ -113,40 +117,35 @@ export default class Game {
                         node.globalTransform.get(0, 2), node.globalTransform.get(1, 2)
                     );
 
-                    // Draw drawables
-                    if ('onDraw' in node && node.onDraw instanceof Function) {
-                        node.onDraw.call(node, context);
-                    }
+                    node.onDraw.call(node, context);
 
                     context.restore();
-
-                    // Iterate children
-                    for (let child of node.children) {
-                        draw(child);
-                    }
                 }
-                else {
-                    context.save();
 
-                    // Apply node transforms
-                    context.translate(node.position.x, node.position.y);
-                    context.rotate(node.rotation * Math.PI / 180);
-                    context.scale(node.scale.x, node.scale.y);
-
-                    // Draw drawables
-                    if ('onDraw' in node && node.onDraw instanceof Function) {
-                        node.onDraw.call(node, context);
-                    }
-
-                    // Iterate children
-                    for (let child of node.children) {
-                        draw(child);
-                    }
-
-                    context.restore();
+                // Iterate children
+                for (let child of node.children) {
+                    draw(child);
                 }
             }
             draw(Game.rootNode);
+
+            // Debug draw
+            function debugDraw(node: Node) {
+                if (!node.isEnabled)
+                    return;
+
+                // // Draw colliders
+                // if (isCollider(node)) {
+                //     // Draw debug
+                //     node.debugDraw(context);
+                // }
+
+                // Iterate children
+                for (let child of node.children) {
+                    debugDraw(child);
+                }
+            }
+            debugDraw(Game.rootNode);
 
             // Clear transition flags
             input._endFrame();
