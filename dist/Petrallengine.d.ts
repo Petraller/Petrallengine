@@ -63,7 +63,7 @@ export interface ICopyable {
 /**
  * Interface for equatable objects.
  */
-interface IEquatable {
+export interface IEquatable {
     /**
      * Determines if this object is equal to another.
      * @param other The other object.
@@ -78,21 +78,19 @@ type Matrix = [Row, Row, Row];
  * Representation of a 3x3 matrix.
  */
 export class Mat3 implements ICopyable, IEquatable {
-    /** The matrix. */
-    m: Matrix;
     constructor(m?: Matrix);
     copy: () => Mat3;
     copyFrom: (other: Mat3) => this;
     equals: (other: Mat3) => boolean;
-    /**
-     * Returns the determinant of this matrix.
-     * @returns The determinant of this matrix.
-     */
+    /** The determinant of this matrix. */
     get determinant(): number;
+    /** The translation component of the matrix. */
+    get translation(): Vec2;
+    set translation(value: Vec2);
+    /** The non-negative scale component of the matrix. */
+    get scale(): Vec2;
     /**
      * Retrieves an element of the matrix.
-     *
-     * Shorthand for `Mat3.m[r][c]`.
      * @param r The row index.
      * @param c The column index.
      * @returns The element.
@@ -100,8 +98,6 @@ export class Mat3 implements ICopyable, IEquatable {
     get: (r: number, c: number) => number;
     /**
      * Sets an element of the matrix.
-     *
-     * Shorthand for `Mat3.m[r][c] = value`.
      * @param r The row index.
      * @param c The column index.
      * @param value The value.
@@ -120,25 +116,6 @@ export class Mat3 implements ICopyable, IEquatable {
      * @returns The column.
      */
     getColumn: (c: number) => Column;
-    /**
-     * Retrieves a minor of the matrix.
-     * @param r The row index to omit.
-     * @param c The column index to omit.
-     * @returns The minor.
-     */
-    getMinor: (r: number, c: number) => [[number, number], [number, number]];
-    /**
-     * Retrieves the determinant of a cofactor of the matrix.
-     * @param r The row index of the element.
-     * @param c The column index of the element.
-     * @returns The determinant of the cofactor.
-     */
-    getCofactorDeterminant: (r: number, c: number) => number;
-    /**
-     * Transposes the matrix.
-     * @returns This matrix after transposition.
-     */
-    transpose: () => this;
     /** The zero matrix. */
     static get zero(): Mat3;
     /** The identity matrix. */
@@ -189,6 +166,12 @@ export class Mat3 implements ICopyable, IEquatable {
      */
     static divide: (m: Mat3, n: number) => Mat3;
     /**
+     * Transposes a matrix.
+     * @param m The matrix.
+     * @returns The transposed matrix.
+     */
+    static transpose: (m: Mat3) => Mat3;
+    /**
      * Inverts a matrix. If the matrix is not invertible, an error is thrown.
      *
      * Does not modify the original matrix.
@@ -214,84 +197,37 @@ export class Mat3 implements ICopyable, IEquatable {
      * @returns The scaling matrix.
      */
     static makeScaling: (v: Vec2) => Mat3;
+    /**
+     * Constructs a transformation matrix.
+     * @param t The translation vector.
+     * @param r The rotation in degrees.
+     * @param s The scaling vector.
+     * @returns The transformation matrix.
+     */
+    static makeTransformation: (t: Vec2, r: number, s: Vec2) => Mat3;
 }
 /**
  * Representation of a 2D vector.
  */
 export class Vec2 implements ICopyable, IEquatable {
-    /** The x-component. */
-    x: number;
-    /** The y-component. */
-    y: number;
     constructor(x: number, y: number);
     copy: () => Vec2;
     copyFrom: (other: Vec2) => this;
     equals: (other: Vec2) => boolean;
-    /**
-     * Returns the squared length of this vector.
-     * @returns The squared length of this vector.
-     */
+    /** The x-component. */
+    get x(): number;
+    /** The y-component. */
+    get y(): number;
+    /** The squared length of this vector. */
     get sqrLength(): number;
-    /**
-     * Returns the length of this vector.
-     * @returns The length of this vector.
-     */
+    /** The length of this vector. */
     get length(): number;
-    /**
-     * Returns the normalized form of this vector.
-     * @returns The normalized form of this vector.
-     */
+    /** The normalized form of this vector. */
     get normalized(): Vec2;
-    /**
-     * Returns the value of the minimum component of this vector.
-     * @returns The value of the minimum component of this vector.
-     */
+    /** The value of the minimum component of this vector. */
     get minComponent(): number;
-    /**
-     * Returns the value of the maximum component of this vector.
-     * @returns The value of the maximum component of this vector.
-     */
+    /** The value of the maximum component of this vector. */
     get maxComponent(): number;
-    /**
-     * Normalizes this vector.
-     * @returns This vector after normalizing.
-     */
-    normalize: () => this;
-    /**
-     * Translates this vector by another vector.
-     * @param v The other vector.
-     * @returns This vector after translating.
-     */
-    translate: (v: Vec2) => this;
-    /**
-     * Rotates this vector by an angle.
-     * @param deg The angle in degrees.
-     * @returns This vector after rotating.
-     */
-    rotate: (deg: number) => this;
-    /**
-     * Scales this vector by a factor.
-     * @param n The scaling factor.
-     * @returns This vector after scaling.
-     */
-    scale: (n: number) => this;
-    /**
-     * Scales this vector by another vector component-wise.
-     * @param v The other vector.
-     * @returns This vector after scaling.
-     */
-    scaleComponents: (v: Vec2) => this;
-    /**
-     * Inverts this vector component-wise.
-     * @returns This vector after inverting.
-     */
-    invert: () => this;
-    /**
-     * Transforms this vector by a matrix.
-     * @param m The matrix.
-     * @returns This vector after transforming.
-     */
-    transform: (m: Mat3) => this;
     /** The zero vector. */
     static get zero(): Vec2;
     /** The unit vector. */
@@ -310,8 +246,6 @@ export class Vec2 implements ICopyable, IEquatable {
     static get infinity(): Vec2;
     /**
      * Adds two vectors component-wise.
-     *
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The sum vector.
@@ -319,8 +253,6 @@ export class Vec2 implements ICopyable, IEquatable {
     static add: (v1: Vec2, v2: Vec2) => Vec2;
     /**
      * Multiplies a vector by a constant.
-     *
-     * Does not modify the original vector.
      * @param v The vector.
      * @param n The constant
      * @returns The scaled vector.
@@ -328,8 +260,6 @@ export class Vec2 implements ICopyable, IEquatable {
     static multiply: (v: Vec2, n: number) => Vec2;
     /**
      * Multiplies two vectors component-wise.
-     *
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The scaled vector.
@@ -337,8 +267,6 @@ export class Vec2 implements ICopyable, IEquatable {
     static multiplyComponents: (v1: Vec2, v2: Vec2) => Vec2;
     /**
      * Subtracts one vector from another.
-     *
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The difference vector.
@@ -346,8 +274,6 @@ export class Vec2 implements ICopyable, IEquatable {
     static subtract: (v1: Vec2, v2: Vec2) => Vec2;
     /**
      * Divides a vector by a constant.
-     *
-     * Does not modify the original vector.
      * @param v The vector.
      * @param n The constant.
      * @returns The scaled vector.
@@ -355,16 +281,12 @@ export class Vec2 implements ICopyable, IEquatable {
     static divide: (v: Vec2, n: number) => Vec2;
     /**
      * Inverts a vector component-wise.
-     *
-     * Does not modify the original vector.
      * @param v The vector.
      * @returns The inverted vector.
      */
     static inverse: (v: Vec2) => Vec2;
     /**
      * Dot multiplies two vectors.
-     *
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The dot product.
@@ -372,13 +294,24 @@ export class Vec2 implements ICopyable, IEquatable {
     static dot: (v1: Vec2, v2: Vec2) => number;
     /**
      * Cross multiplies two vectors.
-     *
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The magnitude of the cross product.
      */
     static cross: (v1: Vec2, v2: Vec2) => number;
+    /**
+     * Rotates a vector by an angle.
+     * @param deg The angle in degrees.
+     * @returns The rotated vector.
+     */
+    static rotate: (v: Vec2, deg: number) => Vec2;
+    /**
+     * Transforms a vector by a matrix.
+     * @param m The matrix.
+     * @param v The vector.
+     * @returns The transformed vector.
+     */
+    static transform: (m: Mat3, v: Vec2) => Vec2;
     /**
      * Converts an angle in degrees to a unit vector.
      * @param deg The angle in degrees.
@@ -409,6 +342,12 @@ export class Vec2 implements ICopyable, IEquatable {
         width: number;
         height: number;
     }) => Vec2;
+    /**
+     * Converts a 3-tuple to a vector, omitting the last element of the tuple.
+     * @param obj The 3-tuple.
+     * @returns The vector.
+     */
+    static from3Tuple: (obj: [number, number, number]) => Vec2;
     /**
      * Linearly interpolates from one vector to another.
      * @param v1 The first vector.
@@ -442,19 +381,6 @@ export class Camera {
      * The scale of the camera.
      */
     static scale: Vec2;
-}
-/**
- * @author Petraller <me@petraller.com>
- */
-/**
- * Interface for all drawables.
- */
-export interface IDrawable {
-    /**
-     * Called when drawn.
-     * @param context The canvas rendering context.
-     */
-    onDraw(context: CanvasRenderingContext2D): void;
 }
 /**
  * Static class for input handling.
@@ -507,12 +433,12 @@ export class Input {
      * Returns the position of the mouse in the canvas.
      * @returns The position of the mouse in the canvas.
      */
-    static getMousePosition(): Vec2;
+    static get mousePosition(): Vec2;
     /**
      * Returns the normalized position of the mouse in the canvas.
      * @returns The normalized position of the mouse in the canvas.
      */
-    static getMousePositionNormalized(): Vec2;
+    static get mousePositionNormalized(): Vec2;
     /**
      * Returns the position on the canvas of a world position.
      * @returns The position on the canvas of a world position.
@@ -558,14 +484,24 @@ export class Node {
     /** The position of this node. */
     get position(): Vec2;
     set position(value: Vec2);
+    /** The global position of this node. */
+    get globalPosition(): Vec2;
+    set globalPosition(value: Vec2);
     /** The rotation in degrees of this node. */
     get rotation(): number;
     set rotation(value: number);
+    /** The global rotation in degrees of this node. */
+    get globalRotation(): number;
+    set globalRotation(value: number);
     /** The scale of this node. */
     get scale(): Vec2;
     set scale(value: Vec2);
+    /** The global scale of this node. */
+    get globalScale(): Vec2;
     /** The transformation matrix of this node. */
     get transform(): Mat3;
+    /** The global transformation matrix of this node. */
+    get globalTransform(): Mat3;
     /** The parent node of this node. */
     get parent(): Node | null;
     set parent(value: Node | null);
@@ -600,10 +536,6 @@ export class Node {
      */
     isDescendantOf(node: Node): boolean;
     /**
-     * Recalculates the transformation matrix and unsets the dirty flag.
-     */
-    recalculateTransformMatrix(): void;
-    /**
      * Called when the node is created.
      */
     onCreate?(): void;
@@ -629,6 +561,16 @@ export class Node {
     onUpdate?(): void;
 }
 /**
+ * Interface for all drawables.
+ */
+export interface IDrawable {
+    /**
+     * Called when drawn.
+     * @param context The canvas rendering context.
+     */
+    onDraw(context: CanvasRenderingContext2D): void;
+}
+/**
  * Static class for Petrallengine.
  *
  * Call `Petrallengine.create(MY_CANVAS_ELEMENT)` to start building your 2D browser application.
@@ -642,6 +584,11 @@ export class Game {
     static readonly FRAME_RATE = 60;
     /** The scheduled interval between frame updates in seconds. */
     static readonly FRAME_TIME: number;
+    /** Debug draw flags. */
+    static readonly DEBUG_DRAWS: {
+        colliders: boolean;
+        boundingBoxes: boolean;
+    };
     /** The root node of the whole game. */
     static get root(): Node;
     /**
@@ -657,109 +604,6 @@ export class Game {
      * Returns the actual elapsed time for the frame in seconds.
      */
     static get deltaTime(): number;
-}
-/**
- * Representation of 2D bounds.
- */
-declare class Bounds implements ICopyable, IEquatable {
-    /** The minimum components. */
-    min: Vec2;
-    /** The maximum components. */
-    max: Vec2;
-    constructor(min: Vec2, max: Vec2);
-    copy: () => Bounds;
-    copyFrom: (other: Bounds) => this;
-    equals: (other: Bounds) => boolean;
-    /** The size of the bounds. */
-    get size(): Vec2;
-    /**
-     * Updates this bounds based on a set of vertices.
-     * @param vertices The vertices.
-     */
-    fromVertices: (vertices: Vec2[]) => void;
-    /**
-     * Updates this bounds to contain a set of bounds.
-     * @param boundses The bounds.
-     */
-    envelop: (boundses: Bounds[], velocity?: Vec2) => void;
-    /**
-     * Determines if a point exists inside this bounds.
-     * @param point The point.
-     * @returns Whether the point exists inside this bounds.
-     */
-    contains: (point: Vec2) => boolean;
-    /**
-     * Determines if this bounds overlaps with another bounds.
-     * @param other The other bounds.
-     * @returns Whether the bounds overlap.
-     */
-    overlaps: (other: Bounds) => boolean;
-    /**
-     * Translates this bounds.
-     * @param v The translation vector.
-     * @returns This bounds after translating.
-     */
-    translate: (v: Vec2) => this;
-    /**
-     * Scales this bounds.
-     * @param v The scale vector.
-     * @param origin The normalized origin to scale from.
-     * @returns This bounds after scaling.
-     */
-    scale: (v: Vec2, origin?: Vec2) => this;
-    /**
-     * Shifts this bounds such that its origin is at a given position.
-     * @param pos The position.
-     * @param origin The normalized origin of the bounds.
-     * @returns This bounds after shifting.
-     */
-    shift: (pos: Vec2, origin?: Vec2) => this;
-    /**
-     * Extends this bounds by a vector.
-     * @param v The extension vector.
-     * @returns This bounds after extending.
-     */
-    extend: (v: Vec2) => this;
-    /** The zero bounds, [(0, 0), (0, 0)]. */
-    static get zero(): Bounds;
-    /** The unit bounds, [(0, 0), (1, 1)]. */
-    static get unit(): Bounds;
-    /** The normalized bounds, [(-0.5, -0.5), (0.5, 0.5)]. */
-    static get norm(): Bounds;
-}
-/**
- * Base class for all collider nodes.
- *
- * A collider must have a parent PhysicsBody to detect collisions.
- */
-export abstract class Collider extends Node {
-    protected _bounds: Bounds;
-    protected _axes: Vec2[];
-    /** The transform-agnostic bounds of this collider. */
-    get bounds(): Bounds;
-    /** The transform-agnostic axes of this collider for SAT. */
-    get axes(): Vec2[];
-    /**
-     * Regenerates the transform-agnostic cached properties of the collider.
-     *
-     * Implementation defined by the collider subtype.
-     */
-    abstract regenerate(): void;
-}
-/**
- * A node that has a regular n-gon collider shape.
- */
-export class NgonCollider extends Collider {
-    /** The offset of the center of the collider. */
-    offset: Vec2;
-    /** The number of sides of the polygon. */
-    get sides(): number;
-    set sides(value: number);
-    /** The radius of the polygon. */
-    get radius(): number;
-    set radius(value: number);
-    get vertices(): Vec2[];
-    regenerate(): void;
 }
 /**
  * Representation of a RGBA color.
@@ -856,6 +700,81 @@ export class Sprite extends Node implements IDrawable {
     /** The color. */
     get color(): Color;
     set color(value: Color);
+}
+/**
+ * Representation of 2D bounds.
+ */
+export class Bounds implements ICopyable, IEquatable {
+    /** The minimum components. */
+    min: Vec2;
+    /** The maximum components. */
+    max: Vec2;
+    constructor(min: Vec2, max: Vec2);
+    copy: () => Bounds;
+    copyFrom: (other: Bounds) => this;
+    equals: (other: Bounds) => boolean;
+    /** The size of the bounds. */
+    get size(): Vec2;
+    /**
+     * Determines if a point exists inside this bounds.
+     * @param point The point.
+     * @returns Whether the point exists inside this bounds.
+     */
+    contains: (point: Vec2) => boolean;
+    /**
+     * Determines if this bounds overlaps with another bounds.
+     * @param other The other bounds.
+     * @returns Whether the bounds overlap.
+     */
+    overlaps: (other: Bounds) => boolean;
+    /** The zero bounds, [(0, 0), (0, 0)]. */
+    static get zero(): Bounds;
+    /** The unit bounds, [(0, 0), (1, 1)]. */
+    static get unit(): Bounds;
+    /** The normalized bounds, [(-0.5, -0.5), (0.5, 0.5)]. */
+    static get norm(): Bounds;
+    /**
+     * Create bounds based on a set of vertices.
+     * @param vertices The vertices.
+     * @returns The bounds.
+     */
+    static fromVertices: (vertices: Vec2[]) => Bounds;
+    /**
+     * Create bounds that envelop a set of bounds.
+     * @param boundses The set of bounds to envelop.
+     * @returns The bounds.
+     */
+    static makeEnvelop: (boundses: Bounds[]) => Bounds;
+    /**
+     * Translates bounds.
+     * @param b The bounds.
+     * @param v The translation vector.
+     * @returns The translated bounds.
+     */
+    static translate: (b: Bounds, v: Vec2) => Bounds;
+    /**
+     * Scales bounds.
+     * @param b The bounds.
+     * @param v The scale vector.
+     * @param origin The normalized origin to scale from.
+     * @returns The scaled bounds.
+     */
+    static scale: (b: Bounds, v: Vec2, origin?: Vec2) => Bounds;
+    /**
+     * Shifts bounds such that its origin is at a given position.
+     * @param b The bounds.
+     * @param pos The position.
+     * @param origin The normalized origin of the bounds.
+     * @returns The shifted bounds.
+     */
+    static shift: (b: Bounds, pos: Vec2, origin?: Vec2) => Bounds;
+    /**
+     * Extends bounds by a vector.
+     * @param b The bounds.
+     * @param v The extension vector.
+     * @returns The extended bounds.
+     */
+    static extend: (b: Bounds, v: Vec2) => Bounds;
 }
 
 //# sourceMappingURL=Petrallengine.d.ts.map

@@ -120,112 +120,38 @@ Math.mod = (x, y)=>x >= 0 ? x % Math.abs(y) : Math.abs(y) - -x % Math.abs(y) % M
 
 class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
     constructor(x, y){
-        /** The x-component. */ this.x = 0;
-        /** The y-component. */ this.y = 0;
+        this._x = 0;
+        this._y = 0;
         this.copy = ()=>new $8ec4c8ffa911853c$export$2e2bcd8739ae039(this.x, this.y);
         this.copyFrom = (other)=>{
-            this.x = other.x;
-            this.y = other.y;
+            this._x = other.x;
+            this._y = other.y;
             return this;
         };
         this.equals = (other)=>this.x === other.x && this.y === other.y;
-        /**
-     * Normalizes this vector.
-     * @returns This vector after normalizing.
-     */ this.normalize = ()=>{
-            const l = this.length;
-            return this.scale(l == 0 ? 0 : 1 / l);
-        };
-        /**
-     * Translates this vector by another vector.
-     * @param v The other vector.
-     * @returns This vector after translating.
-     */ this.translate = (v)=>{
-            this.x += v.x;
-            this.y += v.y;
-            return this;
-        };
-        /**
-     * Rotates this vector by an angle.
-     * @param deg The angle in degrees.
-     * @returns This vector after rotating.
-     */ this.rotate = (deg)=>{
-            const r = deg * Math.PI / 180;
-            const x = Math.cos(r) * this.x - Math.sin(r) * this.y;
-            const y = Math.sin(r) * this.x + Math.cos(r) * this.y;
-            this.x = x;
-            this.y = y;
-            return this;
-        };
-        /**
-     * Scales this vector by a factor.
-     * @param n The scaling factor.
-     * @returns This vector after scaling.
-     */ this.scale = (n)=>{
-            this.x *= n;
-            this.y *= n;
-            return this;
-        };
-        /**
-     * Scales this vector by another vector component-wise.
-     * @param v The other vector.
-     * @returns This vector after scaling.
-     */ this.scaleComponents = (v)=>{
-            this.x *= v.x;
-            this.y *= v.y;
-            return this;
-        };
-        /**
-     * Inverts this vector component-wise.
-     * @returns This vector after inverting.
-     */ this.invert = ()=>{
-            this.x = 1 / this.x;
-            this.y = 1 / this.y;
-            return this;
-        };
-        /**
-     * Transforms this vector by a matrix.
-     * @param m The matrix.
-     * @returns This vector after transforming.
-     */ this.transform = (m)=>{
-            const x = this.x * m.m[0][0] + this.y * m.m[0][1] + m.m[0][2];
-            const y = this.x * m.m[1][0] + this.y * m.m[1][1] + m.m[1][2];
-            this.x = x;
-            this.y = y;
-            return this;
-        };
-        this.x = x;
-        this.y = y;
+        this._x = x;
+        this._y = y;
     }
-    /**
-     * Returns the squared length of this vector.
-     * @returns The squared length of this vector.
-     */ get sqrLength() {
+    /** The x-component. */ get x() {
+        return this._x;
+    }
+    /** The y-component. */ get y() {
+        return this._y;
+    }
+    /** The squared length of this vector. */ get sqrLength() {
         return this.x * this.x + this.y * this.y;
     }
-    /**
-     * Returns the length of this vector.
-     * @returns The length of this vector.
-     */ get length() {
+    /** The length of this vector. */ get length() {
         return Math.sqrt(this.sqrLength);
     }
-    /**
-     * Returns the normalized form of this vector.
-     * @returns The normalized form of this vector.
-     */ get normalized() {
+    /** The normalized form of this vector. */ get normalized() {
         const l = this.length;
         return l == 0 ? $8ec4c8ffa911853c$export$2e2bcd8739ae039.zero : $8ec4c8ffa911853c$export$2e2bcd8739ae039.divide(this, l);
     }
-    /**
-     * Returns the value of the minimum component of this vector.
-     * @returns The value of the minimum component of this vector.
-     */ get minComponent() {
+    /** The value of the minimum component of this vector. */ get minComponent() {
         return this.x < this.y ? this.x : this.y;
     }
-    /**
-     * Returns the value of the maximum component of this vector.
-     * @returns The value of the maximum component of this vector.
-     */ get maxComponent() {
+    /** The value of the maximum component of this vector. */ get maxComponent() {
         return this.x > this.y ? this.x : this.y;
     }
     /** The zero vector. */ static get zero() {
@@ -255,8 +181,6 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
     static #_ = (()=>{
         /**
      * Adds two vectors component-wise.
-     * 
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The sum vector.
@@ -265,8 +189,6 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
     static #_1 = (()=>{
         /**
      * Multiplies a vector by a constant.
-     * 
-     * Does not modify the original vector.
      * @param v The vector.
      * @param n The constant
      * @returns The scaled vector.
@@ -275,8 +197,6 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
     static #_2 = (()=>{
         /**
      * Multiplies two vectors component-wise.
-     * 
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The scaled vector.
@@ -285,8 +205,6 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
     static #_3 = (()=>{
         /**
      * Subtracts one vector from another.
-     * 
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The difference vector.
@@ -295,8 +213,6 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
     static #_4 = (()=>{
         /**
      * Divides a vector by a constant.
-     * 
-     * Does not modify the original vector.
      * @param v The vector.
      * @param n The constant.
      * @returns The scaled vector.
@@ -305,8 +221,6 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
     static #_5 = (()=>{
         /**
      * Inverts a vector component-wise.
-     * 
-     * Does not modify the original vector.
      * @param v The vector.
      * @returns The inverted vector.
      */ this.inverse = (v)=>new $8ec4c8ffa911853c$export$2e2bcd8739ae039(1 / v.x, 1 / v.y);
@@ -314,8 +228,6 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
     static #_6 = (()=>{
         /**
      * Dot multiplies two vectors.
-     * 
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The dot product.
@@ -324,14 +236,36 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
     static #_7 = (()=>{
         /**
      * Cross multiplies two vectors.
-     * 
-     * Does not modify the original vectors.
      * @param v1 The first vector.
      * @param v2 The second vector.
      * @returns The magnitude of the cross product.
      */ this.cross = (v1, v2)=>v1.x * v2.y - v1.y * v2.x;
     })();
     static #_8 = (()=>{
+        /**
+     * Rotates a vector by an angle.
+     * @param deg The angle in degrees.
+     * @returns The rotated vector.
+     */ this.rotate = (v, deg)=>{
+            const r = deg * Math.PI / 180;
+            const x = Math.cos(r) * v.x - Math.sin(r) * v.y;
+            const y = Math.sin(r) * v.x + Math.cos(r) * v.y;
+            return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(x, y);
+        };
+    })();
+    static #_9 = (()=>{
+        /**
+     * Transforms a vector by a matrix.
+     * @param m The matrix.
+     * @param v The vector.
+     * @returns The transformed vector.
+     */ this.transform = (m, v)=>{
+            const x = v.x * m.get(0, 0) + v.y * m.get(0, 1) + m.get(0, 2);
+            const y = v.x * m.get(1, 0) + v.y * m.get(1, 1) + m.get(1, 2);
+            return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(x, y);
+        };
+    })();
+    static #_10 = (()=>{
         /**
      * Converts an angle in degrees to a unit vector.
      * @param deg The angle in degrees.
@@ -341,7 +275,7 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
             return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(Math.cos(r), Math.sin(r));
         };
     })();
-    static #_9 = (()=>{
+    static #_11 = (()=>{
         /**
      * Converts a vector to its angle from the x-axis.
      * @param v The vector.
@@ -351,21 +285,28 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
             return (v.x > 0 ? 0 : v.y > 0 ? 180 : -180) + Math.atan(v.y / v.x) * 180 / Math.PI;
         };
     })();
-    static #_10 = (()=>{
+    static #_12 = (()=>{
         /**
      * Converts an arbitrary object with x and y properties to a vector.
      * @param obj The object.
      * @returns The vector.
      */ this.fromObjXY = (obj)=>new $8ec4c8ffa911853c$export$2e2bcd8739ae039(obj.x, obj.y);
     })();
-    static #_11 = (()=>{
+    static #_13 = (()=>{
         /**
      * Converts an arbitrary object with width and height properties to a vector.
      * @param obj The object.
      * @returns The vector.
      */ this.fromObjWH = (obj)=>new $8ec4c8ffa911853c$export$2e2bcd8739ae039(obj.width, obj.height);
     })();
-    static #_12 = (()=>{
+    static #_14 = (()=>{
+        /**
+     * Converts a 3-tuple to a vector, omitting the last element of the tuple.
+     * @param obj The 3-tuple.
+     * @returns The vector.
+     */ this.from3Tuple = (obj)=>new $8ec4c8ffa911853c$export$2e2bcd8739ae039(obj[0], obj[1]);
+    })();
+    static #_15 = (()=>{
         /**
      * Linearly interpolates from one vector to another.
      * @param v1 The first vector.
@@ -374,7 +315,7 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
      * @returns The interpolated vector.
      */ this.lerp = (v1, v2, t)=>new $8ec4c8ffa911853c$export$2e2bcd8739ae039(Math.lerp(v1.x, v2.x, t), Math.lerp(v1.y, v2.y, t));
     })();
-    static #_13 = (()=>{
+    static #_16 = (()=>{
         /**
      * Linearly interpolates from one vector to another.
      * @param v1 The first vector.
@@ -408,6 +349,316 @@ class $511d31ae5212a454$export$2e2bcd8739ae039 {
 /**
  * @author Petraller <me@petraller.com>
  */ 
+/**
+ * @author Petraller <me@petraller.com>
+ */ 
+
+class $a53cef81bd683a5b$export$2e2bcd8739ae039 {
+    constructor(m){
+        /** The matrix. */ this._m = [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                0,
+                0,
+                0
+            ]
+        ];
+        this.copy = ()=>new $a53cef81bd683a5b$export$2e2bcd8739ae039(this._m);
+        this.copyFrom = (other)=>{
+            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)this._m[r][c] = other._m[r][c];
+            return this;
+        };
+        this.equals = (other)=>{
+            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)if (this._m[r][c] !== other._m[r][c]) return false;
+            return true;
+        };
+        /**
+     * Retrieves an element of the matrix.
+     * @param r The row index.
+     * @param c The column index.
+     * @returns The element.
+     */ this.get = (r, c)=>this._m[r][c];
+        /**
+     * Sets an element of the matrix.
+     * @param r The row index.
+     * @param c The column index.
+     * @param value The value.
+     * @returns This matrix after setting.
+     */ this.set = (r, c, value)=>{
+            this._m[r][c] = value;
+            return this;
+        };
+        /**
+     * Retrieves a row of the matrix.
+     * @param r The row index.
+     * @returns The row.
+     */ this.getRow = (r)=>[
+                this._m[r][0],
+                this._m[r][1],
+                this._m[r][2]
+            ];
+        /**
+     * Retrieves a column of the matrix.
+     * @param c The column index.
+     * @returns The column.
+     */ this.getColumn = (c)=>[
+                this._m[0][c],
+                this._m[1][c],
+                this._m[2][c]
+            ];
+        /**
+     * Retrieves a minor of the matrix.
+     * @param r The row index to omit.
+     * @param c The column index to omit.
+     * @returns The minor.
+     */ this.getMinor = (r, c)=>[
+                r == 0 ? [
+                    c == 0 ? this._m[1][1] : this._m[1][0],
+                    c == 2 ? this._m[1][1] : this._m[1][2]
+                ] : [
+                    c == 0 ? this._m[0][1] : this._m[0][0],
+                    c == 2 ? this._m[0][1] : this._m[0][2]
+                ],
+                r == 2 ? [
+                    c == 0 ? this._m[1][1] : this._m[1][0],
+                    c == 2 ? this._m[1][1] : this._m[1][2]
+                ] : [
+                    c == 0 ? this._m[2][1] : this._m[2][0],
+                    c == 2 ? this._m[2][1] : this._m[2][2]
+                ]
+            ];
+        /**
+     * Retrieves the determinant of a cofactor of the matrix.
+     * @param r The row index of the element.
+     * @param c The column index of the element.
+     * @returns The determinant of the cofactor.
+     */ this.getCofactorDeterminant = (r, c)=>{
+            let minor = this.getMinor(r, c);
+            let i = (r + c) % 2 === 0 ? 1 : -1;
+            return i * (minor[0][0] * minor[1][1] - minor[1][0] * minor[0][1]);
+        };
+        for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)this._m[r][c] = m ? m[r][c] : 0;
+    }
+    /** The determinant of this matrix. */ get determinant() {
+        return this._m[0][0] * (this._m[1][1] * this._m[2][2] - this._m[1][2] * this._m[2][1]) + this._m[0][1] * (this._m[1][2] * this._m[2][0] - this._m[1][0] * this._m[2][2]) + this._m[0][2] * (this._m[1][0] * this._m[2][1] - this._m[1][1] * this._m[2][0]);
+    }
+    /** The translation component of the matrix. */ get translation() {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).from3Tuple(this.getColumn(2));
+    }
+    set translation(value) {
+        this.set(0, 2, value.x).set(1, 2, value.y);
+    }
+    /** The non-negative scale component of the matrix. */ get scale() {
+        return new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).from3Tuple(this.getColumn(0)).length, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).from3Tuple(this.getColumn(1)).length);
+    }
+    /** The zero matrix. */ static get zero() {
+        return new $a53cef81bd683a5b$export$2e2bcd8739ae039([
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                0,
+                0,
+                0
+            ]
+        ]);
+    }
+    /** The identity matrix. */ static get identity() {
+        return new $a53cef81bd683a5b$export$2e2bcd8739ae039([
+            [
+                1,
+                0,
+                0
+            ],
+            [
+                0,
+                1,
+                0
+            ],
+            [
+                0,
+                0,
+                1
+            ]
+        ]);
+    }
+    static #_ = (()=>{
+        /**
+     * Adds two matrices component-wise.
+     * 
+     * Does not modify the original matrices.
+     * @param m1 The first matrix.
+     * @param m2 The second matrix.
+     * @returns The sum matrix.
+     */ this.add = (m1, m2)=>{
+            let result = new $a53cef81bd683a5b$export$2e2bcd8739ae039();
+            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)result._m[r][c] = m1._m[r][c] + m2._m[r][c];
+            return result;
+        };
+    })();
+    static #_1 = (()=>{
+        /**
+     * Multiplies a matrix by a constant.
+     * 
+     * Does not modify the original matrix.
+     * @param m The matrix.
+     * @param n The constant
+     * @returns The scaled matrix.
+     */ this.multiply = (m, n)=>{
+            let result = new $a53cef81bd683a5b$export$2e2bcd8739ae039();
+            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)result._m[r][c] = m._m[r][c] * n;
+            return result;
+        };
+    })();
+    static #_2 = (()=>{
+        /**
+     * Multiplies two matrices.
+     * 
+     * Does not modify the original matrices.
+     * @param m1 The first matrix.
+     * @param m2 The second matrix.
+     * @returns The multiplied matrix.
+     */ this.matrixMultiply = (m1, m2)=>{
+            let result = new $a53cef81bd683a5b$export$2e2bcd8739ae039();
+            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)for(let i = 0; i < 3; ++i)result._m[r][c] += m1._m[r][i] * m2._m[i][c];
+            return result;
+        };
+    })();
+    static #_3 = (()=>{
+        /**
+     * Subtracts one matrix from another.
+     * 
+     * Does not modify the original matrices.
+     * @param m1 The first matrix.
+     * @param m2 The second matrix.
+     * @returns The difference matrix.
+     */ this.subtract = (m1, m2)=>$a53cef81bd683a5b$export$2e2bcd8739ae039.add(m1, $a53cef81bd683a5b$export$2e2bcd8739ae039.multiply(m2, -1));
+    })();
+    static #_4 = (()=>{
+        /**
+     * Divides a matrix by a constant.
+     * 
+     * Does not modify the original matrix.
+     * @param m The matrix.
+     * @param n The constant
+     * @returns The scaled matrix.
+     */ this.divide = (m, n)=>$a53cef81bd683a5b$export$2e2bcd8739ae039.multiply(m, 1 / n);
+    })();
+    static #_5 = (()=>{
+        /**
+     * Transposes a matrix.
+     * @param m The matrix.
+     * @returns The transposed matrix.
+     */ this.transpose = (m)=>{
+            return new $a53cef81bd683a5b$export$2e2bcd8739ae039([
+                [
+                    m._m[0][0],
+                    m._m[1][0],
+                    m._m[2][0]
+                ],
+                [
+                    m._m[0][1],
+                    m._m[1][1],
+                    m._m[2][1]
+                ],
+                [
+                    m._m[0][2],
+                    m._m[1][2],
+                    m._m[2][2]
+                ]
+            ]);
+        };
+    })();
+    static #_6 = (()=>{
+        /**
+     * Inverts a matrix. If the matrix is not invertible, an error is thrown.
+     * 
+     * Does not modify the original matrix.
+     * @param m The matrix.
+     * @returns The inverse matrix.
+     */ this.inverse = (m)=>{
+            const det = m.determinant;
+            if (det === 0) {
+                console.error(`Matrix ${m._m} is not invertible`);
+                return m;
+            }
+            return $a53cef81bd683a5b$export$2e2bcd8739ae039.multiply(new $a53cef81bd683a5b$export$2e2bcd8739ae039([
+                [
+                    m.getCofactorDeterminant(0, 0),
+                    m.getCofactorDeterminant(1, 0),
+                    m.getCofactorDeterminant(2, 0)
+                ],
+                [
+                    m.getCofactorDeterminant(0, 1),
+                    m.getCofactorDeterminant(1, 1),
+                    m.getCofactorDeterminant(2, 1)
+                ],
+                [
+                    m.getCofactorDeterminant(0, 2),
+                    m.getCofactorDeterminant(1, 2),
+                    m.getCofactorDeterminant(2, 2)
+                ]
+            ]), 1 / det);
+        };
+    })();
+    static #_7 = (()=>{
+        /**
+     * Constructs a translation matrix.
+     * @param v The translation vector.
+     * @returns The translation matrix.
+     */ this.makeTranslation = (v)=>{
+            return $a53cef81bd683a5b$export$2e2bcd8739ae039.identity.set(0, 2, v.x).set(1, 2, v.y);
+        };
+    })();
+    static #_8 = (()=>{
+        /**
+     * Constructs a rotation matrix.
+     * @param deg The rotation in degrees.
+     * @returns The rotation matrix.
+     */ this.makeRotation = (deg)=>{
+            const r = deg * Math.PI / 180;
+            return $a53cef81bd683a5b$export$2e2bcd8739ae039.identity.set(0, 0, Math.cos(r)).set(0, 1, -Math.sin(r)).set(1, 0, Math.sin(r)).set(1, 1, Math.cos(r));
+        };
+    })();
+    static #_9 = (()=>{
+        /**
+     * Constructs a scaling matrix.
+     * @param v The scaling vector.
+     * @returns The scaling matrix.
+     */ this.makeScaling = (v)=>{
+            return $a53cef81bd683a5b$export$2e2bcd8739ae039.identity.set(0, 0, v.x).set(1, 1, v.y);
+        };
+    })();
+    static #_10 = (()=>{
+        /**
+     * Constructs a transformation matrix.
+     * @param t The translation vector.
+     * @param r The rotation in degrees.
+     * @param s The scaling vector.
+     * @returns The transformation matrix.
+     */ this.makeTransformation = (t, r, s)=>{
+            return $a53cef81bd683a5b$export$2e2bcd8739ae039.matrixMultiply($a53cef81bd683a5b$export$2e2bcd8739ae039.matrixMultiply($a53cef81bd683a5b$export$2e2bcd8739ae039.makeTranslation(t), $a53cef81bd683a5b$export$2e2bcd8739ae039.makeRotation(r)), $a53cef81bd683a5b$export$2e2bcd8739ae039.makeScaling(s));
+        };
+    })();
+}
+
+
 
 class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
     static #_ = (()=>{
@@ -443,7 +694,7 @@ class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
             $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseStates.set(b, true);
             $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.set(b, true);
         };
-        canvas.onmouseup = (ev)=>{
+        canvas.onmouseup = canvas.onmouseleave = (ev)=>{
             const b = ev.button;
             $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseStates.set(b, false);
             $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.set(b, true);
@@ -518,26 +769,26 @@ class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
     /**
      * Returns the position of the mouse in the canvas.
      * @returns The position of the mouse in the canvas.
-     */ static getMousePosition() {
+     */ static get mousePosition() {
         return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mousePos;
     }
     /**
      * Returns the normalized position of the mouse in the canvas.
      * @returns The normalized position of the mouse in the canvas.
-     */ static getMousePositionNormalized() {
+     */ static get mousePositionNormalized() {
         return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiplyComponents($35fd48d1ddd84d0f$export$2e2bcd8739ae039.mousePos, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(1 / $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas.width, 1 / $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas.height));
     }
     /**
      * Returns the position on the canvas of a world position.
      * @returns The position on the canvas of a world position.
      */ static worldToCanvas(worldPos) {
-        return worldPos.copy().scaleComponents((0, $511d31ae5212a454$export$2e2bcd8739ae039).scale).rotate(-(0, $511d31ae5212a454$export$2e2bcd8739ae039).rotation).translate((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $511d31ae5212a454$export$2e2bcd8739ae039).position, -1)).translate((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).fromObjWH($35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas).scale(0.5));
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).transform((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeTransformation((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $511d31ae5212a454$export$2e2bcd8739ae039).position, -1), -(0, $511d31ae5212a454$export$2e2bcd8739ae039).rotation, (0, $511d31ae5212a454$export$2e2bcd8739ae039).scale), worldPos), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).fromObjWH($35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas), 0.5));
     }
     /**
      * Returns the position in the world of a canvas position.
      * @returns The position in the world of a canvas position.
      */ static canvasToWorld(canvasPos) {
-        return canvasPos.copy().translate((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).fromObjWH($35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas).scale(-0.5)).translate((0, $511d31ae5212a454$export$2e2bcd8739ae039).position).rotate((0, $511d31ae5212a454$export$2e2bcd8739ae039).rotation).scaleComponents((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).inverse((0, $511d31ae5212a454$export$2e2bcd8739ae039).scale));
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).transform((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).inverse((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeTransformation((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $511d31ae5212a454$export$2e2bcd8739ae039).position, -1), -(0, $511d31ae5212a454$export$2e2bcd8739ae039).rotation, (0, $511d31ae5212a454$export$2e2bcd8739ae039).scale)), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(canvasPos, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).fromObjWH($35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas), -0.5)));
     }
 }
 
@@ -545,299 +796,6 @@ class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
 /**
  * @author Petraller <me@petraller.com>
  */ 
-/**
- * @author Petraller <me@petraller.com>
- */ 
-class $a53cef81bd683a5b$export$2e2bcd8739ae039 {
-    constructor(m){
-        /** The matrix. */ this.m = [
-            [
-                0,
-                0,
-                0
-            ],
-            [
-                0,
-                0,
-                0
-            ],
-            [
-                0,
-                0,
-                0
-            ]
-        ];
-        this.copy = ()=>new $a53cef81bd683a5b$export$2e2bcd8739ae039(this.m);
-        this.copyFrom = (other)=>{
-            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)this.m[r][c] = other.m[r][c];
-            return this;
-        };
-        this.equals = (other)=>{
-            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)if (this.m[r][c] !== other.m[r][c]) return false;
-            return true;
-        };
-        /**
-     * Retrieves an element of the matrix.
-     * 
-     * Shorthand for `Mat3.m[r][c]`.
-     * @param r The row index.
-     * @param c The column index.
-     * @returns The element.
-     */ this.get = (r, c)=>this.m[r][c];
-        /**
-     * Sets an element of the matrix.
-     * 
-     * Shorthand for `Mat3.m[r][c] = value`.
-     * @param r The row index.
-     * @param c The column index.
-     * @param value The value.
-     * @returns This matrix after setting.
-     */ this.set = (r, c, value)=>{
-            this.m[r][c] = value;
-            return this;
-        };
-        /**
-     * Retrieves a row of the matrix.
-     * @param r The row index.
-     * @returns The row.
-     */ this.getRow = (r)=>[
-                this.m[r][0],
-                this.m[r][1],
-                this.m[r][2]
-            ];
-        /**
-     * Retrieves a column of the matrix.
-     * @param c The column index.
-     * @returns The column.
-     */ this.getColumn = (c)=>[
-                this.m[0][c],
-                this.m[1][c],
-                this.m[2][c]
-            ];
-        /**
-     * Retrieves a minor of the matrix.
-     * @param r The row index to omit.
-     * @param c The column index to omit.
-     * @returns The minor.
-     */ this.getMinor = (r, c)=>[
-                r == 0 ? [
-                    c == 0 ? this.m[1][1] : this.m[1][0],
-                    c == 2 ? this.m[1][1] : this.m[1][2]
-                ] : [
-                    c == 0 ? this.m[0][1] : this.m[0][0],
-                    c == 2 ? this.m[0][1] : this.m[0][2]
-                ],
-                r == 2 ? [
-                    c == 0 ? this.m[1][1] : this.m[1][0],
-                    c == 2 ? this.m[1][1] : this.m[1][2]
-                ] : [
-                    c == 0 ? this.m[2][1] : this.m[2][0],
-                    c == 2 ? this.m[2][1] : this.m[2][2]
-                ]
-            ];
-        /**
-     * Retrieves the determinant of a cofactor of the matrix.
-     * @param r The row index of the element.
-     * @param c The column index of the element.
-     * @returns The determinant of the cofactor.
-     */ this.getCofactorDeterminant = (r, c)=>{
-            let minor = this.getMinor(r, c);
-            let i = (r + c) % 2 === 0 ? 1 : -1;
-            return i * (minor[0][0] * minor[1][1] - minor[1][0] * minor[0][1]);
-        };
-        /**
-     * Transposes the matrix.
-     * @returns This matrix after transposition.
-     */ this.transpose = ()=>{
-            this.m = [
-                [
-                    this.m[0][0],
-                    this.m[1][0],
-                    this.m[2][0]
-                ],
-                [
-                    this.m[0][1],
-                    this.m[1][1],
-                    this.m[2][1]
-                ],
-                [
-                    this.m[0][2],
-                    this.m[1][2],
-                    this.m[2][2]
-                ]
-            ];
-            return this;
-        };
-        for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)this.m[r][c] = m ? m[r][c] : 0;
-    }
-    /**
-     * Returns the determinant of this matrix.
-     * @returns The determinant of this matrix.
-     */ get determinant() {
-        return this.m[0][0] * (this.m[1][1] * this.m[2][2] - this.m[1][2] * this.m[2][1]) + this.m[0][1] * (this.m[1][2] * this.m[2][0] - this.m[1][0] * this.m[2][2]) + this.m[0][2] * (this.m[1][0] * this.m[2][1] - this.m[1][1] * this.m[2][0]);
-    }
-    /** The zero matrix. */ static get zero() {
-        return new $a53cef81bd683a5b$export$2e2bcd8739ae039([
-            [
-                0,
-                0,
-                0
-            ],
-            [
-                0,
-                0,
-                0
-            ],
-            [
-                0,
-                0,
-                0
-            ]
-        ]);
-    }
-    /** The identity matrix. */ static get identity() {
-        return new $a53cef81bd683a5b$export$2e2bcd8739ae039([
-            [
-                1,
-                0,
-                0
-            ],
-            [
-                0,
-                1,
-                0
-            ],
-            [
-                0,
-                0,
-                1
-            ]
-        ]);
-    }
-    static #_ = (()=>{
-        /**
-     * Adds two matrices component-wise.
-     * 
-     * Does not modify the original matrices.
-     * @param m1 The first matrix.
-     * @param m2 The second matrix.
-     * @returns The sum matrix.
-     */ this.add = (m1, m2)=>{
-            let result = new $a53cef81bd683a5b$export$2e2bcd8739ae039();
-            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)result.m[r][c] = m1.m[r][c] + m2.m[r][c];
-            return result;
-        };
-    })();
-    static #_1 = (()=>{
-        /**
-     * Multiplies a matrix by a constant.
-     * 
-     * Does not modify the original matrix.
-     * @param m The matrix.
-     * @param n The constant
-     * @returns The scaled matrix.
-     */ this.multiply = (m, n)=>{
-            let result = new $a53cef81bd683a5b$export$2e2bcd8739ae039();
-            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)result.m[r][c] = m.m[r][c] * n;
-            return result;
-        };
-    })();
-    static #_2 = (()=>{
-        /**
-     * Multiplies two matrices.
-     * 
-     * Does not modify the original matrices.
-     * @param m1 The first matrix.
-     * @param m2 The second matrix.
-     * @returns The multiplied matrix.
-     */ this.matrixMultiply = (m1, m2)=>{
-            let result = new $a53cef81bd683a5b$export$2e2bcd8739ae039();
-            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)for(let i = 0; i < 3; ++i)result.m[r][c] += m1.m[r][i] * m2.m[i][c];
-            return result;
-        };
-    })();
-    static #_3 = (()=>{
-        /**
-     * Subtracts one matrix from another.
-     * 
-     * Does not modify the original matrices.
-     * @param m1 The first matrix.
-     * @param m2 The second matrix.
-     * @returns The difference matrix.
-     */ this.subtract = (m1, m2)=>$a53cef81bd683a5b$export$2e2bcd8739ae039.add(m1, $a53cef81bd683a5b$export$2e2bcd8739ae039.multiply(m2, -1));
-    })();
-    static #_4 = (()=>{
-        /**
-     * Divides a matrix by a constant.
-     * 
-     * Does not modify the original matrix.
-     * @param m The matrix.
-     * @param n The constant
-     * @returns The scaled matrix.
-     */ this.divide = (m, n)=>$a53cef81bd683a5b$export$2e2bcd8739ae039.multiply(m, 1 / n);
-    })();
-    static #_5 = (()=>{
-        /**
-     * Inverts a matrix. If the matrix is not invertible, an error is thrown.
-     * 
-     * Does not modify the original matrix.
-     * @param m The matrix.
-     * @returns The inverse matrix.
-     */ this.inverse = (m)=>{
-            const det = m.determinant;
-            if (det === 0) {
-                console.error(`Matrix ${m.m} is not invertible`);
-                return m;
-            }
-            return $a53cef81bd683a5b$export$2e2bcd8739ae039.multiply(new $a53cef81bd683a5b$export$2e2bcd8739ae039([
-                [
-                    m.getCofactorDeterminant(0, 0),
-                    m.getCofactorDeterminant(1, 0),
-                    m.getCofactorDeterminant(2, 0)
-                ],
-                [
-                    m.getCofactorDeterminant(0, 1),
-                    m.getCofactorDeterminant(1, 1),
-                    m.getCofactorDeterminant(2, 1)
-                ],
-                [
-                    m.getCofactorDeterminant(0, 2),
-                    m.getCofactorDeterminant(1, 2),
-                    m.getCofactorDeterminant(2, 2)
-                ]
-            ]), 1 / det);
-        };
-    })();
-    static #_6 = (()=>{
-        /**
-     * Constructs a translation matrix.
-     * @param v The translation vector.
-     * @returns The translation matrix.
-     */ this.makeTranslation = (v)=>{
-            return $a53cef81bd683a5b$export$2e2bcd8739ae039.identity.set(0, 2, v.x).set(1, 2, v.y);
-        };
-    })();
-    static #_7 = (()=>{
-        /**
-     * Constructs a rotation matrix.
-     * @param deg The rotation in degrees.
-     * @returns The rotation matrix.
-     */ this.makeRotation = (deg)=>{
-            const r = deg * Math.PI / 180;
-            return $a53cef81bd683a5b$export$2e2bcd8739ae039.identity.set(0, 0, Math.cos(r)).set(0, 1, -Math.sin(r)).set(1, 0, Math.sin(r)).set(1, 1, Math.cos(r));
-        };
-    })();
-    static #_8 = (()=>{
-        /**
-     * Constructs a scaling matrix.
-     * @param v The scaling vector.
-     * @returns The scaling matrix.
-     */ this.makeScaling = (v)=>{
-            return $a53cef81bd683a5b$export$2e2bcd8739ae039.identity.set(0, 0, v.x).set(1, 1, v.y);
-        };
-    })();
-}
-
 
 
 class $3f8760cc7c29435c$export$2e2bcd8739ae039 {
@@ -850,6 +808,7 @@ class $3f8760cc7c29435c$export$2e2bcd8739ae039 {
         this._scale = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one;
         this._parent = null;
         this._transform = (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).identity;
+        this._globalTransform = (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).identity;
         this._isDirty = false;
         /** The unique Snowflake ID of this node. */ this.id = (0, $24207f53032a3f4e$export$389de06130c9495c)();
         /** The name of this node. */ this.name = "New Node";
@@ -872,31 +831,63 @@ class $3f8760cc7c29435c$export$2e2bcd8739ae039 {
         else this.onDisable?.call(this);
     }
     /** The position of this node. */ get position() {
-        this._isDirty = true;
         return this._position;
     }
     set position(value) {
         this._position = value;
         this._isDirty = true;
     }
+    /** The global position of this node. */ get globalPosition() {
+        return this.globalTransform.translation;
+    }
+    set globalPosition(value) {
+        const parent = this.parent ? this.parent.globalTransform : (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).identity;
+        const parentInverse = (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).inverse(parent);
+        const local = (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).matrixMultiply(parentInverse, (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeTransformation(value, this._rotation, this._scale));
+        this.position = local.translation;
+    }
     /** The rotation in degrees of this node. */ get rotation() {
-        this._isDirty = true;
         return this._rotation;
     }
     set rotation(value) {
         this._rotation = (value + 180) % 360 - 180;
         this._isDirty = true;
     }
+    /** The global rotation in degrees of this node. */ get globalRotation() {
+        let rot = this._rotation;
+        let curr = this._parent;
+        while(curr !== null){
+            rot += curr._rotation;
+            curr = curr._parent;
+        }
+        return rot;
+    }
+    set globalRotation(value) {
+        let rot = 0;
+        let curr = this._parent;
+        while(curr !== null){
+            rot += curr._rotation;
+            curr = curr._parent;
+        }
+        this.rotation = value - rot;
+    }
     /** The scale of this node. */ get scale() {
-        this._isDirty = true;
         return this._scale;
     }
     set scale(value) {
         this._scale = value;
         this._isDirty = true;
     }
+    /** The global scale of this node. */ get globalScale() {
+        return this.globalTransform.scale;
+    }
     /** The transformation matrix of this node. */ get transform() {
+        if (this._isDirty) this.recalculateTransformMatrix();
         return this._transform;
+    }
+    /** The global transformation matrix of this node. */ get globalTransform() {
+        if (this._isDirty) this.recalculateTransformMatrix();
+        return this._globalTransform;
     }
     /** The parent node of this node. */ get parent() {
         return this._parent;
@@ -981,12 +972,27 @@ class $3f8760cc7c29435c$export$2e2bcd8739ae039 {
         return false;
     }
     /**
-     * Recalculates the transformation matrix and unsets the dirty flag.
+     * Recalculates the transformation matrices and unsets the dirty flag.
      */ recalculateTransformMatrix() {
         if (!this._isDirty) return;
-        this._transform = (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).matrixMultiply((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).matrixMultiply((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeTranslation(this._position), (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeRotation(this._rotation)), (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeScaling(this._scale));
+        // Calculate
+        this._globalTransform = this._transform = (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeTransformation(this._position, this._rotation, this._scale);
+        if (this.parent) this._globalTransform = (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).matrixMultiply(this.parent.globalTransform, this._transform);
+        // Dirty children
+        for (const child of this.children)child._isDirty = true;
         this._isDirty = false;
     }
+}
+
+
+/**
+ * @author Petraller <me@petraller.com>
+ */ /**
+ * Checks if an object implements a drawable.
+ * @param obj The object.
+ * @returns Whether the object implements a drawable.
+ */ function $936ba809947b4de6$export$1508030049b632ec(obj) {
+    return "onDraw" in obj && obj.onDraw instanceof Function;
 }
 
 
@@ -1004,12 +1010,18 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
         /** The scheduled interval between frame updates in seconds. */ this.FRAME_TIME = 1 / $05bad183ec6d4f44$export$2e2bcd8739ae039.FRAME_RATE;
     })();
     static #_4 = (()=>{
-        this._deltaTime = $05bad183ec6d4f44$export$2e2bcd8739ae039.FRAME_TIME;
+        /** Debug draw flags. */ this.DEBUG_DRAWS = {
+            colliders: true,
+            boundingBoxes: true
+        };
     })();
     static #_5 = (()=>{
-        this._time = 0;
+        this._deltaTime = $05bad183ec6d4f44$export$2e2bcd8739ae039.FRAME_TIME;
     })();
     static #_6 = (()=>{
+        this._time = 0;
+    })();
+    static #_7 = (()=>{
         this.rootNode = new (0, $3f8760cc7c29435c$export$2e2bcd8739ae039)($05bad183ec6d4f44$export$2e2bcd8739ae039);
     })();
     /** The root node of the whole game. */ static get root() {
@@ -1066,18 +1078,30 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
             // Draw all
             function draw(node) {
                 if (!node.isEnabled) return;
-                context.save();
-                // Apply node transforms
-                context.translate(node.position.x, node.position.y);
-                context.rotate(node.rotation * Math.PI / 180);
-                context.scale(node.scale.x, node.scale.y);
                 // Draw drawables
-                if ("onDraw" in node && node.onDraw instanceof Function) node.onDraw.call(node, context);
+                if ((0, $936ba809947b4de6$export$1508030049b632ec)(node)) {
+                    context.save();
+                    // Apply node transforms
+                    context.transform(node.globalTransform.get(0, 0), node.globalTransform.get(1, 0), node.globalTransform.get(0, 1), node.globalTransform.get(1, 1), node.globalTransform.get(0, 2), node.globalTransform.get(1, 2));
+                    node.onDraw.call(node, context);
+                    context.restore();
+                }
                 // Iterate children
                 for (let child of node.children)draw(child);
-                context.restore();
             }
             draw($05bad183ec6d4f44$export$2e2bcd8739ae039.rootNode);
+            // Debug draw
+            function debugDraw(node) {
+                if (!node.isEnabled) return;
+                // // Draw colliders
+                // if (isCollider(node)) {
+                //     // Draw debug
+                //     node.debugDraw(context);
+                // }
+                // Iterate children
+                for (let child of node.children)debugDraw(child);
+            }
+            debugDraw($05bad183ec6d4f44$export$2e2bcd8739ae039.rootNode);
             // Clear transition flags
             input._endFrame();
             const tEnd = Date.now();
@@ -1097,170 +1121,6 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
      * Returns the actual elapsed time for the frame in seconds.
      */ static get deltaTime() {
         return $05bad183ec6d4f44$export$2e2bcd8739ae039._deltaTime / 1000;
-    }
-}
-
-
-/**
- * @author Petraller <me@petraller.com>
- */ /**
- * @author Petraller <me@petraller.com>
- */ 
-
-class $b31606e820d5109e$export$2e2bcd8739ae039 {
-    constructor(min, max){
-        /** The minimum components. */ this.min = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
-        /** The maximum components. */ this.max = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
-        this.copy = ()=>new $b31606e820d5109e$export$2e2bcd8739ae039(this.min, this.max);
-        this.copyFrom = (other)=>{
-            this.min.copyFrom(other.min);
-            this.max.copyFrom(other.max);
-            return this;
-        };
-        this.equals = (other)=>this.min.equals(other.min) && this.max.equals(other.max);
-        /**
-     * Updates this bounds based on a set of vertices.
-     * @param vertices The vertices.
-     */ this.fromVertices = (vertices)=>{
-            this.min = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).infinity;
-            this.max = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).negativeInfinity;
-            // Iterate all vertices
-            for (const vertex of vertices){
-                if (vertex.x > this.max.x) this.max.x = vertex.x;
-                if (vertex.x < this.min.x) this.min.x = vertex.x;
-                if (vertex.y > this.max.y) this.max.y = vertex.y;
-                if (vertex.y < this.min.y) this.min.y = vertex.y;
-            }
-        };
-        /**
-     * Updates this bounds to contain a set of bounds.
-     * @param boundses The bounds.
-     */ this.envelop = (boundses, velocity)=>{
-            this.min = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).infinity;
-            this.max = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).negativeInfinity;
-            // Iterate all bounds
-            for (const bounds of boundses){
-                if (bounds.max.x > this.max.x) this.max.x = bounds.max.x;
-                if (bounds.min.x < this.min.x) this.min.x = bounds.min.x;
-                if (bounds.max.y > this.max.y) this.max.y = bounds.max.y;
-                if (bounds.min.y < this.min.y) this.min.y = bounds.min.y;
-            }
-        };
-        /**
-     * Determines if a point exists inside this bounds.
-     * @param point The point.
-     * @returns Whether the point exists inside this bounds.
-     */ this.contains = (point)=>point.x >= this.min.x && point.x <= this.max.x && point.y >= this.min.y && point.y <= this.max.y;
-        /**
-     * Determines if this bounds overlaps with another bounds.
-     * @param other The other bounds.
-     * @returns Whether the bounds overlap.
-     */ this.overlaps = (other)=>this.min.x <= other.max.x && this.max.x >= other.min.x && this.max.y >= other.min.y && this.min.y <= other.max.y;
-        /**
-     * Translates this bounds.
-     * @param v The translation vector.
-     * @returns This bounds after translating.
-     */ this.translate = (v)=>{
-            this.min.translate(v);
-            this.max.translate(v);
-            return this;
-        };
-        /**
-     * Scales this bounds.
-     * @param v The scale vector.
-     * @param origin The normalized origin to scale from.
-     * @returns This bounds after scaling.
-     */ this.scale = (v, origin = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one.scale(0.5))=>{
-            const o = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).lerpComponents(this.min, this.max, origin);
-            this.min.translate((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(o, -1)).scaleComponents(v).translate(o);
-            this.max.translate((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(o, -1)).scaleComponents(v).translate(o);
-            return this;
-        };
-        /**
-     * Shifts this bounds such that its origin is at a given position.
-     * @param pos The position.
-     * @param origin The normalized origin of the bounds.
-     * @returns This bounds after shifting.
-     */ this.shift = (pos, origin = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one.scale(0.5))=>{
-            const o = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).lerpComponents(this.min, this.max, origin);
-            return this.translate((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(pos, o));
-        };
-        /**
-     * Extends this bounds by a vector.
-     * @param v The extension vector.
-     * @returns This bounds after extending.
-     */ this.extend = (v)=>{
-            if (v.x > 0) this.max.x += v.x;
-            else this.min.x += v.x;
-            if (v.y > 0) this.max.y += v.y;
-            else this.min.y += v.y;
-            return this;
-        };
-        this.min.copyFrom(min);
-        this.max.copyFrom(max);
-    }
-    /** The size of the bounds. */ get size() {
-        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.max, this.min);
-    }
-    /** The zero bounds, [(0, 0), (0, 0)]. */ static get zero() {
-        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero);
-    }
-    /** The unit bounds, [(0, 0), (1, 1)]. */ static get unit() {
-        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one);
-    }
-    /** The normalized bounds, [(-0.5, -0.5), (0.5, 0.5)]. */ static get norm() {
-        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one.scale(-0.5), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one.scale(0.5));
-    }
-}
-
-
-
-class $084fb6562cdf6a86$export$2e2bcd8739ae039 extends (0, $3f8760cc7c29435c$export$2e2bcd8739ae039) {
-    /** The transform-agnostic bounds of this collider. */ get bounds() {
-        return this._bounds;
-    }
-    /** The transform-agnostic axes of this collider for SAT. */ get axes() {
-        return this._axes;
-    }
-    constructor(...args){
-        super(...args);
-        this._bounds = (0, $b31606e820d5109e$export$2e2bcd8739ae039).zero;
-        this._axes = [];
-    }
-}
-
-
-/**
- * @author Petraller <me@petraller.com>
- */ 
-
-class $4a27f9e6b3a88732$export$2e2bcd8739ae039 extends (0, $084fb6562cdf6a86$export$2e2bcd8739ae039) {
-    /** The number of sides of the polygon. */ get sides() {
-        return this._sides;
-    }
-    set sides(value) {
-        this._sides = Math.max(value, 3);
-    }
-    /** The radius of the polygon. */ get radius() {
-        return this._radius;
-    }
-    set radius(value) {
-        this._radius = Math.max(value, 0);
-    }
-    get vertices() {
-        return this._vertices;
-    }
-    regenerate() {
-        this._vertices = [];
-        for(let i = 0; i < this._sides; ++i)this._vertices.push((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).fromAngle(360 * i / this._sides).scale(this._radius).scaleComponents(this.scale).rotate(this.rotation).translate(this.position));
-        this._bounds.fromVertices(this._vertices);
-    }
-    constructor(...args){
-        super(...args);
-        this._sides = 3;
-        this._radius = 1;
-        this._vertices = [];
-        /** The offset of the center of the collider. */ this.offset = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
     }
 }
 
@@ -1545,8 +1405,133 @@ class $31caad46b2dacdff$export$2e2bcd8739ae039 extends (0, $3f8760cc7c29435c$exp
         this._image = null;
         this._color = (0, $65b04c82fca59f60$export$2e2bcd8739ae039).white;
         this.bitmap = null;
-        /** The normalized pivot. */ this.pivot = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one.scale(0.5);
+        /** The normalized pivot. */ this.pivot = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one, 0.5);
     }
+}
+
+
+/**
+ * @author Petraller <me@petraller.com>
+ */ 
+
+class $b31606e820d5109e$export$2e2bcd8739ae039 {
+    constructor(min, max){
+        /** The minimum components. */ this.min = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
+        /** The maximum components. */ this.max = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
+        this.copy = ()=>new $b31606e820d5109e$export$2e2bcd8739ae039(this.min, this.max);
+        this.copyFrom = (other)=>{
+            this.min.copyFrom(other.min);
+            this.max.copyFrom(other.max);
+            return this;
+        };
+        this.equals = (other)=>this.min.equals(other.min) && this.max.equals(other.max);
+        /**
+     * Determines if a point exists inside this bounds.
+     * @param point The point.
+     * @returns Whether the point exists inside this bounds.
+     */ this.contains = (point)=>point.x >= this.min.x && point.x <= this.max.x && point.y >= this.min.y && point.y <= this.max.y;
+        /**
+     * Determines if this bounds overlaps with another bounds.
+     * @param other The other bounds.
+     * @returns Whether the bounds overlap.
+     */ this.overlaps = (other)=>this.min.x <= other.max.x && this.max.x >= other.min.x && this.max.y >= other.min.y && this.min.y <= other.max.y;
+        this.min.copyFrom(min);
+        this.max.copyFrom(max);
+    }
+    /** The size of the bounds. */ get size() {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.max, this.min);
+    }
+    /** The zero bounds, [(0, 0), (0, 0)]. */ static get zero() {
+        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero);
+    }
+    /** The unit bounds, [(0, 0), (1, 1)]. */ static get unit() {
+        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one);
+    }
+    /** The normalized bounds, [(-0.5, -0.5), (0.5, 0.5)]. */ static get norm() {
+        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one, -0.5), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one, 0.5));
+    }
+    static #_ = (()=>{
+        /**
+     * Create bounds based on a set of vertices.
+     * @param vertices The vertices.
+     * @returns The bounds.
+     */ this.fromVertices = (vertices)=>{
+            let b = new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).infinity, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).negativeInfinity);
+            // Iterate all vertices
+            for (const vertex of vertices){
+                if (vertex.x > b.max.x) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(vertex.x, b.max.y);
+                if (vertex.x < b.min.x) b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(vertex.x, b.min.y);
+                if (vertex.y > b.max.y) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.max.x, vertex.y);
+                if (vertex.y < b.min.y) b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.min.x, vertex.y);
+            }
+            return b;
+        };
+    })();
+    static #_1 = (()=>{
+        /**
+     * Create bounds that envelop a set of bounds.
+     * @param boundses The set of bounds to envelop.
+     * @returns The bounds.
+     */ this.makeEnvelop = (boundses)=>{
+            let b = new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).infinity, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).negativeInfinity);
+            // Iterate all bounds
+            for (const bounds of boundses){
+                if (bounds.max.x > b.max.x) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(bounds.max.x, b.max.y);
+                if (bounds.min.x < b.min.x) b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(bounds.min.x, b.min.y);
+                if (bounds.max.y > b.max.y) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.max.x, bounds.max.y);
+                if (bounds.min.y < b.min.y) b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.min.x, bounds.min.y);
+            }
+            return b;
+        };
+    })();
+    static #_2 = (()=>{
+        /**
+     * Translates bounds.
+     * @param b The bounds.
+     * @param v The translation vector.
+     * @returns The translated bounds.
+     */ this.translate = (b, v)=>{
+            return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b.min, v), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b.max, v));
+        };
+    })();
+    static #_3 = (()=>{
+        /**
+     * Scales bounds.
+     * @param b The bounds.
+     * @param v The scale vector.
+     * @param origin The normalized origin to scale from.
+     * @returns The scaled bounds.
+     */ this.scale = (b, v, origin = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one, 0.5))=>{
+            const o = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).lerpComponents(b.min, b.max, origin);
+            return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiplyComponents((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b.min, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(o, -1)), v), o), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiplyComponents((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b.max, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(o, -1)), v), o));
+        };
+    })();
+    static #_4 = (()=>{
+        /**
+     * Shifts bounds such that its origin is at a given position.
+     * @param b The bounds.
+     * @param pos The position.
+     * @param origin The normalized origin of the bounds.
+     * @returns The shifted bounds.
+     */ this.shift = (b, pos, origin = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one, 0.5))=>{
+            const o = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).lerpComponents(b.min, b.max, origin);
+            return $b31606e820d5109e$export$2e2bcd8739ae039.translate(b, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(pos, o));
+        };
+    })();
+    static #_5 = (()=>{
+        /**
+     * Extends bounds by a vector.
+     * @param b The bounds.
+     * @param v The extension vector.
+     * @returns The extended bounds.
+     */ this.extend = (b, v)=>{
+            if (v.x > 0) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.max.x + v.x, b.max.y);
+            else b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.min.x + v.x, b.min.y);
+            if (v.y > 0) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.max.x, b.max.y + v.y);
+            else b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.min.x, b.min.y + v.y);
+            return b;
+        };
+    })();
 }
 
 
@@ -1558,5 +1543,5 @@ class $31caad46b2dacdff$export$2e2bcd8739ae039 extends (0, $3f8760cc7c29435c$exp
  //export * from "./systems/Physics";
 
 
-export {$05bad183ec6d4f44$export$2e2bcd8739ae039 as Game, $084fb6562cdf6a86$export$2e2bcd8739ae039 as Collider, $4a27f9e6b3a88732$export$2e2bcd8739ae039 as NgonCollider, $3f8760cc7c29435c$export$2e2bcd8739ae039 as Node, $31caad46b2dacdff$export$2e2bcd8739ae039 as Sprite, $65b04c82fca59f60$export$2e2bcd8739ae039 as Color, $a53cef81bd683a5b$export$2e2bcd8739ae039 as Mat3, $8ec4c8ffa911853c$export$2e2bcd8739ae039 as Vec2, $511d31ae5212a454$export$2e2bcd8739ae039 as Camera, $35fd48d1ddd84d0f$export$2e2bcd8739ae039 as Input, $24207f53032a3f4e$export$389de06130c9495c as makeSnowflake};
+export {$05bad183ec6d4f44$export$2e2bcd8739ae039 as Game, $3f8760cc7c29435c$export$2e2bcd8739ae039 as Node, $31caad46b2dacdff$export$2e2bcd8739ae039 as Sprite, $b31606e820d5109e$export$2e2bcd8739ae039 as Bounds, $65b04c82fca59f60$export$2e2bcd8739ae039 as Color, $a53cef81bd683a5b$export$2e2bcd8739ae039 as Mat3, $8ec4c8ffa911853c$export$2e2bcd8739ae039 as Vec2, $511d31ae5212a454$export$2e2bcd8739ae039 as Camera, $35fd48d1ddd84d0f$export$2e2bcd8739ae039 as Input, $24207f53032a3f4e$export$389de06130c9495c as makeSnowflake};
 //# sourceMappingURL=Petrallengine.mjs.map
