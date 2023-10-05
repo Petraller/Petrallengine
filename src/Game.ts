@@ -29,7 +29,7 @@ export default class Game {
 
     private static _deltaTime = Game.FRAME_TIME;
     private static _time = 0;
-    private static rootNode: Node = new Node(Game);
+    private static rootNode: Node = new Node(Game, "_ROOT_");
 
     /** The root node of the whole game. */
     static get root() {
@@ -81,6 +81,7 @@ export default class Game {
                     node.isStarted = true;
                 }
                 node.onUpdate?.call(node);
+                node.globalTransform;
 
                 // Iterate children
                 for (let child of node.children) {
