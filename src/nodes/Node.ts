@@ -67,13 +67,45 @@ export default class Node {
     get position() { return this._position; }
     set position(value: Vec2) { this._position = value; this._isDirty = true; }
 
+    /** The global position of this node. */
+    get globalPosition() { return this.globalTransform.translation; }
+    set globalPosition(value: Vec2) {
+        const parent = this.parent ? this.parent.globalTransform : Mat3.identity;
+        const parentInverse = Mat3.inverse(parent);
+        const local = Mat3.matrixMultiply(parentInverse, Mat3.makeTransformation(value, this._rotation, this._scale));
+        this.position = local.translation;
+    }
+
     /** The rotation in degrees of this node. */
     get rotation() { return this._rotation; }
     set rotation(value: number) { this._rotation = (value + 180) % 360 - 180; this._isDirty = true; }
 
+    /** The global rotation in degrees of this node. */
+    get globalRotation() {
+        let rot = this._rotation;
+        let curr = this._parent;
+        while (curr !== null) {
+            rot += curr._rotation;
+            curr = curr._parent;
+        }
+        return rot;
+    }
+    set globalRotation(value: number) {
+        let rot = 0;
+        let curr = this._parent;
+        while (curr !== null) {
+            rot += curr._rotation;
+            curr = curr._parent;
+        }
+        this.rotation = value - rot;
+    }
+
     /** The scale of this node. */
     get scale() { return this._scale; }
     set scale(value: Vec2) { this._scale = value; this._isDirty = true; }
+
+    /** The global scale of this node. */
+    get globalScale() { return this.globalTransform.scale; }
 
     /** The transformation matrix of this node. */
     get transform() { if (this._isDirty) this.recalculateTransformMatrix(); return this._transform; }
@@ -191,7 +223,7 @@ export default class Node {
     /**
      * Recalculates the transformation matrices and unsets the dirty flag.
      */
-    recalculateTransformMatrix() {
+    private recalculateTransformMatrix() {
         if (!this._isDirty)
             return;
 

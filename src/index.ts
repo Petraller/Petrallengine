@@ -86,16 +86,16 @@ class MyRainbow extends P.Sprite {
 
     onUpdate(): void {
         if (P.Input.isKey("ArrowUp")) {
-            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.up, (100 * P.Game.deltaTime)));
+            this.globalPosition = P.Vec2.add(this.globalPosition, P.Vec2.multiply(P.Vec2.up, (100 * P.Game.deltaTime)));
         }
         if (P.Input.isKey("ArrowDown")) {
-            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.down, (100 * P.Game.deltaTime)));
+            this.globalPosition = P.Vec2.add(this.globalPosition, P.Vec2.multiply(P.Vec2.down, (100 * P.Game.deltaTime)));
         }
         if (P.Input.isKey("ArrowLeft")) {
-            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.left, (100 * P.Game.deltaTime)));
+            this.globalPosition = P.Vec2.add(this.globalPosition, P.Vec2.multiply(P.Vec2.left, (100 * P.Game.deltaTime)));
         }
         if (P.Input.isKey("ArrowRight")) {
-            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.right, (100 * P.Game.deltaTime)));
+            this.globalPosition = P.Vec2.add(this.globalPosition, P.Vec2.multiply(P.Vec2.right, (100 * P.Game.deltaTime)));
         }
         if (P.Input.isKey("Comma")) {
             this.rotation--;
@@ -116,7 +116,7 @@ class MyRainbow extends P.Sprite {
             this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.down, P.Game.deltaTime));
         }
         if (P.Input.isKeyPressed("Enter")) {
-            console.log(this.globalTransform);
+            this.globalRotation = 0;
         }
 
         this.t += P.Game.deltaTime;
