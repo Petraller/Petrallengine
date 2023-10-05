@@ -101,29 +101,50 @@ export default class Game {
                 if (!node.isEnabled)
                     return;
 
-                context.save();
+                const useMyMatrices = true;
 
-                // Apply node transforms
-                // context.transform(
-                //     node.globalTransform.get(0, 0), node.globalTransform.get(1, 0),
-                //     node.globalTransform.get(0, 1), node.globalTransform.get(1, 1),
-                //     node.globalTransform.get(0, 2), node.globalTransform.get(1, 2)
-                // );
-                context.translate(node.position.x, node.position.y);
-                context.rotate(node.rotation * Math.PI / 180);
-                context.scale(node.scale.x, node.scale.y);
+                if (useMyMatrices) {
+                    context.save();
 
-                // Draw drawables
-                if ('onDraw' in node && node.onDraw instanceof Function) {
-                    node.onDraw.call(node, context);
+                    // Apply node transforms
+                    context.transform(
+                        node.globalTransform.get(0, 0), node.globalTransform.get(1, 0),
+                        node.globalTransform.get(0, 1), node.globalTransform.get(1, 1),
+                        node.globalTransform.get(0, 2), node.globalTransform.get(1, 2)
+                    );
+
+                    // Draw drawables
+                    if ('onDraw' in node && node.onDraw instanceof Function) {
+                        node.onDraw.call(node, context);
+                    }
+
+                    context.restore();
+
+                    // Iterate children
+                    for (let child of node.children) {
+                        draw(child);
+                    }
                 }
+                else {
+                    context.save();
 
-                // Iterate children
-                for (let child of node.children) {
-                    draw(child);
+                    // Apply node transforms
+                    context.translate(node.position.x, node.position.y);
+                    context.rotate(node.rotation * Math.PI / 180);
+                    context.scale(node.scale.x, node.scale.y);
+
+                    // Draw drawables
+                    if ('onDraw' in node && node.onDraw instanceof Function) {
+                        node.onDraw.call(node, context);
+                    }
+
+                    // Iterate children
+                    for (let child of node.children) {
+                        draw(child);
+                    }
+
+                    context.restore();
                 }
-
-                context.restore();
             }
             draw(Game.rootNode);
 
