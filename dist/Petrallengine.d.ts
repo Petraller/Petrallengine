@@ -71,6 +71,150 @@ interface IEquatable {
      */
     equals(other: IEquatable): boolean;
 }
+type Row = [number, number, number];
+type Column = [number, number, number];
+type Matrix = [Row, Row, Row];
+/**
+ * Representation of a 3x3 matrix.
+ */
+export class Mat3 implements ICopyable, IEquatable {
+    /** The matrix. */
+    m: Matrix;
+    constructor(m?: Matrix);
+    copy: () => Mat3;
+    copyFrom: (other: Mat3) => this;
+    equals: (other: Mat3) => boolean;
+    /**
+     * Returns the determinant of this matrix.
+     * @returns The determinant of this matrix.
+     */
+    get determinant(): number;
+    /**
+     * Retrieves an element of the matrix.
+     *
+     * Shorthand for `Mat3.m[r][c]`.
+     * @param r The row index.
+     * @param c The column index.
+     * @returns The element.
+     */
+    get: (r: number, c: number) => number;
+    /**
+     * Sets an element of the matrix.
+     *
+     * Shorthand for `Mat3.m[r][c] = value`.
+     * @param r The row index.
+     * @param c The column index.
+     * @param value The value.
+     * @returns This matrix after setting.
+     */
+    set: (r: number, c: number, value: number) => this;
+    /**
+     * Retrieves a row of the matrix.
+     * @param r The row index.
+     * @returns The row.
+     */
+    getRow: (r: number) => Row;
+    /**
+     * Retrieves a column of the matrix.
+     * @param c The column index.
+     * @returns The column.
+     */
+    getColumn: (c: number) => Column;
+    /**
+     * Retrieves a minor of the matrix.
+     * @param r The row index to omit.
+     * @param c The column index to omit.
+     * @returns The minor.
+     */
+    getMinor: (r: number, c: number) => [[number, number], [number, number]];
+    /**
+     * Retrieves the determinant of a cofactor of the matrix.
+     * @param r The row index of the element.
+     * @param c The column index of the element.
+     * @returns The determinant of the cofactor.
+     */
+    getCofactorDeterminant: (r: number, c: number) => number;
+    /**
+     * Transposes the matrix.
+     * @returns This matrix after transposition.
+     */
+    transpose: () => this;
+    /** The zero matrix. */
+    static get zero(): Mat3;
+    /** The identity matrix. */
+    static get identity(): Mat3;
+    /**
+     * Adds two matrices component-wise.
+     *
+     * Does not modify the original matrices.
+     * @param m1 The first matrix.
+     * @param m2 The second matrix.
+     * @returns The sum matrix.
+     */
+    static add: (m1: Mat3, m2: Mat3) => Mat3;
+    /**
+     * Multiplies a matrix by a constant.
+     *
+     * Does not modify the original matrix.
+     * @param m The matrix.
+     * @param n The constant
+     * @returns The scaled matrix.
+     */
+    static multiply: (m: Mat3, n: number) => Mat3;
+    /**
+     * Multiplies two matrices.
+     *
+     * Does not modify the original matrices.
+     * @param m1 The first matrix.
+     * @param m2 The second matrix.
+     * @returns The multiplied matrix.
+     */
+    static matrixMultiply: (m1: Mat3, m2: Mat3) => Mat3;
+    /**
+     * Subtracts one matrix from another.
+     *
+     * Does not modify the original matrices.
+     * @param m1 The first matrix.
+     * @param m2 The second matrix.
+     * @returns The difference matrix.
+     */
+    static subtract: (m1: Mat3, m2: Mat3) => Mat3;
+    /**
+     * Divides a matrix by a constant.
+     *
+     * Does not modify the original matrix.
+     * @param m The matrix.
+     * @param n The constant
+     * @returns The scaled matrix.
+     */
+    static divide: (m: Mat3, n: number) => Mat3;
+    /**
+     * Inverts a matrix. If the matrix is not invertible, an error is thrown.
+     *
+     * Does not modify the original matrix.
+     * @param m The matrix.
+     * @returns The inverse matrix.
+     */
+    static inverse: (m: Mat3) => Mat3;
+    /**
+     * Constructs a translation matrix.
+     * @param v The translation vector.
+     * @returns The translation matrix.
+     */
+    static makeTranslation: (v: Vec2) => Mat3;
+    /**
+     * Constructs a rotation matrix.
+     * @param deg The rotation in degrees.
+     * @returns The rotation matrix.
+     */
+    static makeRotation: (deg: number) => Mat3;
+    /**
+     * Constructs a scaling matrix.
+     * @param v The scaling vector.
+     * @returns The scaling matrix.
+     */
+    static makeScaling: (v: Vec2) => Mat3;
+}
 /**
  * Representation of a 2D vector.
  */
@@ -87,29 +231,27 @@ export class Vec2 implements ICopyable, IEquatable {
      * Returns the squared length of this vector.
      * @returns The squared length of this vector.
      */
-    sqrLength: () => number;
+    get sqrLength(): number;
     /**
      * Returns the length of this vector.
      * @returns The length of this vector.
      */
-    length: () => number;
+    get length(): number;
     /**
      * Returns the normalized form of this vector.
-     *
-     * Does not modify the original vector.
      * @returns The normalized form of this vector.
      */
-    normalized: () => Vec2;
+    get normalized(): Vec2;
     /**
      * Returns the value of the minimum component of this vector.
      * @returns The value of the minimum component of this vector.
      */
-    minComponent: () => number;
+    get minComponent(): number;
     /**
      * Returns the value of the maximum component of this vector.
      * @returns The value of the maximum component of this vector.
      */
-    maxComponent: () => number;
+    get maxComponent(): number;
     /**
      * Normalizes this vector.
      * @returns This vector after normalizing.
@@ -144,6 +286,12 @@ export class Vec2 implements ICopyable, IEquatable {
      * @returns This vector after inverting.
      */
     invert: () => this;
+    /**
+     * Transforms this vector by a matrix.
+     * @param m The matrix.
+     * @returns This vector after transforming.
+     */
+    transform: (m: Mat3) => this;
     /** The zero vector. */
     static get zero(): Vec2;
     /** The unit vector. */
@@ -295,106 +443,18 @@ export class Camera {
      */
     static scale: Vec2;
 }
-type Constructor<T> = {
-    new (...args: any[]): T;
-};
 /**
- * Base class for all nodes in the scene tree.
- *
- * Overrideable callbacks:
- * - onCreate
- * - onStart
- * - onDestroy
- * - onEnable
- * - onDisable
- * - onUpdate
+ * @author Petraller <me@petraller.com>
  */
-export class Node {
-    /** The unique Snowflake ID of this node. */
-    readonly id: Snowflake;
-    /** The name of this node. */
-    name: string;
-    /** The position of this node. */
-    position: Vec2;
-    /** The rotation in degrees of this node. */
-    rotation: number;
-    /** The scale of this node. */
-    scale: Vec2;
-    /** The children nodes of this node. */
-    children: Node[];
-    /** Whether this node has started. */
-    isStarted: boolean;
-    /**
-     * Avoid calling `new Node`, call `Petrallengine.root.createChild` instead.
-     */
-    constructor(flag?: any);
-    /** The enabled state of this node. */
-    get isEnabled(): boolean;
-    set isEnabled(value: boolean);
-    /** The parent node of this node. */
-    get parent(): Node | null;
-    set parent(value: Node | null);
-    /** The sibling index of this node. */
-    get siblingIndex(): number;
-    set siblingIndex(value: number);
-    /**
-     * Creates a new child node of this node.
-     * @returns The child node.
-     */
-    createChild<T extends Node>(type: Constructor<T>): T;
-    /**
-     * Destroys this node and all children nodes.
-     */
-    destroy(): void;
-    /**
-     * Finds a descendant node by its name.
-     * @param name The name of the node.
-     * @returns The node, or null if not found.
-     */
-    findDescendantByName(name: string): Node | null;
-    /**
-     * Finds a descendant node by its type.
-     * @param type The type of the node.
-     * @returns The node, or null if not found.
-     */
-    findDescendantByType<T>(type: Constructor<T>): T | null;
-    /**
-     * Called when the node is created.
-     */
-    onCreate?(): void;
-    /**
-     * Called when the node is first ticked.
-     */
-    onStart?(): void;
-    /**
-     * Called when the node is destroyed.
-     */
-    onDestroy?(): void;
-    /**
-     * Called when the node is enabled.
-     */
-    onEnable?(): void;
-    /**
-     * Called when the node is disabled.
-     */
-    onDisable?(): void;
-    /**
-     * Called when the node is ticked.
-     */
-    onUpdate?(): void;
-}
 /**
- * Base class for all drawable nodes.
- *
- * Overrideable callbacks:
- * - onDraw
+ * Interface for all drawables.
  */
-export class Drawable extends Node {
+export interface IDrawable {
     /**
-     * Called when the node is drawn.
+     * Called when drawn.
      * @param context The canvas rendering context.
      */
-    onDraw?(context: CanvasRenderingContext2D): void;
+    onDraw(context: CanvasRenderingContext2D): void;
 }
 /**
  * Static class for input handling.
@@ -464,6 +524,110 @@ export class Input {
      */
     static canvasToWorld(canvasPos: Vec2): Vec2;
 }
+type Constructor<T> = {
+    new (...args: any[]): T;
+};
+/**
+ * Base class for all nodes in the scene tree.
+ *
+ * Overrideable callbacks:
+ * - onCreate
+ * - onStart
+ * - onDestroy
+ * - onEnable
+ * - onDisable
+ * - onUpdate
+ */
+export class Node {
+    /** The unique Snowflake ID of this node. */
+    readonly id: Snowflake;
+    /** The name of this node. */
+    name: string;
+    /** The children nodes of this node. */
+    children: Node[];
+    /** Whether this node has started. */
+    isStarted: boolean;
+    /**
+     * Avoid calling `new Node`, call `Petrallengine.root.createChild` instead.
+     */
+    constructor(flag?: any);
+    toString(): string;
+    /** The enabled state of this node. */
+    get isEnabled(): boolean;
+    set isEnabled(value: boolean);
+    /** The position of this node. */
+    get position(): Vec2;
+    set position(value: Vec2);
+    /** The rotation in degrees of this node. */
+    get rotation(): number;
+    set rotation(value: number);
+    /** The scale of this node. */
+    get scale(): Vec2;
+    set scale(value: Vec2);
+    /** The transformation matrix of this node. */
+    get transform(): Mat3;
+    /** The parent node of this node. */
+    get parent(): Node | null;
+    set parent(value: Node | null);
+    /** The sibling index of this node. */
+    get siblingIndex(): number;
+    set siblingIndex(value: number);
+    /**
+     * Creates a new child node of this node.
+     * @returns The child node.
+     */
+    createChild<T extends Node>(type: Constructor<T>): T;
+    /**
+     * Destroys this node and all children nodes.
+     */
+    destroy(): void;
+    /**
+     * Finds a descendant node by its name.
+     * @param name The name of the node.
+     * @returns The node, or null if not found.
+     */
+    findDescendantByName(name: string): Node | null;
+    /**
+     * Finds a descendant node by its type.
+     * @param type The type of the node.
+     * @returns The node, or null if not found.
+     */
+    findDescendantByType<T>(type: Constructor<T>): T | null;
+    /**
+     * Determines if this node is a descendent of another node.
+     * @param node The other node.
+     * @returns Whether this node is a descendant.
+     */
+    isDescendantOf(node: Node): boolean;
+    /**
+     * Recalculates the transformation matrix and unsets the dirty flag.
+     */
+    recalculateTransformMatrix(): void;
+    /**
+     * Called when the node is created.
+     */
+    onCreate?(): void;
+    /**
+     * Called when the node is first ticked.
+     */
+    onStart?(): void;
+    /**
+     * Called when the node is destroyed.
+     */
+    onDestroy?(): void;
+    /**
+     * Called when the node is enabled.
+     */
+    onEnable?(): void;
+    /**
+     * Called when the node is disabled.
+     */
+    onDisable?(): void;
+    /**
+     * Called when the node is ticked.
+     */
+    onUpdate?(): void;
+}
 /**
  * Static class for Petrallengine.
  *
@@ -493,6 +657,109 @@ export class Game {
      * Returns the actual elapsed time for the frame in seconds.
      */
     static get deltaTime(): number;
+}
+/**
+ * Representation of 2D bounds.
+ */
+declare class Bounds implements ICopyable, IEquatable {
+    /** The minimum components. */
+    min: Vec2;
+    /** The maximum components. */
+    max: Vec2;
+    constructor(min: Vec2, max: Vec2);
+    copy: () => Bounds;
+    copyFrom: (other: Bounds) => this;
+    equals: (other: Bounds) => boolean;
+    /** The size of the bounds. */
+    get size(): Vec2;
+    /**
+     * Updates this bounds based on a set of vertices.
+     * @param vertices The vertices.
+     */
+    fromVertices: (vertices: Vec2[]) => void;
+    /**
+     * Updates this bounds to contain a set of bounds.
+     * @param boundses The bounds.
+     */
+    envelop: (boundses: Bounds[], velocity?: Vec2) => void;
+    /**
+     * Determines if a point exists inside this bounds.
+     * @param point The point.
+     * @returns Whether the point exists inside this bounds.
+     */
+    contains: (point: Vec2) => boolean;
+    /**
+     * Determines if this bounds overlaps with another bounds.
+     * @param other The other bounds.
+     * @returns Whether the bounds overlap.
+     */
+    overlaps: (other: Bounds) => boolean;
+    /**
+     * Translates this bounds.
+     * @param v The translation vector.
+     * @returns This bounds after translating.
+     */
+    translate: (v: Vec2) => this;
+    /**
+     * Scales this bounds.
+     * @param v The scale vector.
+     * @param origin The normalized origin to scale from.
+     * @returns This bounds after scaling.
+     */
+    scale: (v: Vec2, origin?: Vec2) => this;
+    /**
+     * Shifts this bounds such that its origin is at a given position.
+     * @param pos The position.
+     * @param origin The normalized origin of the bounds.
+     * @returns This bounds after shifting.
+     */
+    shift: (pos: Vec2, origin?: Vec2) => this;
+    /**
+     * Extends this bounds by a vector.
+     * @param v The extension vector.
+     * @returns This bounds after extending.
+     */
+    extend: (v: Vec2) => this;
+    /** The zero bounds, [(0, 0), (0, 0)]. */
+    static get zero(): Bounds;
+    /** The unit bounds, [(0, 0), (1, 1)]. */
+    static get unit(): Bounds;
+    /** The normalized bounds, [(-0.5, -0.5), (0.5, 0.5)]. */
+    static get norm(): Bounds;
+}
+/**
+ * Base class for all collider nodes.
+ *
+ * A collider must have a parent PhysicsBody to detect collisions.
+ */
+export abstract class Collider extends Node {
+    protected _bounds: Bounds;
+    protected _axes: Vec2[];
+    /** The transform-agnostic bounds of this collider. */
+    get bounds(): Bounds;
+    /** The transform-agnostic axes of this collider for SAT. */
+    get axes(): Vec2[];
+    /**
+     * Regenerates the transform-agnostic cached properties of the collider.
+     *
+     * Implementation defined by the collider subtype.
+     */
+    abstract regenerate(): void;
+}
+/**
+ * A node that has a regular n-gon collider shape.
+ */
+export class NgonCollider extends Collider {
+    /** The offset of the center of the collider. */
+    offset: Vec2;
+    /** The number of sides of the polygon. */
+    get sides(): number;
+    set sides(value: number);
+    /** The radius of the polygon. */
+    get radius(): number;
+    set radius(value: number);
+    get vertices(): Vec2[];
+    regenerate(): void;
 }
 /**
  * Representation of a RGBA color.
@@ -579,7 +846,7 @@ export class Color implements ICopyable, IEquatable {
 /**
  * A node that draws an image on the canvas.
 */
-export class Sprite extends Drawable {
+export class Sprite extends Node implements IDrawable {
     /** The normalized pivot. */
     pivot: Vec2;
     onDraw(context: CanvasRenderingContext2D): void;

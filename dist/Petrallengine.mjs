@@ -130,35 +130,10 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
         };
         this.equals = (other)=>this.x === other.x && this.y === other.y;
         /**
-     * Returns the squared length of this vector.
-     * @returns The squared length of this vector.
-     */ this.sqrLength = ()=>this.x * this.x + this.y * this.y;
-        /**
-     * Returns the length of this vector.
-     * @returns The length of this vector.
-     */ this.length = ()=>Math.sqrt(this.sqrLength());
-        /**
-     * Returns the normalized form of this vector.
-     * 
-     * Does not modify the original vector.
-     * @returns The normalized form of this vector.
-     */ this.normalized = ()=>{
-            const l = this.length();
-            return l == 0 ? $8ec4c8ffa911853c$export$2e2bcd8739ae039.zero : $8ec4c8ffa911853c$export$2e2bcd8739ae039.divide(this, l);
-        };
-        /**
-     * Returns the value of the minimum component of this vector.
-     * @returns The value of the minimum component of this vector.
-     */ this.minComponent = ()=>this.x < this.y ? this.x : this.y;
-        /**
-     * Returns the value of the maximum component of this vector.
-     * @returns The value of the maximum component of this vector.
-     */ this.maxComponent = ()=>this.x > this.y ? this.x : this.y;
-        /**
      * Normalizes this vector.
      * @returns This vector after normalizing.
      */ this.normalize = ()=>{
-            const l = this.length();
+            const l = this.length;
             return this.scale(l == 0 ? 0 : 1 / l);
         };
         /**
@@ -208,8 +183,50 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
             this.y = 1 / this.y;
             return this;
         };
+        /**
+     * Transforms this vector by a matrix.
+     * @param m The matrix.
+     * @returns This vector after transforming.
+     */ this.transform = (m)=>{
+            const x = this.x * m.m[0][0] + this.y * m.m[0][1] + m.m[0][2];
+            const y = this.x * m.m[1][0] + this.y * m.m[1][1] + m.m[1][2];
+            this.x = x;
+            this.y = y;
+            return this;
+        };
         this.x = x;
         this.y = y;
+    }
+    /**
+     * Returns the squared length of this vector.
+     * @returns The squared length of this vector.
+     */ get sqrLength() {
+        return this.x * this.x + this.y * this.y;
+    }
+    /**
+     * Returns the length of this vector.
+     * @returns The length of this vector.
+     */ get length() {
+        return Math.sqrt(this.sqrLength);
+    }
+    /**
+     * Returns the normalized form of this vector.
+     * @returns The normalized form of this vector.
+     */ get normalized() {
+        const l = this.length;
+        return l == 0 ? $8ec4c8ffa911853c$export$2e2bcd8739ae039.zero : $8ec4c8ffa911853c$export$2e2bcd8739ae039.divide(this, l);
+    }
+    /**
+     * Returns the value of the minimum component of this vector.
+     * @returns The value of the minimum component of this vector.
+     */ get minComponent() {
+        return this.x < this.y ? this.x : this.y;
+    }
+    /**
+     * Returns the value of the maximum component of this vector.
+     * @returns The value of the maximum component of this vector.
+     */ get maxComponent() {
+        return this.x > this.y ? this.x : this.y;
     }
     /** The zero vector. */ static get zero() {
         return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(0, 0);
@@ -390,110 +407,6 @@ class $511d31ae5212a454$export$2e2bcd8739ae039 {
 
 /**
  * @author Petraller <me@petraller.com>
- */ /**
- * @author Petraller <me@petraller.com>
- */ 
-
-class $3f8760cc7c29435c$export$2e2bcd8739ae039 {
-    /**
-     * Avoid calling `new Node`, call `Petrallengine.root.createChild` instead.
-     */ constructor(flag){
-        this._isEnabled = true;
-        this._parent = null;
-        /** The unique Snowflake ID of this node. */ this.id = (0, $24207f53032a3f4e$export$389de06130c9495c)();
-        /** The name of this node. */ this.name = "New Node";
-        /** The position of this node. */ this.position = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
-        /** The rotation in degrees of this node. */ this.rotation = 0;
-        /** The scale of this node. */ this.scale = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one;
-        /** The children nodes of this node. */ this.children = [];
-        /** Whether this node has started. */ this.isStarted = false;
-        if (!flag) {
-            console.warn(`Avoid calling \`new Node\`, call \`Petrallengine.root.createChild\` instead`);
-            console.trace(`\`new Node\` call occured here:`);
-        }
-        this.onCreate?.call(this);
-    }
-    /** The enabled state of this node. */ get isEnabled() {
-        return this._isEnabled;
-    }
-    set isEnabled(value) {
-        this._isEnabled = value;
-        if (value) this.onEnable?.call(this);
-        else this.onDisable?.call(this);
-    }
-    /** The parent node of this node. */ get parent() {
-        return this._parent;
-    }
-    set parent(value) {
-        if (this._parent) {
-            const i = this._parent.children.indexOf(this);
-            if (i !== -1) this._parent.children.splice(i, 1);
-        }
-        this._parent = value;
-        if (this._parent) this._parent.children.push(this);
-    }
-    /** The sibling index of this node. */ get siblingIndex() {
-        if (!this._parent) return 0;
-        return this._parent.children.indexOf(this);
-    }
-    set siblingIndex(value) {
-        if (!this._parent) return;
-        const i = this.siblingIndex;
-        this._parent.children.splice(i, 1);
-        this._parent.children.splice(value, 0, this);
-    }
-    /**
-     * Creates a new child node of this node.
-     * @returns The child node.
-     */ createChild(type) {
-        const node = new type(this.createChild);
-        node.parent = this;
-        return node;
-    }
-    /**
-     * Destroys this node and all children nodes.
-     */ destroy() {
-        for (let child of this.children)child.destroy();
-        this.onDestroy?.call(this);
-        this.parent = null;
-    }
-    /**
-     * Finds a descendant node by its name.
-     * @param name The name of the node.
-     * @returns The node, or null if not found.
-     */ findDescendantByName(name) {
-        for (let child of this.children){
-            if (child.name == name) return child;
-        }
-        for (let child of this.children){
-            const result = child.findDescendantByName(name);
-            if (result) return result;
-        }
-        return null;
-    }
-    /**
-     * Finds a descendant node by its type.
-     * @param type The type of the node.
-     * @returns The node, or null if not found.
-     */ findDescendantByType(type) {
-        for (let child of this.children){
-            if (child instanceof type) return child;
-        }
-        for (let child of this.children){
-            const result = child.findDescendantByType(type);
-            if (result) return result;
-        }
-        return null;
-    }
-}
-
-
-class $d2cec58d40f83ce6$export$2e2bcd8739ae039 extends (0, $3f8760cc7c29435c$export$2e2bcd8739ae039) {
-}
-
-
-/**
- * @author Petraller <me@petraller.com>
  */ 
 
 class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
@@ -629,6 +542,453 @@ class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
 }
 
 
+/**
+ * @author Petraller <me@petraller.com>
+ */ 
+/**
+ * @author Petraller <me@petraller.com>
+ */ 
+class $a53cef81bd683a5b$export$2e2bcd8739ae039 {
+    constructor(m){
+        /** The matrix. */ this.m = [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                0,
+                0,
+                0
+            ]
+        ];
+        this.copy = ()=>new $a53cef81bd683a5b$export$2e2bcd8739ae039(this.m);
+        this.copyFrom = (other)=>{
+            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)this.m[r][c] = other.m[r][c];
+            return this;
+        };
+        this.equals = (other)=>{
+            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)if (this.m[r][c] !== other.m[r][c]) return false;
+            return true;
+        };
+        /**
+     * Retrieves an element of the matrix.
+     * 
+     * Shorthand for `Mat3.m[r][c]`.
+     * @param r The row index.
+     * @param c The column index.
+     * @returns The element.
+     */ this.get = (r, c)=>this.m[r][c];
+        /**
+     * Sets an element of the matrix.
+     * 
+     * Shorthand for `Mat3.m[r][c] = value`.
+     * @param r The row index.
+     * @param c The column index.
+     * @param value The value.
+     * @returns This matrix after setting.
+     */ this.set = (r, c, value)=>{
+            this.m[r][c] = value;
+            return this;
+        };
+        /**
+     * Retrieves a row of the matrix.
+     * @param r The row index.
+     * @returns The row.
+     */ this.getRow = (r)=>[
+                this.m[r][0],
+                this.m[r][1],
+                this.m[r][2]
+            ];
+        /**
+     * Retrieves a column of the matrix.
+     * @param c The column index.
+     * @returns The column.
+     */ this.getColumn = (c)=>[
+                this.m[0][c],
+                this.m[1][c],
+                this.m[2][c]
+            ];
+        /**
+     * Retrieves a minor of the matrix.
+     * @param r The row index to omit.
+     * @param c The column index to omit.
+     * @returns The minor.
+     */ this.getMinor = (r, c)=>[
+                r == 0 ? [
+                    c == 0 ? this.m[1][1] : this.m[1][0],
+                    c == 2 ? this.m[1][1] : this.m[1][2]
+                ] : [
+                    c == 0 ? this.m[0][1] : this.m[0][0],
+                    c == 2 ? this.m[0][1] : this.m[0][2]
+                ],
+                r == 2 ? [
+                    c == 0 ? this.m[1][1] : this.m[1][0],
+                    c == 2 ? this.m[1][1] : this.m[1][2]
+                ] : [
+                    c == 0 ? this.m[2][1] : this.m[2][0],
+                    c == 2 ? this.m[2][1] : this.m[2][2]
+                ]
+            ];
+        /**
+     * Retrieves the determinant of a cofactor of the matrix.
+     * @param r The row index of the element.
+     * @param c The column index of the element.
+     * @returns The determinant of the cofactor.
+     */ this.getCofactorDeterminant = (r, c)=>{
+            let minor = this.getMinor(r, c);
+            let i = (r + c) % 2 === 0 ? 1 : -1;
+            return i * (minor[0][0] * minor[1][1] - minor[1][0] * minor[0][1]);
+        };
+        /**
+     * Transposes the matrix.
+     * @returns This matrix after transposition.
+     */ this.transpose = ()=>{
+            this.m = [
+                [
+                    this.m[0][0],
+                    this.m[1][0],
+                    this.m[2][0]
+                ],
+                [
+                    this.m[0][1],
+                    this.m[1][1],
+                    this.m[2][1]
+                ],
+                [
+                    this.m[0][2],
+                    this.m[1][2],
+                    this.m[2][2]
+                ]
+            ];
+            return this;
+        };
+        for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)this.m[r][c] = m ? m[r][c] : 0;
+    }
+    /**
+     * Returns the determinant of this matrix.
+     * @returns The determinant of this matrix.
+     */ get determinant() {
+        return this.m[0][0] * (this.m[1][1] * this.m[2][2] - this.m[1][2] * this.m[2][1]) + this.m[0][1] * (this.m[1][2] * this.m[2][0] - this.m[1][0] * this.m[2][2]) + this.m[0][2] * (this.m[1][0] * this.m[2][1] - this.m[1][1] * this.m[2][0]);
+    }
+    /** The zero matrix. */ static get zero() {
+        return new $a53cef81bd683a5b$export$2e2bcd8739ae039([
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                0,
+                0,
+                0
+            ]
+        ]);
+    }
+    /** The identity matrix. */ static get identity() {
+        return new $a53cef81bd683a5b$export$2e2bcd8739ae039([
+            [
+                1,
+                0,
+                0
+            ],
+            [
+                0,
+                1,
+                0
+            ],
+            [
+                0,
+                0,
+                1
+            ]
+        ]);
+    }
+    static #_ = (()=>{
+        /**
+     * Adds two matrices component-wise.
+     * 
+     * Does not modify the original matrices.
+     * @param m1 The first matrix.
+     * @param m2 The second matrix.
+     * @returns The sum matrix.
+     */ this.add = (m1, m2)=>{
+            let result = new $a53cef81bd683a5b$export$2e2bcd8739ae039();
+            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)result.m[r][c] = m1.m[r][c] + m2.m[r][c];
+            return result;
+        };
+    })();
+    static #_1 = (()=>{
+        /**
+     * Multiplies a matrix by a constant.
+     * 
+     * Does not modify the original matrix.
+     * @param m The matrix.
+     * @param n The constant
+     * @returns The scaled matrix.
+     */ this.multiply = (m, n)=>{
+            let result = new $a53cef81bd683a5b$export$2e2bcd8739ae039();
+            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)result.m[r][c] = m.m[r][c] * n;
+            return result;
+        };
+    })();
+    static #_2 = (()=>{
+        /**
+     * Multiplies two matrices.
+     * 
+     * Does not modify the original matrices.
+     * @param m1 The first matrix.
+     * @param m2 The second matrix.
+     * @returns The multiplied matrix.
+     */ this.matrixMultiply = (m1, m2)=>{
+            let result = new $a53cef81bd683a5b$export$2e2bcd8739ae039();
+            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)for(let i = 0; i < 3; ++i)result.m[r][c] += m1.m[r][i] * m2.m[i][c];
+            return result;
+        };
+    })();
+    static #_3 = (()=>{
+        /**
+     * Subtracts one matrix from another.
+     * 
+     * Does not modify the original matrices.
+     * @param m1 The first matrix.
+     * @param m2 The second matrix.
+     * @returns The difference matrix.
+     */ this.subtract = (m1, m2)=>$a53cef81bd683a5b$export$2e2bcd8739ae039.add(m1, $a53cef81bd683a5b$export$2e2bcd8739ae039.multiply(m2, -1));
+    })();
+    static #_4 = (()=>{
+        /**
+     * Divides a matrix by a constant.
+     * 
+     * Does not modify the original matrix.
+     * @param m The matrix.
+     * @param n The constant
+     * @returns The scaled matrix.
+     */ this.divide = (m, n)=>$a53cef81bd683a5b$export$2e2bcd8739ae039.multiply(m, 1 / n);
+    })();
+    static #_5 = (()=>{
+        /**
+     * Inverts a matrix. If the matrix is not invertible, an error is thrown.
+     * 
+     * Does not modify the original matrix.
+     * @param m The matrix.
+     * @returns The inverse matrix.
+     */ this.inverse = (m)=>{
+            const det = m.determinant;
+            if (det === 0) {
+                console.error(`Matrix ${m.m} is not invertible`);
+                return m;
+            }
+            return $a53cef81bd683a5b$export$2e2bcd8739ae039.multiply(new $a53cef81bd683a5b$export$2e2bcd8739ae039([
+                [
+                    m.getCofactorDeterminant(0, 0),
+                    m.getCofactorDeterminant(1, 0),
+                    m.getCofactorDeterminant(2, 0)
+                ],
+                [
+                    m.getCofactorDeterminant(0, 1),
+                    m.getCofactorDeterminant(1, 1),
+                    m.getCofactorDeterminant(2, 1)
+                ],
+                [
+                    m.getCofactorDeterminant(0, 2),
+                    m.getCofactorDeterminant(1, 2),
+                    m.getCofactorDeterminant(2, 2)
+                ]
+            ]), 1 / det);
+        };
+    })();
+    static #_6 = (()=>{
+        /**
+     * Constructs a translation matrix.
+     * @param v The translation vector.
+     * @returns The translation matrix.
+     */ this.makeTranslation = (v)=>{
+            return $a53cef81bd683a5b$export$2e2bcd8739ae039.identity.set(0, 2, v.x).set(1, 2, v.y);
+        };
+    })();
+    static #_7 = (()=>{
+        /**
+     * Constructs a rotation matrix.
+     * @param deg The rotation in degrees.
+     * @returns The rotation matrix.
+     */ this.makeRotation = (deg)=>{
+            const r = deg * Math.PI / 180;
+            return $a53cef81bd683a5b$export$2e2bcd8739ae039.identity.set(0, 0, Math.cos(r)).set(0, 1, -Math.sin(r)).set(1, 0, Math.sin(r)).set(1, 1, Math.cos(r));
+        };
+    })();
+    static #_8 = (()=>{
+        /**
+     * Constructs a scaling matrix.
+     * @param v The scaling vector.
+     * @returns The scaling matrix.
+     */ this.makeScaling = (v)=>{
+            return $a53cef81bd683a5b$export$2e2bcd8739ae039.identity.set(0, 0, v.x).set(1, 1, v.y);
+        };
+    })();
+}
+
+
+
+class $3f8760cc7c29435c$export$2e2bcd8739ae039 {
+    /**
+     * Avoid calling `new Node`, call `Petrallengine.root.createChild` instead.
+     */ constructor(flag){
+        this._isEnabled = true;
+        this._position = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
+        this._rotation = 0;
+        this._scale = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one;
+        this._parent = null;
+        this._transform = (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).identity;
+        this._isDirty = false;
+        /** The unique Snowflake ID of this node. */ this.id = (0, $24207f53032a3f4e$export$389de06130c9495c)();
+        /** The name of this node. */ this.name = "New Node";
+        /** The children nodes of this node. */ this.children = [];
+        /** Whether this node has started. */ this.isStarted = false;
+        if (!flag) {
+            console.warn(`Avoid calling \`new Node\`, call \`Petrallengine.root.createChild\` instead`);
+            console.trace(`\`new Node\` call occured here:`);
+        }
+    }
+    toString() {
+        return `${this.name}#${this.id}`;
+    }
+    /** The enabled state of this node. */ get isEnabled() {
+        return this._isEnabled;
+    }
+    set isEnabled(value) {
+        this._isEnabled = value;
+        if (value) this.onEnable?.call(this);
+        else this.onDisable?.call(this);
+    }
+    /** The position of this node. */ get position() {
+        this._isDirty = true;
+        return this._position;
+    }
+    set position(value) {
+        this._position = value;
+        this._isDirty = true;
+    }
+    /** The rotation in degrees of this node. */ get rotation() {
+        this._isDirty = true;
+        return this._rotation;
+    }
+    set rotation(value) {
+        this._rotation = (value + 180) % 360 - 180;
+        this._isDirty = true;
+    }
+    /** The scale of this node. */ get scale() {
+        this._isDirty = true;
+        return this._scale;
+    }
+    set scale(value) {
+        this._scale = value;
+        this._isDirty = true;
+    }
+    /** The transformation matrix of this node. */ get transform() {
+        return this._transform;
+    }
+    /** The parent node of this node. */ get parent() {
+        return this._parent;
+    }
+    set parent(value) {
+        if (value && value.isDescendantOf(this)) {
+            // Hey stop that. No circular hierarchy pls
+            console.error(`Making \`${value.toString()}\` a parent of \`${this.toString()}\` will create a circular hierarchy`);
+            return;
+        }
+        if (this._parent) {
+            const i = this._parent.children.indexOf(this);
+            if (i !== -1) this._parent.children.splice(i, 1);
+        }
+        this._parent = value;
+        if (this._parent) this._parent.children.push(this);
+    }
+    /** The sibling index of this node. */ get siblingIndex() {
+        if (!this._parent) return 0;
+        return this._parent.children.indexOf(this);
+    }
+    set siblingIndex(value) {
+        if (!this._parent) return;
+        const i = this.siblingIndex;
+        this._parent.children.splice(i, 1);
+        this._parent.children.splice(value, 0, this);
+    }
+    /**
+     * Creates a new child node of this node.
+     * @returns The child node.
+     */ createChild(type) {
+        const node = new type(this.createChild);
+        node.parent = this;
+        node.onCreate?.call(node);
+        return node;
+    }
+    /**
+     * Destroys this node and all children nodes.
+     */ destroy() {
+        for (let child of this.children)child.destroy();
+        this.onDestroy?.call(this);
+        this.parent = null;
+    }
+    /**
+     * Finds a descendant node by its name.
+     * @param name The name of the node.
+     * @returns The node, or null if not found.
+     */ findDescendantByName(name) {
+        for (let child of this.children){
+            if (child.name == name) return child;
+        }
+        for (let child of this.children){
+            const result = child.findDescendantByName(name);
+            if (result) return result;
+        }
+        return null;
+    }
+    /**
+     * Finds a descendant node by its type.
+     * @param type The type of the node.
+     * @returns The node, or null if not found.
+     */ findDescendantByType(type) {
+        for (let child of this.children){
+            if (child instanceof type) return child;
+        }
+        for (let child of this.children){
+            const result = child.findDescendantByType(type);
+            if (result) return result;
+        }
+        return null;
+    }
+    /**
+     * Determines if this node is a descendent of another node.
+     * @param node The other node.
+     * @returns Whether this node is a descendant.
+     */ isDescendantOf(node) {
+        let curr = this.parent;
+        while(curr !== null){
+            if (curr === node) return true;
+            curr = curr.parent;
+        }
+        return false;
+    }
+    /**
+     * Recalculates the transformation matrix and unsets the dirty flag.
+     */ recalculateTransformMatrix() {
+        if (!this._isDirty) return;
+        this._transform = (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).matrixMultiply((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).matrixMultiply((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeTranslation(this._position), (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeRotation(this._rotation)), (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeScaling(this._scale));
+        this._isDirty = false;
+    }
+}
+
 
 class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
     static #_ = (()=>{
@@ -712,7 +1072,7 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
                 context.rotate(node.rotation * Math.PI / 180);
                 context.scale(node.scale.x, node.scale.y);
                 // Draw drawables
-                if (node instanceof (0, $d2cec58d40f83ce6$export$2e2bcd8739ae039)) node.onDraw?.call(node, context);
+                if ("onDraw" in node && node.onDraw instanceof Function) node.onDraw.call(node, context);
                 // Iterate children
                 for (let child of node.children)draw(child);
                 context.restore();
@@ -740,6 +1100,169 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
     }
 }
 
+
+/**
+ * @author Petraller <me@petraller.com>
+ */ /**
+ * @author Petraller <me@petraller.com>
+ */ 
+
+class $b31606e820d5109e$export$2e2bcd8739ae039 {
+    constructor(min, max){
+        /** The minimum components. */ this.min = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
+        /** The maximum components. */ this.max = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
+        this.copy = ()=>new $b31606e820d5109e$export$2e2bcd8739ae039(this.min, this.max);
+        this.copyFrom = (other)=>{
+            this.min.copyFrom(other.min);
+            this.max.copyFrom(other.max);
+            return this;
+        };
+        this.equals = (other)=>this.min.equals(other.min) && this.max.equals(other.max);
+        /**
+     * Updates this bounds based on a set of vertices.
+     * @param vertices The vertices.
+     */ this.fromVertices = (vertices)=>{
+            this.min = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).infinity;
+            this.max = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).negativeInfinity;
+            // Iterate all vertices
+            for (const vertex of vertices){
+                if (vertex.x > this.max.x) this.max.x = vertex.x;
+                if (vertex.x < this.min.x) this.min.x = vertex.x;
+                if (vertex.y > this.max.y) this.max.y = vertex.y;
+                if (vertex.y < this.min.y) this.min.y = vertex.y;
+            }
+        };
+        /**
+     * Updates this bounds to contain a set of bounds.
+     * @param boundses The bounds.
+     */ this.envelop = (boundses, velocity)=>{
+            this.min = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).infinity;
+            this.max = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).negativeInfinity;
+            // Iterate all bounds
+            for (const bounds of boundses){
+                if (bounds.max.x > this.max.x) this.max.x = bounds.max.x;
+                if (bounds.min.x < this.min.x) this.min.x = bounds.min.x;
+                if (bounds.max.y > this.max.y) this.max.y = bounds.max.y;
+                if (bounds.min.y < this.min.y) this.min.y = bounds.min.y;
+            }
+        };
+        /**
+     * Determines if a point exists inside this bounds.
+     * @param point The point.
+     * @returns Whether the point exists inside this bounds.
+     */ this.contains = (point)=>point.x >= this.min.x && point.x <= this.max.x && point.y >= this.min.y && point.y <= this.max.y;
+        /**
+     * Determines if this bounds overlaps with another bounds.
+     * @param other The other bounds.
+     * @returns Whether the bounds overlap.
+     */ this.overlaps = (other)=>this.min.x <= other.max.x && this.max.x >= other.min.x && this.max.y >= other.min.y && this.min.y <= other.max.y;
+        /**
+     * Translates this bounds.
+     * @param v The translation vector.
+     * @returns This bounds after translating.
+     */ this.translate = (v)=>{
+            this.min.translate(v);
+            this.max.translate(v);
+            return this;
+        };
+        /**
+     * Scales this bounds.
+     * @param v The scale vector.
+     * @param origin The normalized origin to scale from.
+     * @returns This bounds after scaling.
+     */ this.scale = (v, origin = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one.scale(0.5))=>{
+            const o = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).lerpComponents(this.min, this.max, origin);
+            this.min.translate((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(o, -1)).scaleComponents(v).translate(o);
+            this.max.translate((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(o, -1)).scaleComponents(v).translate(o);
+            return this;
+        };
+        /**
+     * Shifts this bounds such that its origin is at a given position.
+     * @param pos The position.
+     * @param origin The normalized origin of the bounds.
+     * @returns This bounds after shifting.
+     */ this.shift = (pos, origin = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one.scale(0.5))=>{
+            const o = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).lerpComponents(this.min, this.max, origin);
+            return this.translate((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(pos, o));
+        };
+        /**
+     * Extends this bounds by a vector.
+     * @param v The extension vector.
+     * @returns This bounds after extending.
+     */ this.extend = (v)=>{
+            if (v.x > 0) this.max.x += v.x;
+            else this.min.x += v.x;
+            if (v.y > 0) this.max.y += v.y;
+            else this.min.y += v.y;
+            return this;
+        };
+        this.min.copyFrom(min);
+        this.max.copyFrom(max);
+    }
+    /** The size of the bounds. */ get size() {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.max, this.min);
+    }
+    /** The zero bounds, [(0, 0), (0, 0)]. */ static get zero() {
+        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero);
+    }
+    /** The unit bounds, [(0, 0), (1, 1)]. */ static get unit() {
+        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one);
+    }
+    /** The normalized bounds, [(-0.5, -0.5), (0.5, 0.5)]. */ static get norm() {
+        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one.scale(-0.5), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one.scale(0.5));
+    }
+}
+
+
+
+class $084fb6562cdf6a86$export$2e2bcd8739ae039 extends (0, $3f8760cc7c29435c$export$2e2bcd8739ae039) {
+    /** The transform-agnostic bounds of this collider. */ get bounds() {
+        return this._bounds;
+    }
+    /** The transform-agnostic axes of this collider for SAT. */ get axes() {
+        return this._axes;
+    }
+    constructor(...args){
+        super(...args);
+        this._bounds = (0, $b31606e820d5109e$export$2e2bcd8739ae039).zero;
+        this._axes = [];
+    }
+}
+
+
+/**
+ * @author Petraller <me@petraller.com>
+ */ 
+
+class $4a27f9e6b3a88732$export$2e2bcd8739ae039 extends (0, $084fb6562cdf6a86$export$2e2bcd8739ae039) {
+    /** The number of sides of the polygon. */ get sides() {
+        return this._sides;
+    }
+    set sides(value) {
+        this._sides = Math.max(value, 3);
+    }
+    /** The radius of the polygon. */ get radius() {
+        return this._radius;
+    }
+    set radius(value) {
+        this._radius = Math.max(value, 0);
+    }
+    get vertices() {
+        return this._vertices;
+    }
+    regenerate() {
+        this._vertices = [];
+        for(let i = 0; i < this._sides; ++i)this._vertices.push((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).fromAngle(360 * i / this._sides).scale(this._radius).scaleComponents(this.scale).rotate(this.rotation).translate(this.position));
+        this._bounds.fromVertices(this._vertices);
+    }
+    constructor(...args){
+        super(...args);
+        this._sides = 3;
+        this._radius = 1;
+        this._vertices = [];
+        /** The offset of the center of the collider. */ this.offset = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
+    }
+}
 
 
 
@@ -922,7 +1445,7 @@ class $65b04c82fca59f60$export$2e2bcd8739ae039 {
 
 
 
-class $31caad46b2dacdff$export$2e2bcd8739ae039 extends (0, $d2cec58d40f83ce6$export$2e2bcd8739ae039) {
+class $31caad46b2dacdff$export$2e2bcd8739ae039 extends (0, $3f8760cc7c29435c$export$2e2bcd8739ae039) {
     static #_ = (()=>{
         this.bitmapStore = new Map();
     })();
@@ -1031,8 +1554,9 @@ class $31caad46b2dacdff$export$2e2bcd8739ae039 extends (0, $d2cec58d40f83ce6$exp
 
 
 
+
  //export * from "./systems/Physics";
 
 
-export {$05bad183ec6d4f44$export$2e2bcd8739ae039 as Game, $d2cec58d40f83ce6$export$2e2bcd8739ae039 as Drawable, $3f8760cc7c29435c$export$2e2bcd8739ae039 as Node, $31caad46b2dacdff$export$2e2bcd8739ae039 as Sprite, $65b04c82fca59f60$export$2e2bcd8739ae039 as Color, $8ec4c8ffa911853c$export$2e2bcd8739ae039 as Vec2, $511d31ae5212a454$export$2e2bcd8739ae039 as Camera, $35fd48d1ddd84d0f$export$2e2bcd8739ae039 as Input, $24207f53032a3f4e$export$389de06130c9495c as makeSnowflake};
+export {$05bad183ec6d4f44$export$2e2bcd8739ae039 as Game, $084fb6562cdf6a86$export$2e2bcd8739ae039 as Collider, $4a27f9e6b3a88732$export$2e2bcd8739ae039 as NgonCollider, $3f8760cc7c29435c$export$2e2bcd8739ae039 as Node, $31caad46b2dacdff$export$2e2bcd8739ae039 as Sprite, $65b04c82fca59f60$export$2e2bcd8739ae039 as Color, $a53cef81bd683a5b$export$2e2bcd8739ae039 as Mat3, $8ec4c8ffa911853c$export$2e2bcd8739ae039 as Vec2, $511d31ae5212a454$export$2e2bcd8739ae039 as Camera, $35fd48d1ddd84d0f$export$2e2bcd8739ae039 as Input, $24207f53032a3f4e$export$389de06130c9495c as makeSnowflake};
 //# sourceMappingURL=Petrallengine.mjs.map
