@@ -247,4 +247,20 @@ export default class Mat3 implements ICopyable, IEquatable {
     static makeScaling = (v: Vec2) => {
         return Mat3.identity.set(0, 0, v.x).set(1, 1, v.y);
     }
+
+    /**
+     * Constructs a transformation matrix.
+     * @param t The translation vector.
+     * @param r The rotation in degrees.
+     * @param s The scaling vector.
+     * @returns The transformation matrix.
+     */
+    static makeTransformation = (t: Vec2, r: number, s: Vec2) => {
+        return Mat3.matrixMultiply(
+            Mat3.matrixMultiply(
+                Mat3.makeTranslation(t),
+                Mat3.makeRotation(r)
+            ), Mat3.makeScaling(s)
+        );
+    }
 }

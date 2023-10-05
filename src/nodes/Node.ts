@@ -190,12 +190,7 @@ export default class Node {
     recalculateTransformMatrix() {
         if (!this._isDirty)
             return;
-        this._transform = Mat3.matrixMultiply(
-            Mat3.matrixMultiply(
-                Mat3.makeTranslation(this._position),
-                Mat3.makeRotation(this._rotation)
-            ), Mat3.makeScaling(this._scale)
-        );
+        this._transform = Mat3.makeTransformation(this._position, this._rotation, this._scale);
         this._isDirty = false;
     }
 
