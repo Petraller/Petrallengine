@@ -23,6 +23,7 @@ export default class Input {
             console.warn("Input is used as a static class, do not create additional objects of Input");
             return;
         }
+        Input.singleton = this;
 
         // Register canvas events
         Input.canvas = canvas;
@@ -60,7 +61,7 @@ export default class Input {
      * 
      * Called by `Petrallengine.create`.
      */
-    _endFrame() {
+    endFrame() {
         for (let i of Input.keyTransits.keys()) {
             Input.keyTransits.set(i, false);
         }
