@@ -5,6 +5,7 @@
 import '../Math';
 import ICopyable from './ICopyable';
 import IEquatable from './IEquatable';
+import Mat3 from './Mat3';
 
 /**
  * Representation of a 2D vector.
@@ -99,6 +100,19 @@ export default class Vec2 implements ICopyable, IEquatable {
      * @returns This vector after inverting.
      */
     invert = () => { this.x = 1 / this.x; this.y = 1 / this.y; return this; }
+
+    /**
+     * Transforms this vector by a matrix.
+     * @param m The matrix.
+     * @returns This vector after transforming.
+     */
+    transform = (m: Mat3) => {
+        const x = this.x * m.m[0][0] + this.y * m.m[0][1] + m.m[0][2];
+        const y = this.x * m.m[1][0] + this.y * m.m[1][1] + m.m[1][2];
+        this.x = x;
+        this.y = y;
+        return this;
+    };
 
     /** The zero vector. */
     static get zero() { return new Vec2(0, 0); }
