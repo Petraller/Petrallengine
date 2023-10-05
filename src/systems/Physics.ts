@@ -16,16 +16,16 @@ export default class Physics {
         };
 
         // Distance squared
-        const distSqr = Vec2.subtract(posRay, posCircle).sqrLength();
+        const distSqr = Vec2.subtract(posRay, posCircle).sqrLength;
 
         // Check if interior or exterior ray
         output.isInterior = (distSqr < radius * radius);
 
         // Ray length
-        const rl = velRay.length();
+        const rl = velRay.length;
 
         // Delta from start to CPA
-        const m = Vec2.dot(Vec2.subtract(posCircle, posRay), velRay.normalized());
+        const m = Vec2.dot(Vec2.subtract(posCircle, posRay), velRay.normalized);
         if (!output.isInterior && m < 0 && distSqr > radius * radius)
             return output;
 
@@ -70,8 +70,8 @@ export default class Physics {
 
         // Check if interior or exterior intersection
         const relPos = Vec2.subtract(pos1, pos2);
-        output.isInterior = (relPos.sqrLength() < (radius1 - radius2) * (radius1 - radius2));
-        if (!output.isInterior && relPos.sqrLength() < (radius1 + radius2) * (radius1 + radius2)) {
+        output.isInterior = (relPos.sqrLength < (radius1 - radius2) * (radius1 - radius2));
+        if (!output.isInterior && relPos.sqrLength < (radius1 + radius2) * (radius1 + radius2)) {
             // Overlapping circles, I don't care about this case
             return output;
         }
@@ -105,7 +105,7 @@ export default class Physics {
         };
 
         // Just in case
-        const n = normal.normalized();
+        const n = normal.normalized;
 
         // Magnitude of velocity in direction of normal
         const a1 = Vec2.dot(vel1, n);
