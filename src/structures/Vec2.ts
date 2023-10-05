@@ -25,94 +25,20 @@ export default class Vec2 implements ICopyable, IEquatable {
     copyFrom = (other: Vec2) => { this.x = other.x; this.y = other.y; return this; };
     equals = (other: Vec2) => this.x === other.x && this.y === other.y;
 
-    /**
-     * Returns the squared length of this vector.
-     * @returns The squared length of this vector.
-     */
+    /** The squared length of this vector. */
     get sqrLength() { return this.x * this.x + this.y * this.y; }
 
-    /**
-     * Returns the length of this vector.
-     * @returns The length of this vector.
-     */
+    /** The length of this vector. */
     get length() { return Math.sqrt(this.sqrLength); }
 
-    /**
-     * Returns the normalized form of this vector.
-     * @returns The normalized form of this vector.
-     */
+    /** The normalized form of this vector. */
     get normalized() { const l = this.length; return l == 0 ? Vec2.zero : Vec2.divide(this, l); };
 
-    /**
-     * Returns the value of the minimum component of this vector.
-     * @returns The value of the minimum component of this vector.
-     */
+    /** The value of the minimum component of this vector. */
     get minComponent() { return this.x < this.y ? this.x : this.y; }
 
-    /**
-     * Returns the value of the maximum component of this vector.
-     * @returns The value of the maximum component of this vector.
-     */
+    /** The value of the maximum component of this vector. */
     get maxComponent() { return this.x > this.y ? this.x : this.y; }
-
-    /**
-     * Normalizes this vector.
-     * @returns This vector after normalizing.
-     */
-    normalize = () => { const l = this.length; return this.scale(l == 0 ? 0 : 1 / l); };
-
-    /**
-     * Translates this vector by another vector.
-     * @param v The other vector.
-     * @returns This vector after translating.
-     */
-    translate = (v: Vec2) => { this.x += v.x; this.y += v.y; return this; };
-
-    /**
-     * Rotates this vector by an angle.
-     * @param deg The angle in degrees.
-     * @returns This vector after rotating.
-     */
-    rotate = (deg: number) => {
-        const r = deg * Math.PI / 180;
-        const x = Math.cos(r) * this.x - Math.sin(r) * this.y;
-        const y = Math.sin(r) * this.x + Math.cos(r) * this.y;
-        this.x = x; this.y = y;
-        return this;
-    };
-
-    /**
-     * Scales this vector by a factor.
-     * @param n The scaling factor.
-     * @returns This vector after scaling.
-     */
-    scale = (n: number) => { this.x *= n; this.y *= n; return this; };
-
-    /**
-     * Scales this vector by another vector component-wise.
-     * @param v The other vector.
-     * @returns This vector after scaling.
-     */
-    scaleComponents = (v: Vec2) => { this.x *= v.x; this.y *= v.y; return this; };
-
-    /**
-     * Inverts this vector component-wise.
-     * @returns This vector after inverting.
-     */
-    invert = () => { this.x = 1 / this.x; this.y = 1 / this.y; return this; }
-
-    /**
-     * Transforms this vector by a matrix.
-     * @param m The matrix.
-     * @returns This vector after transforming.
-     */
-    transform = (m: Mat3) => {
-        const x = this.x * m.m[0][0] + this.y * m.m[0][1] + m.m[0][2];
-        const y = this.x * m.m[1][0] + this.y * m.m[1][1] + m.m[1][2];
-        this.x = x;
-        this.y = y;
-        return this;
-    };
 
     /** The zero vector. */
     static get zero() { return new Vec2(0, 0); }
@@ -209,6 +135,30 @@ export default class Vec2 implements ICopyable, IEquatable {
      * @returns The magnitude of the cross product.
      */
     static cross = (v1: Vec2, v2: Vec2) => v1.x * v2.y - v1.y * v2.x;
+
+    /**
+     * Rotates a vector by an angle.
+     * @param deg The angle in degrees.
+     * @returns The rotated vector.
+     */
+    static rotate = (v: Vec2, deg: number) => {
+        const r = deg * Math.PI / 180;
+        const x = Math.cos(r) * v.x - Math.sin(r) * v.y;
+        const y = Math.sin(r) * v.x + Math.cos(r) * v.y;
+        return new Vec2(x, y);
+    };
+
+    /**
+     * Transforms a vector by a matrix.
+     * @param m The matrix.
+     * @param v The vector.
+     * @returns The transformed vector.
+     */
+    static transform = (m: Mat3, v: Vec2) => {
+        const x = v.x * m.m[0][0] + v.y * m.m[0][1] + m.m[0][2];
+        const y = v.x * m.m[1][0] + v.y * m.m[1][1] + m.m[1][2];
+        return new Vec2(x, y);
+    };
 
     /**
      * Converts an angle in degrees to a unit vector.

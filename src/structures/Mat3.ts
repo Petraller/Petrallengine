@@ -39,15 +39,18 @@ export default class Mat3 implements ICopyable, IEquatable {
         return true;
     }
 
-    /**
-     * Returns the determinant of this matrix.
-     * @returns The determinant of this matrix.
-     */
+    /** The determinant of this matrix. */
     get determinant() {
         return this.m[0][0] * (this.m[1][1] * this.m[2][2] - this.m[1][2] * this.m[2][1]) +
             this.m[0][1] * (this.m[1][2] * this.m[2][0] - this.m[1][0] * this.m[2][2]) +
             this.m[0][2] * (this.m[1][0] * this.m[2][1] - this.m[1][1] * this.m[2][0]);
     }
+
+    /** The translation component of the matrix. */
+    get translation() { return Vec2.from3Tuple(this.getColumn(2)); }
+
+    /** The non-negative scale component of the matrix. */
+    get scale() { return new Vec2(Vec2.from3Tuple(this.getColumn(0)).length, Vec2.from3Tuple(this.getColumn(1)).length); }
 
     /**
      * Retrieves an element of the matrix.
@@ -90,7 +93,7 @@ export default class Mat3 implements ICopyable, IEquatable {
      * @param c The column index to omit.
      * @returns The minor.
      */
-    getMinor = (r: number, c: number): [[number, number], [number, number]] => [
+    private getMinor = (r: number, c: number): [[number, number], [number, number]] => [
         r == 0
             ? [c == 0 ? this.m[1][1] : this.m[1][0], c == 2 ? this.m[1][1] : this.m[1][2]]
             : [c == 0 ? this.m[0][1] : this.m[0][0], c == 2 ? this.m[0][1] : this.m[0][2]],
@@ -105,23 +108,10 @@ export default class Mat3 implements ICopyable, IEquatable {
      * @param c The column index of the element.
      * @returns The determinant of the cofactor.
      */
-    getCofactorDeterminant = (r: number, c: number) => {
+    private getCofactorDeterminant = (r: number, c: number) => {
         let minor = this.getMinor(r, c);
         let i = (r + c) % 2 === 0 ? 1 : -1;
         return i * (minor[0][0] * minor[1][1] - minor[1][0] * minor[0][1]);
-    }
-
-    /**
-     * Transposes the matrix.
-     * @returns This matrix after transposition.
-     */
-    transpose = () => {
-        this.m = ([
-            [this.m[0][0], this.m[1][0], this.m[2][0]],
-            [this.m[0][1], this.m[1][1], this.m[2][1]],
-            [this.m[0][2], this.m[1][2], this.m[2][2]]
-        ]);
-        return this;
     }
 
     /** The zero matrix. */
@@ -197,6 +187,19 @@ export default class Mat3 implements ICopyable, IEquatable {
      * @returns The scaled matrix.
      */
     static divide = (m: Mat3, n: number) => Mat3.multiply(m, 1 / n);
+
+    /**
+     * Transposes a matrix.
+     * @param m The matrix.
+     * @returns The transposed matrix.
+     */
+    static transpose = (m: Mat3) => {
+        return new Mat3([
+            [m.m[0][0], m.m[1][0], m.m[2][0]],
+            [m.m[0][1], m.m[1][1], m.m[2][1]],
+            [m.m[0][2], m.m[1][2], m.m[2][2]]
+        ]);;
+    }
 
     /**
      * Inverts a matrix. If the matrix is not invertible, an error is thrown.

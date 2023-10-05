@@ -63,15 +63,15 @@ export default class Node {
     }
 
     /** The position of this node. */
-    get position() { this._isDirty = true; return this._position; }
+    get position() { return this._position; }
     set position(value: Vec2) { this._position = value; this._isDirty = true; }
 
     /** The rotation in degrees of this node. */
-    get rotation() { this._isDirty = true; return this._rotation; }
+    get rotation() { return this._rotation; }
     set rotation(value: number) { this._rotation = (value + 180) % 360 - 180; this._isDirty = true; }
 
     /** The scale of this node. */
-    get scale() { this._isDirty = true; return this._scale; }
+    get scale() { return this._scale; }
     set scale(value: Vec2) { this._scale = value; this._isDirty = true; }
 
     /** The transformation matrix of this node. */

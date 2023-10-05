@@ -19,7 +19,7 @@ export default class Sprite extends Node implements IDrawable {
     private bitmap: ImageBitmap | null = null;
 
     /** The normalized pivot. */
-    pivot: Vec2 = Vec2.one.scale(0.5);
+    pivot: Vec2 = Vec2.multiply(Vec2.one, 0.5);
 
     onDraw(context: CanvasRenderingContext2D): void {
         if (this.bitmap) {
