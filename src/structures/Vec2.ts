@@ -28,39 +28,37 @@ export default class Vec2 implements ICopyable, IEquatable {
      * Returns the squared length of this vector.
      * @returns The squared length of this vector.
      */
-    sqrLength = () => this.x * this.x + this.y * this.y;
+    get sqrLength() { return this.x * this.x + this.y * this.y; }
 
     /**
      * Returns the length of this vector.
      * @returns The length of this vector.
      */
-    length = () => Math.sqrt(this.sqrLength());
+    get length() { return Math.sqrt(this.sqrLength); }
 
     /**
      * Returns the normalized form of this vector.
-     * 
-     * Does not modify the original vector.
      * @returns The normalized form of this vector.
      */
-    normalized = () => { const l = this.length(); return l == 0 ? Vec2.zero : Vec2.divide(this, l); };
+    get normalized() { const l = this.length; return l == 0 ? Vec2.zero : Vec2.divide(this, l); };
 
     /**
      * Returns the value of the minimum component of this vector.
      * @returns The value of the minimum component of this vector.
      */
-    minComponent = () => this.x < this.y ? this.x : this.y;
+    get minComponent() { return this.x < this.y ? this.x : this.y; }
 
     /**
      * Returns the value of the maximum component of this vector.
      * @returns The value of the maximum component of this vector.
      */
-    maxComponent = () => this.x > this.y ? this.x : this.y;
+    get maxComponent() { return this.x > this.y ? this.x : this.y; }
 
     /**
      * Normalizes this vector.
      * @returns This vector after normalizing.
      */
-    normalize = () => { const l = this.length(); return this.scale(l == 0 ? 0 : 1 / l); };
+    normalize = () => { const l = this.length; return this.scale(l == 0 ? 0 : 1 / l); };
 
     /**
      * Translates this vector by another vector.
