@@ -3,6 +3,7 @@
  */
 
 import Vec2 from '../structures/Vec2';
+import Mat3 from '../structures/Mat3';
 import { Snowflake, makeSnowflake } from '../Snowflake';
 
 type Constructor<T> = { new(...args: any[]): T };
@@ -20,18 +21,18 @@ type Constructor<T> = { new(...args: any[]): T };
  */
 export default class Node {
     private _isEnabled: boolean = true;
+    private _position: Vec2 = Vec2.zero;
     private _rotation: number = 0;
+    private _scale: Vec2 = Vec2.one;
     private _parent: Node | null = null;
+    private _transform: Mat3 = Mat3.identity;
+    private _isDirty = false;
 
     /** The unique Snowflake ID of this node. */
     readonly id: Snowflake = makeSnowflake();
 
     /** The name of this node. */
     name: string = "New Node";
-    /** The position of this node. */
-    position: Vec2 = Vec2.zero;
-    /** The scale of this node. */
-    scale: Vec2 = Vec2.one;
     /** The children nodes of this node. */
     children: Node[] = [];
     /** Whether this node has started. */
@@ -60,10 +61,21 @@ export default class Node {
             this.onDisable?.call(this);
         }
     }
-    
+
+    /** The position of this node. */
+    get position() { this._isDirty = true; return this._position; }
+    set position(value: Vec2) { this._position = value; this._isDirty = true; }
+
     /** The rotation in degrees of this node. */
-    get rotation() { return this._rotation; }
-    set rotation(value: number) { this._rotation = (value + 180) % 360 - 180; }
+    get rotation() { this._isDirty = true; return this._rotation; }
+    set rotation(value: number) { this._rotation = (value + 180) % 360 - 180; this._isDirty = true; }
+
+    /** The scale of this node. */
+    get scale() { this._isDirty = true; return this._scale; }
+    set scale(value: Vec2) { this._scale = value; this._isDirty = true; }
+
+    /** The transformation matrix of this node. */
+    get transform() { return this._transform; }
 
     /** The parent node of this node. */
     get parent() { return this._parent; }
@@ -170,6 +182,21 @@ export default class Node {
             curr = curr.parent;
         }
         return false;
+    }
+
+    /**
+     * Recalculates the transformation matrix and unsets the dirty flag.
+     */
+    recalculateTransformMatrix() {
+        if (!this._isDirty)
+            return;
+        this._transform = Mat3.matrixMultiply(
+            Mat3.matrixMultiply(
+                Mat3.makeTranslation(this._position),
+                Mat3.makeRotation(this._rotation)
+            ), Mat3.makeScaling(this._scale)
+        );
+        this._isDirty = false;
     }
 
     /**
