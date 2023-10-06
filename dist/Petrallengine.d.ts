@@ -8,6 +8,26 @@ export type Snowflake = string;
  */
 export const makeSnowflake: () => Snowflake;
 /**
+ * Interface for all drawables.
+ */
+export interface IDrawable {
+    /**
+     * Called when drawn.
+     * @param context The canvas rendering context.
+     */
+    onDraw(context: CanvasRenderingContext2D): void;
+}
+/**
+ * Interface for all drawables.
+ */
+interface IDebugDrawable {
+    /**
+     * Called when debug drawn.
+     * @param context The canvas rendering context.
+     */
+    onDebugDraw(context: CanvasRenderingContext2D): void;
+}
+/**
  * @author Petraller <me@petraller.com>
  */
 /** */
@@ -224,6 +244,8 @@ export class Vec2 implements ICopyable, IEquatable {
     get length(): number;
     /** The normalized form of this vector. */
     get normalized(): Vec2;
+    /** A normal to this vector. */
+    get normal(): Vec2;
     /** The value of the minimum component of this vector. */
     get minComponent(): number;
     /** The value of the maximum component of this vector. */
@@ -365,91 +387,6 @@ export class Vec2 implements ICopyable, IEquatable {
      */
     static lerpComponents: (v1: Vec2, v2: Vec2, t: Vec2) => Vec2;
 }
-/**
- * Static class for moving the viewport in the world space.
- */
-export class Camera {
-    /**
-     * The position of the camera.
-     */
-    static position: Vec2;
-    /**
-     * The rotation of the camera.
-     */
-    static rotation: number;
-    /**
-     * The scale of the camera.
-     */
-    static scale: Vec2;
-}
-/**
- * Static class for input handling.
- */
-export class Input {
-    constructor(canvas: HTMLCanvasElement);
-    /**
-     * Clears all internal flags at the end of the frame.
-     *
-     * Called by `Petrallengine.create`.
-     */
-    _endFrame(): void;
-    /**
-     * Returns whether a keyboard key is down.
-     * @param keyCode The code of the key.
-     * @returns Whether the key is down.
-     */
-    static isKey(keyCode: string): boolean;
-    /**
-     * Returns whether a keyboard key was pressed this frame.
-     * @param keyCode The code of the key.
-     * @returns Whether the key was pressed this frame.
-     */
-    static isKeyPressed(keyCode: string): boolean;
-    /**
-     * Returns whether a keyboard key was released this frame.
-     * @param keyCode The code of the key.
-     * @returns Whether the key was released this frame.
-     */
-    static isKeyReleased(keyCode: string): boolean;
-    /**
-     * Returns whether a mouse button is down.
-     * @param button The mouse button.
-     * @returns Whether the mouse button is down.
-     */
-    static isMouse(button?: number): boolean;
-    /**
-     * Returns whether a mouse button was pressed this frame.
-     * @param button The mouse button.
-     * @returns Whether the mouse button was pressed this frame.
-     */
-    static isMousePressed(button?: number): boolean;
-    /**
-     * Returns whether a mouse button was released this frame.
-     * @param button The mouse button.
-     * @returns Whether the mouse button was released this frame.
-     */
-    static isMouseReleased(button?: number): boolean;
-    /**
-     * Returns the position of the mouse in the canvas.
-     * @returns The position of the mouse in the canvas.
-     */
-    static get mousePosition(): Vec2;
-    /**
-     * Returns the normalized position of the mouse in the canvas.
-     * @returns The normalized position of the mouse in the canvas.
-     */
-    static get mousePositionNormalized(): Vec2;
-    /**
-     * Returns the position on the canvas of a world position.
-     * @returns The position on the canvas of a world position.
-     */
-    static worldToCanvas(worldPos: Vec2): Vec2;
-    /**
-     * Returns the position in the world of a canvas position.
-     * @returns The position in the world of a canvas position.
-     */
-    static canvasToWorld(canvasPos: Vec2): Vec2;
-}
 type Constructor<T> = {
     new (...args: any[]): T;
 };
@@ -476,7 +413,7 @@ export class Node {
     /**
      * Avoid calling `new Node`, call `Petrallengine.root.createChild` instead.
      */
-    constructor(flag?: any);
+    constructor(flag?: any, name?: string);
     toString(): string;
     /** The enabled state of this node. */
     get isEnabled(): boolean;
@@ -561,145 +498,32 @@ export class Node {
     onUpdate?(): void;
 }
 /**
- * Interface for all drawables.
- */
-export interface IDrawable {
-    /**
-     * Called when drawn.
-     * @param context The canvas rendering context.
-     */
-    onDraw(context: CanvasRenderingContext2D): void;
-}
-/**
- * Static class for Petrallengine.
+ * Base class for all physics-based nodes.
  *
- * Call `Petrallengine.create(MY_CANVAS_ELEMENT)` to start building your 2D browser application.
+ * Overrideable callbacks:
+ * - onCollisionEnter
+ * - onCollisionUpdate
+ * - onCollisionExit
  */
-export class Game {
-    /** The build number. */
-    static readonly BUILD = 1;
-    /** The version. */
-    static readonly VERSION = "0.0.1";
-    /** The number of scheduled frame updates per second. */
-    static readonly FRAME_RATE = 60;
-    /** The scheduled interval between frame updates in seconds. */
-    static readonly FRAME_TIME: number;
-    /** Debug draw flags. */
-    static readonly DEBUG_DRAWS: {
-        colliders: boolean;
-        boundingBoxes: boolean;
-    };
-    /** The root node of the whole game. */
-    static get root(): Node;
+export abstract class Body extends Node {
+    /** The velocity of this body. */
+    get velocity(): Vec2;
+    set velocity(value: Vec2);
     /**
-     * Initialises the engine.
-     * @param target The target canvas element to render onto.
+     * Called when the node first collides with another body.
+     * @param other The colliding body.
      */
-    static create(target?: HTMLCanvasElement): void;
+    onCollisionEnter?(other: Body): void;
     /**
-     * Returns the total elapsed game time in seconds.
+     * Called while the node is colliding with another body.
+     * @param other The colliding body.
      */
-    static get time(): number;
+    onCollisionUpdate?(other: Body): void;
     /**
-     * Returns the actual elapsed time for the frame in seconds.
+     * Called when the node stops colliding with another body.
+     * @param other The colliding body.
      */
-    static get deltaTime(): number;
-}
-/**
- * Representation of a RGBA color.
- */
-export class Color implements ICopyable, IEquatable {
-    /** The red component. */
-    r: number;
-    /** The green component. */
-    g: number;
-    /** The blue component. */
-    b: number;
-    /** The alpha component. */
-    a: number;
-    constructor(r: number, g: number, b: number, a?: number);
-    copy: () => Color;
-    copyFrom: (other: Color) => this;
-    equals: (other: Color) => boolean;
-    /**
-     * Converts the color to its #RRGGBBAA hexadecimal string representation.
-     * @param hasAlpha Whether to include the alpha channel.
-     * @returns The hexadecimal string representation.
-     */
-    toHexString: (hasAlpha?: boolean) => string;
-    /**
-     * Converts the color to its HSV representation.
-     * @returns The HSV representation.
-     */
-    toHSV: () => {
-        h: number;
-        s: number;
-        v: number;
-    };
-    /** Black. */
-    static get black(): Color;
-    /** Blue. */
-    static get blue(): Color;
-    /** Green. */
-    static get green(): Color;
-    /** Teal. */
-    static get teal(): Color;
-    /** Red. */
-    static get red(): Color;
-    /** Magenta. */
-    static get magenta(): Color;
-    /** Yellow. */
-    static get yellow(): Color;
-    /** White. */
-    static get white(): Color;
-    /** Grey. */
-    static get grey(): Color;
-    /** Transparent. */
-    static get transparent(): Color;
-    /**
-     * Linearly interpolates from one color to another.
-     * @param c1 The first color.
-     * @param c2 The second color.
-     * @param t The amount to interpolate by.
-     * @returns The interpolated color.
-     */
-    static lerp(c1: Color, c2: Color, t: number): Color;
-    /**
-     * Spherically linearly interpolates from one color to another.
-     * @param c1 The first color.
-     * @param c2 The second color.
-     * @param t The amount to interpolate by.
-     * @returns The interpolated color.
-     */
-    static slerp(c1: Color, c2: Color, t: number): Color;
-    /**
-     * Creates a color from its hexadecimal string representation.
-     * @param str The hexadecimal string representation.
-     * @returns The color.
-     */
-    static fromHexString: (str: string) => Color;
-    /**
-     * Creates a color from its HSV representation.
-     * @param h The hue.
-     * @param s The saturation.
-     * @param v The value.
-     * @returns The color.
-     */
-    static fromHSV: (h: number, s: number, v: number) => Color;
-}
-/**
- * A node that draws an image on the canvas.
-*/
-export class Sprite extends Node implements IDrawable {
-    /** The normalized pivot. */
-    pivot: Vec2;
-    onDraw(context: CanvasRenderingContext2D): void;
-    /** The image path. */
-    get image(): string | null;
-    set image(value: string | null);
-    /** The color. */
-    get color(): Color;
-    set color(value: Color);
+    onCollisionExit?(other: Body): void;
 }
 /**
  * Representation of 2D bounds.
@@ -775,6 +599,279 @@ export class Bounds implements ICopyable, IEquatable {
      * @returns The extended bounds.
      */
     static extend: (b: Bounds, v: Vec2) => Bounds;
+}
+/**
+ * 32-bit bitmask used for collisions.
+ */
+type Mask = number;
+/**
+ * Base class for all collider nodes.
+ *
+ * A collider must have a parent PhysicsBody to detect collisions.
+ */
+export abstract class Collider extends Node implements IDebugDrawable {
+    protected _bounds: Bounds;
+    /** The layers this body is part of. */
+    layers: Mask;
+    /** The layers this body can interact with. */
+    filter: Mask;
+    /** The globally positioned bounds of this collider. */
+    get bounds(): Bounds;
+    /**
+     * Regenerates the cached properties of the collider.
+     *
+     * Implementation defined by the collider subtype.
+     */
+    abstract regenerate(): void;
+    /**
+     * Determines if this collider can interact with another collider based on their layers.
+     * @param other The other collider.
+     * @returns Whether the colliders can interact.
+     */
+    canCollideWith(other: Collider): boolean;
+    onDebugDraw(context: CanvasRenderingContext2D): void;
+}
+/**
+ * Static class for moving the viewport in the world space.
+ */
+export class Camera {
+    /**
+     * The position of the camera.
+     */
+    static position: Vec2;
+    /**
+     * The rotation of the camera.
+     */
+    static rotation: number;
+    /**
+     * The scale of the camera.
+     */
+    static scale: Vec2;
+}
+/**
+ * Static class for input handling.
+ */
+export class Input {
+    constructor(canvas: HTMLCanvasElement);
+    /**
+     * Clears all internal flags at the end of the frame.
+     *
+     * Called by `Petrallengine.create`.
+     */
+    endFrame(): void;
+    /**
+     * Returns whether a keyboard key is down.
+     * @param keyCode The code of the key.
+     * @returns Whether the key is down.
+     */
+    static isKey(keyCode: string): boolean;
+    /**
+     * Returns whether a keyboard key was pressed this frame.
+     * @param keyCode The code of the key.
+     * @returns Whether the key was pressed this frame.
+     */
+    static isKeyPressed(keyCode: string): boolean;
+    /**
+     * Returns whether a keyboard key was released this frame.
+     * @param keyCode The code of the key.
+     * @returns Whether the key was released this frame.
+     */
+    static isKeyReleased(keyCode: string): boolean;
+    /**
+     * Returns whether a mouse button is down.
+     * @param button The mouse button.
+     * @returns Whether the mouse button is down.
+     */
+    static isMouse(button?: number): boolean;
+    /**
+     * Returns whether a mouse button was pressed this frame.
+     * @param button The mouse button.
+     * @returns Whether the mouse button was pressed this frame.
+     */
+    static isMousePressed(button?: number): boolean;
+    /**
+     * Returns whether a mouse button was released this frame.
+     * @param button The mouse button.
+     * @returns Whether the mouse button was released this frame.
+     */
+    static isMouseReleased(button?: number): boolean;
+    /**
+     * Returns the position of the mouse in the canvas.
+     * @returns The position of the mouse in the canvas.
+     */
+    static get mousePosition(): Vec2;
+    /**
+     * Returns the normalized position of the mouse in the canvas.
+     * @returns The normalized position of the mouse in the canvas.
+     */
+    static get mousePositionNormalized(): Vec2;
+    /**
+     * Returns the position on the canvas of a world position.
+     * @returns The position on the canvas of a world position.
+     */
+    static worldToCanvas(worldPos: Vec2): Vec2;
+    /**
+     * Returns the position in the world of a canvas position.
+     * @returns The position in the world of a canvas position.
+     */
+    static canvasToWorld(canvasPos: Vec2): Vec2;
+}
+/**
+ * A node that has a circle collider shape.
+ */
+export class CircleCollider extends Collider {
+    /** The radius of the circle. */
+    get radius(): number;
+    set radius(value: number);
+    regenerate(): void;
+    onDebugDraw(context: CanvasRenderingContext2D): void;
+}
+interface CollisionInfo {
+}
+/**
+ * Static class for physics and collisions.
+ */
+export class Physics {
+    constructor();
+    tick(): CollisionInfo[];
+    static registerBody(body: Body): void;
+    static registerCollider(collider: Collider, owner: Body): void;
+}
+/**
+ * Static class for Petrallengine.
+ *
+ * Call `Petrallengine.create(MY_CANVAS_ELEMENT)` to start building your 2D browser application.
+ */
+export class Game {
+    /** The build number. */
+    static readonly BUILD = 1;
+    /** The version. */
+    static readonly VERSION = "0.0.1";
+    /** The number of scheduled frame updates per second. */
+    static readonly FRAME_RATE = 60;
+    /** The scheduled interval between frame updates in seconds. */
+    static readonly FRAME_TIME: number;
+    /** Debug draw flags. */
+    static readonly DEBUG_DRAWS: {
+        colliders: boolean;
+        boundingBoxes: boolean;
+    };
+    /** The root node of the whole game. */
+    static get root(): Node;
+    /**
+     * Initialises the engine.
+     * @param target The target canvas element to render onto.
+     */
+    static create(target?: HTMLCanvasElement): void;
+    /**
+     * Returns the total elapsed game time in seconds.
+     */
+    static get time(): number;
+    /**
+     * Returns the actual elapsed time for the frame in seconds.
+     */
+    static get deltaTime(): number;
+}
+/**
+ * A node that responds to collisions but not physics.
+*/
+export class CollisionBody extends Body {
+}
+/**
+ * Representation of a RGBA color.
+ */
+export class Color implements ICopyable, IEquatable {
+    /** The red component. */
+    r: number;
+    /** The green component. */
+    g: number;
+    /** The blue component. */
+    b: number;
+    /** The alpha component. */
+    a: number;
+    constructor(r: number, g: number, b: number, a?: number);
+    copy: () => Color;
+    copyFrom: (other: Color) => this;
+    equals: (other: Color) => boolean;
+    /**
+     * Converts the color to its #RRGGBBAA hexadecimal string representation.
+     * @param hasAlpha Whether to include the alpha channel.
+     * @returns The hexadecimal string representation.
+     */
+    toHexString: (hasAlpha?: boolean) => string;
+    /**
+     * Converts the color to its HSV representation.
+     * @returns The HSV representation.
+     */
+    toHSV: () => {
+        h: number;
+        s: number;
+        v: number;
+    };
+    /** Black. */
+    static get black(): Color;
+    /** Blue. */
+    static get blue(): Color;
+    /** Green. */
+    static get green(): Color;
+    /** Cyan. */
+    static get cyan(): Color;
+    /** Red. */
+    static get red(): Color;
+    /** Magenta. */
+    static get magenta(): Color;
+    /** Yellow. */
+    static get yellow(): Color;
+    /** White. */
+    static get white(): Color;
+    /** Grey. */
+    static get grey(): Color;
+    /** Transparent. */
+    static get transparent(): Color;
+    /**
+     * Linearly interpolates from one color to another.
+     * @param c1 The first color.
+     * @param c2 The second color.
+     * @param t The amount to interpolate by.
+     * @returns The interpolated color.
+     */
+    static lerp(c1: Color, c2: Color, t: number): Color;
+    /**
+     * Spherically linearly interpolates from one color to another.
+     * @param c1 The first color.
+     * @param c2 The second color.
+     * @param t The amount to interpolate by.
+     * @returns The interpolated color.
+     */
+    static slerp(c1: Color, c2: Color, t: number): Color;
+    /**
+     * Creates a color from its hexadecimal string representation.
+     * @param str The hexadecimal string representation.
+     * @returns The color.
+     */
+    static fromHexString: (str: string) => Color;
+    /**
+     * Creates a color from its HSV representation.
+     * @param h The hue.
+     * @param s The saturation.
+     * @param v The value.
+     * @returns The color.
+     */
+    static fromHSV: (h: number, s: number, v: number) => Color;
+}
+/**
+ * A node that draws an image on the canvas.
+*/
+export class Sprite extends Node implements IDrawable {
+    /** The normalized pivot. */
+    pivot: Vec2;
+    onDraw(context: CanvasRenderingContext2D): void;
+    /** The image path. */
+    get image(): string | null;
+    set image(value: string | null);
+    /** The color. */
+    get color(): Color;
+    set color(value: Color);
 }
 
 //# sourceMappingURL=Petrallengine.d.ts.map

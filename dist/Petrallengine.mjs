@@ -110,6 +110,31 @@ const $24207f53032a3f4e$export$389de06130c9495c = $24207f53032a3f4e$var$Snowflak
  */ /**
  * @author Petraller <me@petraller.com>
  */ /**
+ * Checks if an object implements a drawable.
+ * @param obj The object.
+ * @returns Whether the object implements a drawable.
+ */ function $936ba809947b4de6$export$1508030049b632ec(obj) {
+    return "onDraw" in obj && obj.onDraw instanceof Function;
+}
+
+
+/**
+ * @author Petraller <me@petraller.com>
+ */ /**
+ * Checks if an object implements a debug drawable.
+ * @param obj The object.
+ * @returns Whether the object implements a debug drawable.
+ */ function $3d145095d1c4fd99$export$c9e1b957c27b07fb(obj) {
+    return "onDebugDraw" in obj && obj.onDebugDraw instanceof Function;
+}
+
+
+/**
+ * @author Petraller <me@petraller.com>
+ */ /**
+ * @author Petraller <me@petraller.com>
+ */ 
+/**
  * @author Petraller <me@petraller.com>
  */ /**
  * @author Petraller <me@petraller.com>
@@ -147,6 +172,9 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
     /** The normalized form of this vector. */ get normalized() {
         const l = this.length;
         return l == 0 ? $8ec4c8ffa911853c$export$2e2bcd8739ae039.zero : $8ec4c8ffa911853c$export$2e2bcd8739ae039.divide(this, l);
+    }
+    /** A normal to this vector. */ get normal() {
+        return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(-this.y, this.x);
     }
     /** The value of the minimum component of this vector. */ get minComponent() {
         return this.x < this.y ? this.x : this.y;
@@ -327,28 +355,6 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
 }
 
 
-class $511d31ae5212a454$export$2e2bcd8739ae039 {
-    static #_ = (()=>{
-        /**
-     * The position of the camera.
-     */ this.position = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
-    })();
-    static #_1 = (()=>{
-        /**
-     * The rotation of the camera.
-     */ this.rotation = 0;
-    })();
-    static #_2 = (()=>{
-        /**
-     * The scale of the camera.
-     */ this.scale = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one;
-    })();
-}
-
-
-/**
- * @author Petraller <me@petraller.com>
- */ 
 /**
  * @author Petraller <me@petraller.com>
  */ 
@@ -659,149 +665,10 @@ class $a53cef81bd683a5b$export$2e2bcd8739ae039 {
 }
 
 
-
-class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
-    static #_ = (()=>{
-        this.singleton = null;
-    })();
-    static #_1 = (()=>{
-        this.canvas = null;
-    })();
-    static #_2 = (()=>{
-        this.keyStates = new Map();
-    })();
-    static #_3 = (()=>{
-        this.keyTransits = new Map();
-    })();
-    static #_4 = (()=>{
-        this.mouseStates = new Map();
-    })();
-    static #_5 = (()=>{
-        this.mouseTransits = new Map();
-    })();
-    static #_6 = (()=>{
-        this.mousePos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
-    })();
-    constructor(canvas){
-        if ($35fd48d1ddd84d0f$export$2e2bcd8739ae039.singleton) {
-            console.warn("Input is used as a static class, do not create additional objects of Input");
-            return;
-        }
-        // Register canvas events
-        $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas = canvas;
-        canvas.onmousedown = (ev)=>{
-            const b = ev.button;
-            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseStates.set(b, true);
-            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.set(b, true);
-        };
-        canvas.onmouseup = canvas.onmouseleave = (ev)=>{
-            const b = ev.button;
-            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseStates.set(b, false);
-            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.set(b, true);
-        };
-        canvas.onmousemove = (ev)=>{
-            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mousePos = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(ev.offsetX, ev.offsetY);
-        };
-        // Register window events
-        window.onkeydown = (ev)=>{
-            const c = ev.code;
-            if (!ev.repeat) {
-                $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyStates.set(c, true);
-                $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.set(c, true);
-            }
-        };
-        window.onkeyup = (ev)=>{
-            const c = ev.code;
-            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyStates.set(c, false);
-            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.set(c, true);
-        };
-    }
-    /**
-     * Clears all internal flags at the end of the frame.
-     * 
-     * Called by `Petrallengine.create`.
-     */ _endFrame() {
-        for (let i of $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.keys())$35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.set(i, false);
-        for (let i of $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.keys())$35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.set(i, false);
-    }
-    /**
-     * Returns whether a keyboard key is down.
-     * @param keyCode The code of the key.
-     * @returns Whether the key is down.
-     */ static isKey(keyCode) {
-        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyStates.get(keyCode) ?? false;
-    }
-    /**
-     * Returns whether a keyboard key was pressed this frame.
-     * @param keyCode The code of the key.
-     * @returns Whether the key was pressed this frame.
-     */ static isKeyPressed(keyCode) {
-        return ($35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.get(keyCode) ?? false) && $35fd48d1ddd84d0f$export$2e2bcd8739ae039.isKey(keyCode);
-    }
-    /**
-     * Returns whether a keyboard key was released this frame.
-     * @param keyCode The code of the key.
-     * @returns Whether the key was released this frame.
-     */ static isKeyReleased(keyCode) {
-        return ($35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.get(keyCode) ?? false) && !$35fd48d1ddd84d0f$export$2e2bcd8739ae039.isKey(keyCode);
-    }
-    /**
-     * Returns whether a mouse button is down.
-     * @param button The mouse button.
-     * @returns Whether the mouse button is down.
-     */ static isMouse(button = 0) {
-        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseStates.get(button) ?? false;
-    }
-    /**
-     * Returns whether a mouse button was pressed this frame.
-     * @param button The mouse button.
-     * @returns Whether the mouse button was pressed this frame.
-     */ static isMousePressed(button = 0) {
-        return ($35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.get(button) ?? false) && $35fd48d1ddd84d0f$export$2e2bcd8739ae039.isMouse(button);
-    }
-    /**
-     * Returns whether a mouse button was released this frame.
-     * @param button The mouse button.
-     * @returns Whether the mouse button was released this frame.
-     */ static isMouseReleased(button = 0) {
-        return ($35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.get(button) ?? false) && !$35fd48d1ddd84d0f$export$2e2bcd8739ae039.isMouse(button);
-    }
-    /**
-     * Returns the position of the mouse in the canvas.
-     * @returns The position of the mouse in the canvas.
-     */ static get mousePosition() {
-        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mousePos;
-    }
-    /**
-     * Returns the normalized position of the mouse in the canvas.
-     * @returns The normalized position of the mouse in the canvas.
-     */ static get mousePositionNormalized() {
-        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiplyComponents($35fd48d1ddd84d0f$export$2e2bcd8739ae039.mousePos, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(1 / $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas.width, 1 / $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas.height));
-    }
-    /**
-     * Returns the position on the canvas of a world position.
-     * @returns The position on the canvas of a world position.
-     */ static worldToCanvas(worldPos) {
-        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).transform((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeTransformation((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $511d31ae5212a454$export$2e2bcd8739ae039).position, -1), -(0, $511d31ae5212a454$export$2e2bcd8739ae039).rotation, (0, $511d31ae5212a454$export$2e2bcd8739ae039).scale), worldPos), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).fromObjWH($35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas), 0.5));
-    }
-    /**
-     * Returns the position in the world of a canvas position.
-     * @returns The position in the world of a canvas position.
-     */ static canvasToWorld(canvasPos) {
-        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).transform((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).inverse((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeTransformation((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $511d31ae5212a454$export$2e2bcd8739ae039).position, -1), -(0, $511d31ae5212a454$export$2e2bcd8739ae039).rotation, (0, $511d31ae5212a454$export$2e2bcd8739ae039).scale)), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(canvasPos, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).fromObjWH($35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas), -0.5)));
-    }
-}
-
-
-/**
- * @author Petraller <me@petraller.com>
- */ 
-
-
 class $3f8760cc7c29435c$export$2e2bcd8739ae039 {
     /**
      * Avoid calling `new Node`, call `Petrallengine.root.createChild` instead.
-     */ constructor(flag){
+     */ constructor(flag, name = "New Node"){
         this._isEnabled = true;
         this._position = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
         this._rotation = 0;
@@ -818,6 +685,7 @@ class $3f8760cc7c29435c$export$2e2bcd8739ae039 {
             console.warn(`Avoid calling \`new Node\`, call \`Petrallengine.root.createChild\` instead`);
             console.trace(`\`new Node\` call occured here:`);
         }
+        this.name = name;
     }
     toString() {
         return `${this.name}#${this.id}`;
@@ -882,11 +750,11 @@ class $3f8760cc7c29435c$export$2e2bcd8739ae039 {
         return this.globalTransform.scale;
     }
     /** The transformation matrix of this node. */ get transform() {
-        if (this._isDirty) this.recalculateTransformMatrix();
+        this.recalculateTransformMatrix();
         return this._transform;
     }
     /** The global transformation matrix of this node. */ get globalTransform() {
-        if (this._isDirty) this.recalculateTransformMatrix();
+        this.recalculateTransformMatrix();
         return this._globalTransform;
     }
     /** The parent node of this node. */ get parent() {
@@ -976,8 +844,9 @@ class $3f8760cc7c29435c$export$2e2bcd8739ae039 {
      */ recalculateTransformMatrix() {
         if (!this._isDirty) return;
         // Calculate
-        this._globalTransform = this._transform = (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeTransformation(this._position, this._rotation, this._scale);
+        this._transform = (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeTransformation(this._position, this._rotation, this._scale);
         if (this.parent) this._globalTransform = (0, $a53cef81bd683a5b$export$2e2bcd8739ae039).matrixMultiply(this.parent.globalTransform, this._transform);
+        else this._globalTransform = this._transform.copy();
         // Dirty children
         for (const child of this.children)child._isDirty = true;
         this._isDirty = false;
@@ -985,14 +854,629 @@ class $3f8760cc7c29435c$export$2e2bcd8739ae039 {
 }
 
 
+
+class $46a097085382b218$export$2e2bcd8739ae039 extends (0, $3f8760cc7c29435c$export$2e2bcd8739ae039) {
+    /** The velocity of this body. */ get velocity() {
+        return this._velocity;
+    }
+    set velocity(value) {
+        this._velocity = value;
+    }
+    constructor(...args){
+        super(...args);
+        this._velocity = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
+    }
+}
+
+
+/**
+ * @author Petraller <me@petraller.com>
+ */ 
+/**
+ * @author Petraller <me@petraller.com>
+ */ 
+
+class $b31606e820d5109e$export$2e2bcd8739ae039 {
+    constructor(min, max){
+        /** The minimum components. */ this.min = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
+        /** The maximum components. */ this.max = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
+        this.copy = ()=>new $b31606e820d5109e$export$2e2bcd8739ae039(this.min, this.max);
+        this.copyFrom = (other)=>{
+            this.min.copyFrom(other.min);
+            this.max.copyFrom(other.max);
+            return this;
+        };
+        this.equals = (other)=>this.min.equals(other.min) && this.max.equals(other.max);
+        /**
+     * Determines if a point exists inside this bounds.
+     * @param point The point.
+     * @returns Whether the point exists inside this bounds.
+     */ this.contains = (point)=>point.x >= this.min.x && point.x <= this.max.x && point.y >= this.min.y && point.y <= this.max.y;
+        /**
+     * Determines if this bounds overlaps with another bounds.
+     * @param other The other bounds.
+     * @returns Whether the bounds overlap.
+     */ this.overlaps = (other)=>this.min.x <= other.max.x && this.max.x >= other.min.x && this.max.y >= other.min.y && this.min.y <= other.max.y;
+        this.min.copyFrom(min);
+        this.max.copyFrom(max);
+    }
+    /** The size of the bounds. */ get size() {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.max, this.min);
+    }
+    /** The zero bounds, [(0, 0), (0, 0)]. */ static get zero() {
+        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero);
+    }
+    /** The unit bounds, [(0, 0), (1, 1)]. */ static get unit() {
+        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one);
+    }
+    /** The normalized bounds, [(-0.5, -0.5), (0.5, 0.5)]. */ static get norm() {
+        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one, -0.5), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one, 0.5));
+    }
+    static #_ = (()=>{
+        /**
+     * Create bounds based on a set of vertices.
+     * @param vertices The vertices.
+     * @returns The bounds.
+     */ this.fromVertices = (vertices)=>{
+            let b = new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).infinity, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).negativeInfinity);
+            // Iterate all vertices
+            for (const vertex of vertices){
+                if (vertex.x > b.max.x) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(vertex.x, b.max.y);
+                if (vertex.x < b.min.x) b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(vertex.x, b.min.y);
+                if (vertex.y > b.max.y) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.max.x, vertex.y);
+                if (vertex.y < b.min.y) b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.min.x, vertex.y);
+            }
+            return b;
+        };
+    })();
+    static #_1 = (()=>{
+        /**
+     * Create bounds that envelop a set of bounds.
+     * @param boundses The set of bounds to envelop.
+     * @returns The bounds.
+     */ this.makeEnvelop = (boundses)=>{
+            let b = new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).infinity, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).negativeInfinity);
+            // Iterate all bounds
+            for (const bounds of boundses){
+                if (bounds.max.x > b.max.x) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(bounds.max.x, b.max.y);
+                if (bounds.min.x < b.min.x) b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(bounds.min.x, b.min.y);
+                if (bounds.max.y > b.max.y) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.max.x, bounds.max.y);
+                if (bounds.min.y < b.min.y) b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.min.x, bounds.min.y);
+            }
+            return b;
+        };
+    })();
+    static #_2 = (()=>{
+        /**
+     * Translates bounds.
+     * @param b The bounds.
+     * @param v The translation vector.
+     * @returns The translated bounds.
+     */ this.translate = (b, v)=>{
+            return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b.min, v), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b.max, v));
+        };
+    })();
+    static #_3 = (()=>{
+        /**
+     * Scales bounds.
+     * @param b The bounds.
+     * @param v The scale vector.
+     * @param origin The normalized origin to scale from.
+     * @returns The scaled bounds.
+     */ this.scale = (b, v, origin = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one, 0.5))=>{
+            const o = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).lerpComponents(b.min, b.max, origin);
+            return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiplyComponents((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b.min, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(o, -1)), v), o), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiplyComponents((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b.max, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(o, -1)), v), o));
+        };
+    })();
+    static #_4 = (()=>{
+        /**
+     * Shifts bounds such that its origin is at a given position.
+     * @param b The bounds.
+     * @param pos The position.
+     * @param origin The normalized origin of the bounds.
+     * @returns The shifted bounds.
+     */ this.shift = (b, pos, origin = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one, 0.5))=>{
+            const o = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).lerpComponents(b.min, b.max, origin);
+            return $b31606e820d5109e$export$2e2bcd8739ae039.translate(b, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(pos, o));
+        };
+    })();
+    static #_5 = (()=>{
+        /**
+     * Extends bounds by a vector.
+     * @param b The bounds.
+     * @param v The extension vector.
+     * @returns The extended bounds.
+     */ this.extend = (b, v)=>{
+            if (v.x > 0) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.max.x + v.x, b.max.y);
+            else b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.min.x + v.x, b.min.y);
+            if (v.y > 0) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.max.x, b.max.y + v.y);
+            else b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.min.x, b.min.y + v.y);
+            return b;
+        };
+    })();
+}
+
+
+class $084fb6562cdf6a86$export$2e2bcd8739ae039 extends (0, $3f8760cc7c29435c$export$2e2bcd8739ae039) {
+    /** The globally positioned bounds of this collider. */ get bounds() {
+        return this._bounds.copy();
+    }
+    /**
+     * Determines if this collider can interact with another collider based on their layers.
+     * @param other The other collider.
+     * @returns Whether the colliders can interact.
+     */ canCollideWith(other) {
+        return (other.layers & this.filter) !== 0;
+    }
+    onDebugDraw(context) {
+        // Draw bb
+        context.strokeStyle = "#00ffff";
+        context.strokeRect(this._bounds.min.x, this._bounds.min.y, this._bounds.size.x, this._bounds.size.y);
+    }
+    constructor(...args){
+        super(...args);
+        this._bounds = (0, $b31606e820d5109e$export$2e2bcd8739ae039).zero;
+        /** The layers this body is part of. */ this.layers = 0x00000001;
+        /** The layers this body can interact with. */ this.filter = 0x00000001;
+    }
+}
+
+
+
+/**
+ * @author Petraller <me@petraller.com>
+ */ 
+class $511d31ae5212a454$export$2e2bcd8739ae039 {
+    static #_ = (()=>{
+        /**
+     * The position of the camera.
+     */ this.position = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
+    })();
+    static #_1 = (()=>{
+        /**
+     * The rotation of the camera.
+     */ this.rotation = 0;
+    })();
+    static #_2 = (()=>{
+        /**
+     * The scale of the camera.
+     */ this.scale = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one;
+    })();
+}
+
+
+/**
+ * @author Petraller <me@petraller.com>
+ */ 
+
+
+class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
+    static #_ = (()=>{
+        this.singleton = null;
+    })();
+    static #_1 = (()=>{
+        this.canvas = null;
+    })();
+    static #_2 = (()=>{
+        this.keyStates = new Map();
+    })();
+    static #_3 = (()=>{
+        this.keyTransits = new Map();
+    })();
+    static #_4 = (()=>{
+        this.mouseStates = new Map();
+    })();
+    static #_5 = (()=>{
+        this.mouseTransits = new Map();
+    })();
+    static #_6 = (()=>{
+        this.mousePos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
+    })();
+    constructor(canvas){
+        if ($35fd48d1ddd84d0f$export$2e2bcd8739ae039.singleton) {
+            console.warn("Input is used as a static class, do not create additional objects of Input");
+            return;
+        }
+        $35fd48d1ddd84d0f$export$2e2bcd8739ae039.singleton = this;
+        // Register canvas events
+        $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas = canvas;
+        canvas.onmousedown = (ev)=>{
+            const b = ev.button;
+            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseStates.set(b, true);
+            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.set(b, true);
+        };
+        canvas.onmouseup = canvas.onmouseleave = (ev)=>{
+            const b = ev.button;
+            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseStates.set(b, false);
+            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.set(b, true);
+        };
+        canvas.onmousemove = (ev)=>{
+            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mousePos = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(ev.offsetX, ev.offsetY);
+        };
+        // Register window events
+        window.onkeydown = (ev)=>{
+            const c = ev.code;
+            if (!ev.repeat) {
+                $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyStates.set(c, true);
+                $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.set(c, true);
+            }
+        };
+        window.onkeyup = (ev)=>{
+            const c = ev.code;
+            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyStates.set(c, false);
+            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.set(c, true);
+        };
+    }
+    /**
+     * Clears all internal flags at the end of the frame.
+     * 
+     * Called by `Petrallengine.create`.
+     */ endFrame() {
+        for (let i of $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.keys())$35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.set(i, false);
+        for (let i of $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.keys())$35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.set(i, false);
+    }
+    /**
+     * Returns whether a keyboard key is down.
+     * @param keyCode The code of the key.
+     * @returns Whether the key is down.
+     */ static isKey(keyCode) {
+        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyStates.get(keyCode) ?? false;
+    }
+    /**
+     * Returns whether a keyboard key was pressed this frame.
+     * @param keyCode The code of the key.
+     * @returns Whether the key was pressed this frame.
+     */ static isKeyPressed(keyCode) {
+        return ($35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.get(keyCode) ?? false) && $35fd48d1ddd84d0f$export$2e2bcd8739ae039.isKey(keyCode);
+    }
+    /**
+     * Returns whether a keyboard key was released this frame.
+     * @param keyCode The code of the key.
+     * @returns Whether the key was released this frame.
+     */ static isKeyReleased(keyCode) {
+        return ($35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.get(keyCode) ?? false) && !$35fd48d1ddd84d0f$export$2e2bcd8739ae039.isKey(keyCode);
+    }
+    /**
+     * Returns whether a mouse button is down.
+     * @param button The mouse button.
+     * @returns Whether the mouse button is down.
+     */ static isMouse(button = 0) {
+        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseStates.get(button) ?? false;
+    }
+    /**
+     * Returns whether a mouse button was pressed this frame.
+     * @param button The mouse button.
+     * @returns Whether the mouse button was pressed this frame.
+     */ static isMousePressed(button = 0) {
+        return ($35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.get(button) ?? false) && $35fd48d1ddd84d0f$export$2e2bcd8739ae039.isMouse(button);
+    }
+    /**
+     * Returns whether a mouse button was released this frame.
+     * @param button The mouse button.
+     * @returns Whether the mouse button was released this frame.
+     */ static isMouseReleased(button = 0) {
+        return ($35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.get(button) ?? false) && !$35fd48d1ddd84d0f$export$2e2bcd8739ae039.isMouse(button);
+    }
+    /**
+     * Returns the position of the mouse in the canvas.
+     * @returns The position of the mouse in the canvas.
+     */ static get mousePosition() {
+        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mousePos;
+    }
+    /**
+     * Returns the normalized position of the mouse in the canvas.
+     * @returns The normalized position of the mouse in the canvas.
+     */ static get mousePositionNormalized() {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiplyComponents($35fd48d1ddd84d0f$export$2e2bcd8739ae039.mousePos, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(1 / $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas.width, 1 / $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas.height));
+    }
+    /**
+     * Returns the position on the canvas of a world position.
+     * @returns The position on the canvas of a world position.
+     */ static worldToCanvas(worldPos) {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).transform((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeTransformation((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $511d31ae5212a454$export$2e2bcd8739ae039).position, -1), -(0, $511d31ae5212a454$export$2e2bcd8739ae039).rotation, (0, $511d31ae5212a454$export$2e2bcd8739ae039).scale), worldPos), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).fromObjWH($35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas), 0.5));
+    }
+    /**
+     * Returns the position in the world of a canvas position.
+     * @returns The position in the world of a canvas position.
+     */ static canvasToWorld(canvasPos) {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).transform((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).inverse((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeTransformation((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $511d31ae5212a454$export$2e2bcd8739ae039).position, -1), -(0, $511d31ae5212a454$export$2e2bcd8739ae039).rotation, (0, $511d31ae5212a454$export$2e2bcd8739ae039).scale)), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(canvasPos, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).fromObjWH($35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas), -0.5)));
+    }
+}
+
+
 /**
  * @author Petraller <me@petraller.com>
  */ /**
- * Checks if an object implements a drawable.
- * @param obj The object.
- * @returns Whether the object implements a drawable.
- */ function $936ba809947b4de6$export$1508030049b632ec(obj) {
-    return "onDraw" in obj && obj.onDraw instanceof Function;
+ * @author Petraller <me@petraller.com>
+ */ 
+
+
+class $e59215a0bab84dac$export$2e2bcd8739ae039 extends (0, $084fb6562cdf6a86$export$2e2bcd8739ae039) {
+    /** The radius of the circle. */ get radius() {
+        return this._radius;
+    }
+    set radius(value) {
+        this._radius = Math.max(value, 0);
+    }
+    regenerate() {
+        this._bounds = new (0, $b31606e820d5109e$export$2e2bcd8739ae039)((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.globalPosition, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(this._radius, this._radius)), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(this.globalPosition, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(this._radius, this._radius)));
+    }
+    onDebugDraw(context) {
+        // Draw vertices
+        context.strokeStyle = "#ff00ff";
+        context.beginPath();
+        context.arc(this.globalPosition.x, this.globalPosition.y, this.radius, 0, 360);
+        context.stroke();
+        super.onDebugDraw(context);
+    }
+    constructor(...args){
+        super(...args);
+        this._radius = 1;
+    }
+}
+
+
+/**
+ * @author Petraller <me@petraller.com>
+ */ 
+class $2f54bffac7b55ad5$export$2e2bcd8739ae039 extends (0, $084fb6562cdf6a86$export$2e2bcd8739ae039) {
+    /** The globally positioned vertices of the collider. */ get vertices() {
+        return this._vertices.slice();
+    }
+    /** The axes of this collider for SAT. */ get axes() {
+        return this._axes.slice();
+    }
+    onDebugDraw(context) {
+        // Draw vertices
+        context.strokeStyle = "#ff00ff";
+        context.beginPath();
+        for(let i = 0; i <= this._vertices.length; ++i){
+            const v = this._vertices[i % this._vertices.length];
+            if (i == 0) context.moveTo(v.x, v.y);
+            else context.lineTo(v.x, v.y);
+        }
+        context.stroke();
+        // Draw bb
+        context.strokeStyle = "#00ffff";
+        context.strokeRect(this._bounds.min.x, this._bounds.min.y, this._bounds.size.x, this._bounds.size.y);
+        super.onDebugDraw(context);
+    }
+    constructor(...args){
+        super(...args);
+        this._vertices = [];
+        this._axes = [];
+    }
+}
+
+
+
+
+function $faf0e2bf52520646$var$makeSnowflakePair(id1, id2) {
+    if (id1 < id2) return id1 + "|" + id2;
+    return id2 + "|" + id2;
+}
+function $faf0e2bf52520646$var$breakSnowflakePair(pair) {
+    const items = pair.split("|");
+    return [
+        items[0],
+        items[1]
+    ];
+}
+class $faf0e2bf52520646$export$2e2bcd8739ae039 {
+    static #_ = (()=>{
+        this.singleton = null;
+    })();
+    static #_1 = (()=>{
+        this.bodies = new Map();
+    })();
+    static #_2 = (()=>{
+        this.colliders = new Map();
+    })();
+    static #_3 = (()=>{
+        this.bodyColliders = new Map();
+    })();
+    static #_4 = (()=>{
+        this.colliderBodies = new Map();
+    })();
+    static #_5 = (()=>{
+        this.pairsCollided = new Set();
+    })();
+    constructor(){
+        if ($faf0e2bf52520646$export$2e2bcd8739ae039.singleton) {
+            console.warn("Physics is used as a static class, do not create additional objects of Physics");
+            return;
+        }
+        $faf0e2bf52520646$export$2e2bcd8739ae039.singleton = this;
+    }
+    tick() {
+        let collisions = [];
+        let pairsCalled = new Set();
+        function triggerBody(c1, c2) {
+            const b1 = $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get($faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.get(c1.id));
+            const b2 = $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get($faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.get(c2.id));
+            const pair = $faf0e2bf52520646$var$makeSnowflakePair(b1.id, b2.id);
+            if (!$faf0e2bf52520646$export$2e2bcd8739ae039.pairsCollided.has(pair)) {
+                // Call collision enter callback
+                $faf0e2bf52520646$export$2e2bcd8739ae039.pairsCollided.add(pair);
+                b1.onCollisionEnter?.call(b1, b2);
+                b2.onCollisionEnter?.call(b2, b1);
+            } else {
+                // Call collision update callback
+                b1.onCollisionUpdate?.call(b1, b2);
+                b2.onCollisionUpdate?.call(b2, b1);
+            }
+            // Mark this pair as being called this frame
+            if (!pairsCalled.has(pair)) pairsCalled.add(pair);
+        }
+        // Get colliders as array
+        let colliders = Array.from($faf0e2bf52520646$export$2e2bcd8739ae039.colliders.values());
+        // Sort by min x
+        colliders.sort((c1, c2)=>c1.bounds.min.x - c2.bounds.min.x);
+        // Iterate all colliders
+        for(let i = 0; i < colliders.length; i++){
+            const ci = colliders[i];
+            ci.globalTransform;
+            ci.regenerate();
+            const bi = $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get($faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.get(ci.id));
+            for(let j = i + 1; j < colliders.length; j++){
+                const cj = colliders[j];
+                ci.globalTransform;
+                cj.regenerate();
+                const bj = $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get($faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.get(cj.id));
+                // Same body
+                if (bi.id === bj.id) continue;
+                // --- BROAD PHASE ---
+                // Non-intersecting layers
+                if (!ci.canCollideWith(cj)) continue;
+                // Extend bounds
+                const bndi = (0, $b31606e820d5109e$export$2e2bcd8739ae039).extend(ci.bounds, bi.velocity);
+                const bndj = (0, $b31606e820d5109e$export$2e2bcd8739ae039).extend(cj.bounds, bj.velocity);
+                // X limits
+                if (bndj.min.x > bndi.max.x) break;
+                // Y overlap
+                if (bndi.max.y < bndj.min.y || bndi.min.y > bndj.max.y) continue;
+                // BB overlap
+                if (!bndi.overlaps(bndj)) continue;
+                // --- NARROW PHASE ---
+                if (ci instanceof (0, $e59215a0bab84dac$export$2e2bcd8739ae039) && cj instanceof (0, $e59215a0bab84dac$export$2e2bcd8739ae039)) {
+                    // Circle-circle
+                    const col = $faf0e2bf52520646$export$2e2bcd8739ae039.circleCircleIntersection(ci.globalPosition, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, ci.radius, cj.globalPosition, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, cj.radius);
+                    if (col.willIntersect) {
+                        collisions.push(col);
+                        triggerBody(ci, cj);
+                    }
+                    continue;
+                } else if (ci instanceof (0, $2f54bffac7b55ad5$export$2e2bcd8739ae039) && cj instanceof (0, $2f54bffac7b55ad5$export$2e2bcd8739ae039)) continue;
+                else if (ci instanceof (0, $e59215a0bab84dac$export$2e2bcd8739ae039) && cj instanceof (0, $2f54bffac7b55ad5$export$2e2bcd8739ae039) || ci instanceof (0, $2f54bffac7b55ad5$export$2e2bcd8739ae039) && cj instanceof (0, $e59215a0bab84dac$export$2e2bcd8739ae039)) continue;
+                console.error(`Colliders ${typeof ci} and ${typeof cj} not supported by collision detection`);
+            }
+        }
+        // Clear uncalled pairs
+        for (const pair of $faf0e2bf52520646$export$2e2bcd8739ae039.pairsCollided.values()){
+            const [b1id, b2id] = $faf0e2bf52520646$var$breakSnowflakePair(pair);
+            if (pairsCalled.has(pair)) continue;
+            const [b1, b2] = [
+                $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get(b1id),
+                $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get(b2id)
+            ];
+            $faf0e2bf52520646$export$2e2bcd8739ae039.pairsCollided.delete(pair);
+            b1.onCollisionExit?.call(b1, b2);
+            b2.onCollisionExit?.call(b2, b1);
+        }
+        return collisions;
+    }
+    static registerBody(body) {
+        if ($faf0e2bf52520646$export$2e2bcd8739ae039.bodies.has(body.id) || $faf0e2bf52520646$export$2e2bcd8739ae039.bodyColliders.has(body.id)) {
+            console.error(`Body #${body.id} already registered in physics system`);
+            return;
+        }
+        $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.set(body.id, body);
+        $faf0e2bf52520646$export$2e2bcd8739ae039.bodyColliders.set(body.id, new Set);
+    }
+    static registerCollider(collider, owner) {
+        if ($faf0e2bf52520646$export$2e2bcd8739ae039.colliders.has(collider.id) || $faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.has(collider.id)) {
+            console.error(`Collider #${owner.id} already registered in physics system`);
+            return;
+        }
+        if (!$faf0e2bf52520646$export$2e2bcd8739ae039.bodies.has(owner.id)) {
+            console.error(`Body #${owner.id} not registered in physics system`);
+            return;
+        }
+        if ($faf0e2bf52520646$export$2e2bcd8739ae039.bodyColliders.get(owner.id)?.has(collider.id) || $faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.has(collider.id)) {
+            console.warn(`Collider #${collider.id} already registered with body #${$faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.get(collider.id)} in physics system`);
+            return;
+        }
+        $faf0e2bf52520646$export$2e2bcd8739ae039.colliders.set(collider.id, collider);
+        $faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.set(collider.id, owner.id);
+        $faf0e2bf52520646$export$2e2bcd8739ae039.bodyColliders.get(owner.id)?.add(collider.id);
+    }
+    static rayCircleIntersection(posRay, velRay, posCircle, radius) {
+        let output = {
+            willIntersect: false,
+            isInterior: false,
+            intersectTime: 0
+        };
+        // Distance squared
+        const distSqr = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(posRay, posCircle).sqrLength;
+        // Check if interior or exterior ray
+        output.isInterior = distSqr < radius * radius;
+        // Ray length
+        const rl = velRay.length;
+        // Delta from start to CPA
+        const m = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(posCircle, posRay), velRay.normalized);
+        if (!output.isInterior && m < 0 && distSqr > radius * radius) return output;
+        // CPA
+        const nSqr = distSqr - m * m;
+        if (nSqr > radius * radius) return output;
+        // Delta from collision point to CPA
+        const s = Math.sqrt(radius * radius - nSqr);
+        // Time to intersect
+        const it = output.isInterior ? (m + s) / rl : (m - s) / rl;
+        if (it >= 0 && it <= 1) {
+            output.willIntersect = true;
+            output.intersectTime = it;
+        }
+        return output;
+    }
+    static circleCircleIntersection(pos1, vel1, radius1, pos2, vel2, radius2) {
+        let output = {
+            willIntersect: false,
+            isInterior: false,
+            intersectTime: 0,
+            intersectPos1: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero,
+            intersectPos2: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero
+        };
+        // Relative position of 1 from 2
+        const relPos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(pos1, pos2);
+        // Relative vel of 1 from 2
+        const relvel = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(vel1, vel2);
+        // Zero relative velocity
+        if (relvel.sqrLength === 0) {
+            output.willIntersect = relPos.sqrLength <= (radius1 + radius2) * (radius1 + radius2);
+            return output;
+        }
+        // Relative ray
+        const relRayPos = pos1.copy();
+        const relRayVel = relvel;
+        // Check if interior or exterior intersection
+        output.isInterior = relPos.sqrLength < (radius1 - radius2) * (radius1 - radius2);
+        if (!output.isInterior && relPos.sqrLength < (radius1 + radius2) * (radius1 + radius2)) // Overlapping circles, I don't care about this case
+        return output;
+        // Relative circle
+        const relCirclePos = pos2.copy();
+        const relCircleRadius = output.isInterior ? Math.abs(radius1 - radius2) : radius1 + radius2;
+        // Ray-circle
+        const col = $faf0e2bf52520646$export$2e2bcd8739ae039.rayCircleIntersection(relRayPos, relRayVel, relCirclePos, relCircleRadius);
+        // Intersection points
+        if (col.willIntersect) {
+            output.willIntersect = col.willIntersect;
+            output.intersectTime = col.intersectTime;
+            output.intersectPos1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(pos1, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(vel1, col.intersectTime));
+            output.intersectPos2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(pos2, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(vel2, col.intersectTime));
+        }
+        return output;
+    }
+    static circleCircleResponse(normal, intersectTime, vel1, mass1, intersectPos1, vel2, mass2, intersectPos2) {
+        let output = {
+            reflVel1: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero,
+            reflVel2: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero,
+            reflPos1: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero,
+            reflPos2: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero
+        };
+        // Just in case
+        const n = normal.normalized;
+        // Magnitude of velocity in direction of normal
+        const a1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot(vel1, n);
+        const a2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot(vel2, n);
+        // Factor of normal to add
+        const f1 = -2 * (a1 - a2) * (mass2 < Infinity ? mass2 / (mass1 + mass2) : 1);
+        const f2 = 2 * (a1 - a2) * (mass1 < Infinity ? mass1 / (mass1 + mass2) : 1);
+        output.reflVel1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(vel1, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(n, f1));
+        output.reflVel2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(vel2, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(n, f2));
+        output.reflPos1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(intersectPos1, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(output.reflVel1, 1 - intersectTime));
+        output.reflPos2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(intersectPos2, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(output.reflVel2, 1 - intersectTime));
+        return output;
+    }
 }
 
 
@@ -1022,7 +1506,7 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
         this._time = 0;
     })();
     static #_7 = (()=>{
-        this.rootNode = new (0, $3f8760cc7c29435c$export$2e2bcd8739ae039)($05bad183ec6d4f44$export$2e2bcd8739ae039);
+        this.rootNode = new (0, $3f8760cc7c29435c$export$2e2bcd8739ae039)($05bad183ec6d4f44$export$2e2bcd8739ae039, "_ROOT_");
     })();
     /** The root node of the whole game. */ static get root() {
         return $05bad183ec6d4f44$export$2e2bcd8739ae039.rootNode;
@@ -1048,9 +1532,11 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
         console.debug(`Using ${target.outerHTML} as render canvas`);
         // Initialise systems
         const input = new (0, $35fd48d1ddd84d0f$export$2e2bcd8739ae039)(target);
-        // Create game loop
+        const physics = new (0, $faf0e2bf52520646$export$2e2bcd8739ae039)();
+        // Get context
         const canvas = target;
         const context = canvas.getContext("2d");
+        // Create game loop
         const ft = 1000 / $05bad183ec6d4f44$export$2e2bcd8739ae039.FRAME_RATE;
         const gameLoop = ()=>{
             const tStart = Date.now();
@@ -1060,12 +1546,27 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
                 if (!node.isStarted) {
                     node.onStart?.call(node);
                     node.isStarted = true;
+                    if (node instanceof (0, $46a097085382b218$export$2e2bcd8739ae039)) (0, $faf0e2bf52520646$export$2e2bcd8739ae039).registerBody(node);
+                    if (node instanceof (0, $084fb6562cdf6a86$export$2e2bcd8739ae039)) {
+                        let curr = node.parent;
+                        while(curr !== null){
+                            if (curr instanceof (0, $46a097085382b218$export$2e2bcd8739ae039)) {
+                                (0, $faf0e2bf52520646$export$2e2bcd8739ae039).registerCollider(node, curr);
+                                break;
+                            }
+                            curr = curr.parent;
+                        }
+                        if (curr === null) console.error(`Collider does not have a parent Body, it will not be registered by the Physics system`);
+                    }
                 }
                 node.onUpdate?.call(node);
+                node.globalTransform;
                 // Iterate children
                 for (let child of node.children)update(child);
             }
             update($05bad183ec6d4f44$export$2e2bcd8739ae039.rootNode);
+            // Physics step
+            physics.tick();
             // Reset
             context.reset();
             // Clear
@@ -1098,12 +1599,18 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
                 //     // Draw debug
                 //     node.debugDraw(context);
                 // }
+                // Draw drawables
+                if ((0, $3d145095d1c4fd99$export$c9e1b957c27b07fb)(node)) {
+                    context.save();
+                    node.onDebugDraw.call(node, context);
+                    context.restore();
+                }
                 // Iterate children
                 for (let child of node.children)debugDraw(child);
             }
             debugDraw($05bad183ec6d4f44$export$2e2bcd8739ae039.rootNode);
             // Clear transition flags
-            input._endFrame();
+            input.endFrame();
             const tEnd = Date.now();
             const dt = tEnd - tStart;
             const wait = Math.max(ft - dt, 0);
@@ -1122,6 +1629,16 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
      */ static get deltaTime() {
         return $05bad183ec6d4f44$export$2e2bcd8739ae039._deltaTime / 1000;
     }
+}
+
+
+
+
+
+/**
+ * @author Petraller <me@petraller.com>
+ */ 
+class $d5bbfaa4a2882b39$export$2e2bcd8739ae039 extends (0, $46a097085382b218$export$2e2bcd8739ae039) {
 }
 
 
@@ -1192,7 +1709,7 @@ class $65b04c82fca59f60$export$2e2bcd8739ae039 {
     /** Green. */ static get green() {
         return new $65b04c82fca59f60$export$2e2bcd8739ae039(0, 1, 0);
     }
-    /** Teal. */ static get teal() {
+    /** Cyan. */ static get cyan() {
         return new $65b04c82fca59f60$export$2e2bcd8739ae039(0, 1, 1);
     }
     /** Red. */ static get red() {
@@ -1410,129 +1927,6 @@ class $31caad46b2dacdff$export$2e2bcd8739ae039 extends (0, $3f8760cc7c29435c$exp
 }
 
 
-/**
- * @author Petraller <me@petraller.com>
- */ 
-
-class $b31606e820d5109e$export$2e2bcd8739ae039 {
-    constructor(min, max){
-        /** The minimum components. */ this.min = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
-        /** The maximum components. */ this.max = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
-        this.copy = ()=>new $b31606e820d5109e$export$2e2bcd8739ae039(this.min, this.max);
-        this.copyFrom = (other)=>{
-            this.min.copyFrom(other.min);
-            this.max.copyFrom(other.max);
-            return this;
-        };
-        this.equals = (other)=>this.min.equals(other.min) && this.max.equals(other.max);
-        /**
-     * Determines if a point exists inside this bounds.
-     * @param point The point.
-     * @returns Whether the point exists inside this bounds.
-     */ this.contains = (point)=>point.x >= this.min.x && point.x <= this.max.x && point.y >= this.min.y && point.y <= this.max.y;
-        /**
-     * Determines if this bounds overlaps with another bounds.
-     * @param other The other bounds.
-     * @returns Whether the bounds overlap.
-     */ this.overlaps = (other)=>this.min.x <= other.max.x && this.max.x >= other.min.x && this.max.y >= other.min.y && this.min.y <= other.max.y;
-        this.min.copyFrom(min);
-        this.max.copyFrom(max);
-    }
-    /** The size of the bounds. */ get size() {
-        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.max, this.min);
-    }
-    /** The zero bounds, [(0, 0), (0, 0)]. */ static get zero() {
-        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero);
-    }
-    /** The unit bounds, [(0, 0), (1, 1)]. */ static get unit() {
-        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one);
-    }
-    /** The normalized bounds, [(-0.5, -0.5), (0.5, 0.5)]. */ static get norm() {
-        return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one, -0.5), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one, 0.5));
-    }
-    static #_ = (()=>{
-        /**
-     * Create bounds based on a set of vertices.
-     * @param vertices The vertices.
-     * @returns The bounds.
-     */ this.fromVertices = (vertices)=>{
-            let b = new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).infinity, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).negativeInfinity);
-            // Iterate all vertices
-            for (const vertex of vertices){
-                if (vertex.x > b.max.x) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(vertex.x, b.max.y);
-                if (vertex.x < b.min.x) b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(vertex.x, b.min.y);
-                if (vertex.y > b.max.y) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.max.x, vertex.y);
-                if (vertex.y < b.min.y) b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.min.x, vertex.y);
-            }
-            return b;
-        };
-    })();
-    static #_1 = (()=>{
-        /**
-     * Create bounds that envelop a set of bounds.
-     * @param boundses The set of bounds to envelop.
-     * @returns The bounds.
-     */ this.makeEnvelop = (boundses)=>{
-            let b = new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).infinity, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).negativeInfinity);
-            // Iterate all bounds
-            for (const bounds of boundses){
-                if (bounds.max.x > b.max.x) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(bounds.max.x, b.max.y);
-                if (bounds.min.x < b.min.x) b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(bounds.min.x, b.min.y);
-                if (bounds.max.y > b.max.y) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.max.x, bounds.max.y);
-                if (bounds.min.y < b.min.y) b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.min.x, bounds.min.y);
-            }
-            return b;
-        };
-    })();
-    static #_2 = (()=>{
-        /**
-     * Translates bounds.
-     * @param b The bounds.
-     * @param v The translation vector.
-     * @returns The translated bounds.
-     */ this.translate = (b, v)=>{
-            return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b.min, v), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b.max, v));
-        };
-    })();
-    static #_3 = (()=>{
-        /**
-     * Scales bounds.
-     * @param b The bounds.
-     * @param v The scale vector.
-     * @param origin The normalized origin to scale from.
-     * @returns The scaled bounds.
-     */ this.scale = (b, v, origin = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one, 0.5))=>{
-            const o = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).lerpComponents(b.min, b.max, origin);
-            return new $b31606e820d5109e$export$2e2bcd8739ae039((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiplyComponents((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b.min, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(o, -1)), v), o), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiplyComponents((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b.max, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(o, -1)), v), o));
-        };
-    })();
-    static #_4 = (()=>{
-        /**
-     * Shifts bounds such that its origin is at a given position.
-     * @param b The bounds.
-     * @param pos The position.
-     * @param origin The normalized origin of the bounds.
-     * @returns The shifted bounds.
-     */ this.shift = (b, pos, origin = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).one, 0.5))=>{
-            const o = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).lerpComponents(b.min, b.max, origin);
-            return $b31606e820d5109e$export$2e2bcd8739ae039.translate(b, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(pos, o));
-        };
-    })();
-    static #_5 = (()=>{
-        /**
-     * Extends bounds by a vector.
-     * @param b The bounds.
-     * @param v The extension vector.
-     * @returns The extended bounds.
-     */ this.extend = (b, v)=>{
-            if (v.x > 0) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.max.x + v.x, b.max.y);
-            else b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.min.x + v.x, b.min.y);
-            if (v.y > 0) b.max = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.max.x, b.max.y + v.y);
-            else b.min = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(b.min.x, b.min.y + v.y);
-            return b;
-        };
-    })();
-}
 
 
 
@@ -1540,8 +1934,7 @@ class $b31606e820d5109e$export$2e2bcd8739ae039 {
 
 
 
- //export * from "./systems/Physics";
 
 
-export {$05bad183ec6d4f44$export$2e2bcd8739ae039 as Game, $3f8760cc7c29435c$export$2e2bcd8739ae039 as Node, $31caad46b2dacdff$export$2e2bcd8739ae039 as Sprite, $b31606e820d5109e$export$2e2bcd8739ae039 as Bounds, $65b04c82fca59f60$export$2e2bcd8739ae039 as Color, $a53cef81bd683a5b$export$2e2bcd8739ae039 as Mat3, $8ec4c8ffa911853c$export$2e2bcd8739ae039 as Vec2, $511d31ae5212a454$export$2e2bcd8739ae039 as Camera, $35fd48d1ddd84d0f$export$2e2bcd8739ae039 as Input, $24207f53032a3f4e$export$389de06130c9495c as makeSnowflake};
+export {$05bad183ec6d4f44$export$2e2bcd8739ae039 as Game, $46a097085382b218$export$2e2bcd8739ae039 as Body, $e59215a0bab84dac$export$2e2bcd8739ae039 as CircleCollider, $084fb6562cdf6a86$export$2e2bcd8739ae039 as Collider, $d5bbfaa4a2882b39$export$2e2bcd8739ae039 as CollisionBody, $3f8760cc7c29435c$export$2e2bcd8739ae039 as Node, $31caad46b2dacdff$export$2e2bcd8739ae039 as Sprite, $b31606e820d5109e$export$2e2bcd8739ae039 as Bounds, $65b04c82fca59f60$export$2e2bcd8739ae039 as Color, $a53cef81bd683a5b$export$2e2bcd8739ae039 as Mat3, $8ec4c8ffa911853c$export$2e2bcd8739ae039 as Vec2, $511d31ae5212a454$export$2e2bcd8739ae039 as Camera, $35fd48d1ddd84d0f$export$2e2bcd8739ae039 as Input, $faf0e2bf52520646$export$2e2bcd8739ae039 as Physics, $24207f53032a3f4e$export$389de06130c9495c as makeSnowflake};
 //# sourceMappingURL=Petrallengine.mjs.map
