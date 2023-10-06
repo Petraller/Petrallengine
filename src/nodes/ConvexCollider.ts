@@ -19,8 +19,6 @@ export default abstract class ConvexCollider extends Collider {
     get axes() { return this._axes.slice(); }
 
     onDebugDraw(context: CanvasRenderingContext2D): void {
-        this.regenerate();
-
         // Draw vertices
         context.strokeStyle = "#ff00ff";
         context.beginPath();

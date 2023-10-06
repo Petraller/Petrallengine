@@ -23,8 +23,6 @@ export default class CircleCollider extends Collider {
     }
 
     onDebugDraw(context: CanvasRenderingContext2D): void {
-        this.regenerate();
-
         // Draw vertices
         context.strokeStyle = "#ff00ff";
         context.beginPath();

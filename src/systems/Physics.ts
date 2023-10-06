@@ -49,46 +49,15 @@ export default class Physics {
             return;
         }
         Physics.singleton = this;
-
-        setInterval(() => {
-            Physics.tick();
-        }, 1000 * Game.FIXED_FRAME_TIME);
     }
 
-    static registerBody(body: Body) {
-        if (Physics.bodies.has(body.id) || Physics.bodyColliders.has(body.id)) {
-            console.error(`Body #${body.id} already registered in physics system`);
-            return;
-        }
-        Physics.bodies.set(body.id, body);
-        Physics.bodyColliders.set(body.id, new Set<Snowflake>);
-    }
-
-    static registerCollider(collider: Collider, owner: Body) {
-        if (Physics.colliders.has(collider.id) || Physics.colliderBodies.has(collider.id)) {
-            console.error(`Collider #${owner.id} already registered in physics system`);
-            return;
-        }
-        if (!Physics.bodies.has(owner.id)) {
-            console.error(`Body #${owner.id} not registered in physics system`);
-            return;
-        }
-        if (Physics.bodyColliders.get(owner.id)?.has(collider.id) || Physics.colliderBodies.has(collider.id)) {
-            console.warn(`Collider #${collider.id} already registered with body #${Physics.colliderBodies.get(collider.id)} in physics system`);
-            return;
-        }
-        Physics.colliders.set(collider.id, collider);
-        Physics.colliderBodies.set(collider.id, owner.id);
-        Physics.bodyColliders.get(owner.id)?.add(collider.id);
-    }
-
-    private static tick() {
+    tick() {
         let collisions: CollisionInfo[] = [];
         let pairsCalled: Set<SnowflakePair> = new Set<SnowflakePair>();
         function triggerBody(c1: Collider, c2: Collider) {
             const b1 = Physics.bodies.get(Physics.colliderBodies.get(c1.id)!)!;
             const b2 = Physics.bodies.get(Physics.colliderBodies.get(c2.id)!)!;
-            const pair = makeSnowflakePair(c1.id, c2.id);
+            const pair = makeSnowflakePair(b1.id, b2.id);
 
             if (!Physics.pairsCollided.has(pair)) {
                 // Call collision enter callback
@@ -108,7 +77,7 @@ export default class Physics {
         }
 
         // Get colliders as array
-        let colliders: Collider[] = Array.from(this.colliders.values());
+        let colliders: Collider[] = Array.from(Physics.colliders.values());
 
         // Sort by min x
         colliders.sort((c1, c2) => c1.bounds.min.x - c2.bounds.min.x);
@@ -116,9 +85,13 @@ export default class Physics {
         // Iterate all colliders
         for (let i = 0; i < colliders.length; i++) {
             const ci = colliders[i];
+            ci.globalTransform;
+            ci.regenerate();
             const bi = Physics.bodies.get(Physics.colliderBodies.get(ci.id)!)!;
             for (let j = i + 1; j < colliders.length; j++) {
                 const cj = colliders[j];
+                ci.globalTransform;
+                cj.regenerate();
                 const bj = Physics.bodies.get(Physics.colliderBodies.get(cj.id)!)!;
 
                 // Same body
@@ -183,16 +156,44 @@ export default class Physics {
 
         // Clear uncalled pairs
         for (const pair of Physics.pairsCollided.values()) {
-            const [b1, b2] = breakSnowflakePair(pair).map((id) => Physics.bodies.get(id)!);
+            const [b1id, b2id] = breakSnowflakePair(pair);
             if (pairsCalled.has(pair)) {
                 continue;
             }
+            const [b1, b2] = [Physics.bodies.get(b1id)!, Physics.bodies.get(b2id)!];
             Physics.pairsCollided.delete(pair);
             b1.onCollisionExit?.call(b1, b2);
             b2.onCollisionExit?.call(b2, b1);
         }
 
         return collisions;
+    }
+
+    static registerBody(body: Body) {
+        if (Physics.bodies.has(body.id) || Physics.bodyColliders.has(body.id)) {
+            console.error(`Body #${body.id} already registered in physics system`);
+            return;
+        }
+        Physics.bodies.set(body.id, body);
+        Physics.bodyColliders.set(body.id, new Set<Snowflake>);
+    }
+
+    static registerCollider(collider: Collider, owner: Body) {
+        if (Physics.colliders.has(collider.id) || Physics.colliderBodies.has(collider.id)) {
+            console.error(`Collider #${owner.id} already registered in physics system`);
+            return;
+        }
+        if (!Physics.bodies.has(owner.id)) {
+            console.error(`Body #${owner.id} not registered in physics system`);
+            return;
+        }
+        if (Physics.bodyColliders.get(owner.id)?.has(collider.id) || Physics.colliderBodies.has(collider.id)) {
+            console.warn(`Collider #${collider.id} already registered with body #${Physics.colliderBodies.get(collider.id)} in physics system`);
+            return;
+        }
+        Physics.colliders.set(collider.id, collider);
+        Physics.colliderBodies.set(collider.id, owner.id);
+        Physics.bodyColliders.get(owner.id)?.add(collider.id);
     }
 
     private static rayCircleIntersection(posRay: Vec2, velRay: Vec2, posCircle: Vec2, radius: number) {
@@ -248,15 +249,23 @@ export default class Physics {
             intersectPos2: Vec2.zero,
         };
 
+        // Relative position of 1 from 2
+        const relPos = Vec2.subtract(pos1, pos2);
+
         // Relative vel of 1 from 2
         const relvel = Vec2.subtract(vel1, vel2);
+
+        // Zero relative velocity
+        if (relvel.sqrLength === 0) {
+            output.willIntersect = relPos.sqrLength <= (radius1 + radius2) * (radius1 + radius2);
+            return output;
+        }
 
         // Relative ray
         const relRayPos = pos1.copy();
         const relRayVel = relvel;
 
         // Check if interior or exterior intersection
-        const relPos = Vec2.subtract(pos1, pos2);
         output.isInterior = (relPos.sqrLength < (radius1 - radius2) * (radius1 - radius2));
         if (!output.isInterior && relPos.sqrLength < (radius1 + radius2) * (radius1 + radius2)) {
             // Overlapping circles, I don't care about this case

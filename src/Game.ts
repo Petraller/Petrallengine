@@ -4,6 +4,8 @@
 
 import { isDrawable } from './nodes/IDrawable';
 import { isDebugDrawable } from './nodes/IDebugDrawable';
+import Body from './nodes/Body';
+import Collider from './nodes/Collider';
 import Node from './nodes/Node';
 import Camera from './systems/Camera';
 import Input from './systems/Input';
@@ -23,10 +25,6 @@ export default class Game {
     static readonly FRAME_RATE = 60;
     /** The scheduled interval between frame updates in seconds. */
     static readonly FRAME_TIME = 1 / Game.FRAME_RATE;
-    /** The number of scheduled physics updates per second. */
-    static readonly FIXED_FRAME_RATE = 50;
-    /** The scheduled interval between physics updates in seconds. */
-    static readonly FIXED_FRAME_TIME = 1 / Game.FIXED_FRAME_RATE;
     /** Debug draw flags. */
     static readonly DEBUG_DRAWS = {
         colliders: true,
@@ -88,6 +86,23 @@ export default class Game {
                 if (!node.isStarted) {
                     node.onStart?.call(node);
                     node.isStarted = true;
+
+                    if (node instanceof Body) {
+                        Physics.registerBody(node);
+                    }
+                    if (node instanceof Collider) {
+                        let curr: Node | null = node.parent;
+                        while (curr !== null) {
+                            if (curr instanceof Body) {
+                                Physics.registerCollider(node, curr);
+                                break;
+                            }
+                            curr = curr.parent;
+                        }
+                        if (curr === null) {
+                            console.error(`Collider does not have a parent Body, it will not be registered by the Physics system`);
+                        }
+                    }
                 }
                 node.onUpdate?.call(node);
                 node.globalTransform;
@@ -98,6 +113,9 @@ export default class Game {
                 }
             }
             update(Game.rootNode);
+
+            // Physics step
+            physics.tick();
 
             // Reset
             context.reset();

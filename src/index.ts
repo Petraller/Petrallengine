@@ -137,42 +137,10 @@ P.Game.create();
 // myChild.image = "assets/sprites/ship_B.png";
 // myChild.color = P.Color.red;
 
-// class dragon extends Petrallengine.Node implements Petrallengine.IDrawable {
-//     myGon: ngon | null = null;
-
-//     onStart(): void {
-//         this.myGon = this.findDescendantByType(ngon);
-//     }
-
-//     onDraw(context: CanvasRenderingContext2D): void {
-//         if (!this.myGon)
-//             return;
-
-//         context.strokeStyle = "#ff00ff";
-//         context.beginPath();
-//         for (let i = 0; i <= this.myGon.vertices.length; ++i) {
-//             const v = this.myGon.vertices[i % this.myGon.vertices.length];
-//             if (i == 0)
-//                 context.moveTo(v.x, v.y);
-//             else
-//                 context.lineTo(v.x, v.y);
-//         }
-//         context.stroke();
-
-//         context.strokeStyle = "#00ffff";
-//         context.strokeRect(this.myGon.bounds.min.x,
-//             this.myGon.bounds.min.y,
-//             this.myGon.bounds.size.x,
-//             this.myGon.bounds.size.y);
-//     }
-// }
-class ngon extends P.CircleCollider {
-    myProp: number = 1;
-
+class body extends P.Body {
     onCreate(): void {
-        this.radius = 100;
+        this.position = P.Vec2.multiply(P.Vec2.left, 100);
     }
-
     onUpdate(): void {
         if (P.Input.isKey("KeyW")) {
             this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.up, 100 * P.Game.deltaTime));
@@ -186,22 +154,49 @@ class ngon extends P.CircleCollider {
         if (P.Input.isKey("KeyD")) {
             this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.right, 100 * P.Game.deltaTime));
         }
-        // if (P.Input.isKeyPressed("ArrowUp"))
-        //     this.sides++;
-        // if (P.Input.isKeyPressed("ArrowDown"))
-        //     this.sides--;
-        if (P.Input.isKey("ArrowRight"))
-            this.radius++;
-        if (P.Input.isKey("ArrowLeft"))
-            this.radius--;
-
-        this.rotation++;
-
-        // let mat = Petrallengine.Mat3.inverse(Petrallengine.Mat3.makeScaling(Petrallengine.Vec2.one.scale(1.01)));
-        // this.position.transform(mat);
     }
 }
-P.Game.root.createChild(ngon);
+class body2 extends P.Body {
+    onCreate(): void {
+        this.position = P.Vec2.multiply(P.Vec2.right, 100);
+    }
+    onUpdate(): void {
+        if (P.Input.isKey("ArrowUp")) {
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.up, 100 * P.Game.deltaTime));
+        }
+        if (P.Input.isKey("ArrowDown")) {
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.down, 100 * P.Game.deltaTime));
+        }
+        if (P.Input.isKey("ArrowLeft")) {
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.left, 100 * P.Game.deltaTime));
+        }
+        if (P.Input.isKey("ArrowRight")) {
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.right, 100 * P.Game.deltaTime));
+        }
+    }
+    onCollisionEnter(other: P.Body): void {
+        console.log('enter');
+    }
+    onCollisionUpdate(other: P.Body): void {
+        console.log('update');
+    }
+    onCollisionExit(other: P.Body): void {
+        console.log('exit');
+    }
+}
+class collider extends P.CircleCollider {
+    onCreate(): void {
+        this.radius = 50;
+    }
+    onUpdate(): void {
+        if (P.Input.isKey("Digit1"))
+            this.radius--;
+        if (P.Input.isKey("Digit2"))
+            this.radius++;
+    }
+}
+P.Game.root.createChild(body).createChild(collider);
+P.Game.root.createChild(body2).createChild(collider);
 
 // let mat: Petrallengine.Mat3;
 // mat = Petrallengine.Mat3.identity;
