@@ -6,6 +6,7 @@ import Camera from './systems/Camera';
 import Input from './systems/Input';
 import Node from './nodes/Node';
 import { isDrawable } from './nodes/IDrawable';
+import Physics from './systems/Physics';
 
 /**
  * Static class for Petrallengine.
@@ -21,6 +22,10 @@ export default class Game {
     static readonly FRAME_RATE = 60;
     /** The scheduled interval between frame updates in seconds. */
     static readonly FRAME_TIME = 1 / Game.FRAME_RATE;
+    /** The number of scheduled physics updates per second. */
+    static readonly FIXED_FRAME_RATE = 50;
+    /** The scheduled interval between physics updates in seconds. */
+    static readonly FIXED_FRAME_TIME = 1 / Game.FIXED_FRAME_RATE;
     /** Debug draw flags. */
     static readonly DEBUG_DRAWS = {
         colliders: true,
@@ -63,10 +68,13 @@ export default class Game {
 
         // Initialise systems
         const input = new Input(target);
+        const physics = new Physics();
 
-        // Create game loop
+        // Get context
         const canvas = target;
         const context = canvas.getContext('2d')!;
+
+        // Create game loop
         const ft = 1000 / Game.FRAME_RATE;
         const gameLoop = () => {
             const tStart = Date.now();
