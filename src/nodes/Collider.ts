@@ -2,9 +2,9 @@
  * @author Petraller <me@petraller.com>
  */
 
+import Body from './Body';
 import Bounds from '../structures/Bounds';
 import Node from './Node';
-import Vec2 from '../structures/Vec2';
 
 /**
  * 32-bit bitmask used for collisions.
