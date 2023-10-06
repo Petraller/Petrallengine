@@ -2,8 +2,8 @@
  * @author Petraller <me@petraller.com>
  */
 
-import Body from './Body';
 import Bounds from '../structures/Bounds';
+import IDebugDrawable from './IDebugDrawable';
 import Node from './Node';
 
 /**
@@ -12,20 +12,11 @@ import Node from './Node';
 export type Mask = number;
 
 /**
- * Checks if an object implements a collider.
- * @param obj The object.
- * @returns Whether the object implements a collider.
- */
-export function isCollider(obj: Object): obj is Collider {
-    return 'bounds' in obj && 'axes' in obj && 'regenerate' in obj && obj.regenerate instanceof Function;
-}
-
-/**
  * Base class for all collider nodes.
  * 
  * A collider must have a parent PhysicsBody to detect collisions.
  */
-export default abstract class Collider extends Node {
+export default abstract class Collider extends Node implements IDebugDrawable {
     protected _bounds = Bounds.zero;
 
     /** The layers this body is part of. */
@@ -52,11 +43,7 @@ export default abstract class Collider extends Node {
         return ((other.layers & this.filter) !== 0);
     }
 
-    /**
-     * Called when debug drawn.
-     * @param context The canvas rendering context.
-     */
-    debugDraw(context: CanvasRenderingContext2D): void {
+    onDebugDraw(context: CanvasRenderingContext2D): void {
         // Draw bb
         context.strokeStyle = "#00ffff";
         context.strokeRect(

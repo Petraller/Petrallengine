@@ -40,102 +40,102 @@ P.Game.create();
 //     color(c1, c2, Color.slerp);
 // }
 
-class MyMover extends P.Node {
-    onUpdate(): void {
-        if (P.Input.isKey("KeyW")) {
-            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.up, (100 * P.Game.deltaTime)));
-        }
-        if (P.Input.isKey("KeyS")) {
-            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.down, (100 * P.Game.deltaTime)));
-        }
-        if (P.Input.isKey("KeyA")) {
-            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.left, (100 * P.Game.deltaTime)));
-        }
-        if (P.Input.isKey("KeyD")) {
-            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.right, (100 * P.Game.deltaTime)));
-        }
-        if (P.Input.isKey("KeyQ")) {
-            this.rotation--;
-        }
-        if (P.Input.isKey("KeyE")) {
-            this.rotation++;
-        }
-        if (P.Input.isKey("KeyZ")) {
-            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.left, P.Game.deltaTime));
-        }
-        if (P.Input.isKey("KeyX")) {
-            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.right, P.Game.deltaTime));
-        }
-        if (P.Input.isKey("KeyC")) {
-            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.up, P.Game.deltaTime));
-        }
-        if (P.Input.isKey("KeyV")) {
-            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.down, P.Game.deltaTime));
-        }
-        if (P.Input.isKeyPressed("Space")) {
-            console.log(this.globalTransform);
-        }
-    };
-}
-class MyRainbow extends P.Sprite {
-    t: number = 0;
+// class MyMover extends P.Node {
+//     onUpdate(): void {
+//         if (P.Input.isKey("KeyW")) {
+//             this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.up, (100 * P.Game.deltaTime)));
+//         }
+//         if (P.Input.isKey("KeyS")) {
+//             this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.down, (100 * P.Game.deltaTime)));
+//         }
+//         if (P.Input.isKey("KeyA")) {
+//             this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.left, (100 * P.Game.deltaTime)));
+//         }
+//         if (P.Input.isKey("KeyD")) {
+//             this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.right, (100 * P.Game.deltaTime)));
+//         }
+//         if (P.Input.isKey("KeyQ")) {
+//             this.rotation--;
+//         }
+//         if (P.Input.isKey("KeyE")) {
+//             this.rotation++;
+//         }
+//         if (P.Input.isKey("KeyZ")) {
+//             this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.left, P.Game.deltaTime));
+//         }
+//         if (P.Input.isKey("KeyX")) {
+//             this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.right, P.Game.deltaTime));
+//         }
+//         if (P.Input.isKey("KeyC")) {
+//             this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.up, P.Game.deltaTime));
+//         }
+//         if (P.Input.isKey("KeyV")) {
+//             this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.down, P.Game.deltaTime));
+//         }
+//         if (P.Input.isKeyPressed("Space")) {
+//             console.log(this.globalTransform);
+//         }
+//     };
+// }
+// class MyRainbow extends P.Sprite {
+//     t: number = 0;
 
-    onCreate(): void {
-        this.color = P.Color.red;
-    }
+//     onCreate(): void {
+//         this.color = P.Color.red;
+//     }
 
-    onUpdate(): void {
-        if (P.Input.isKey("ArrowUp")) {
-            this.globalPosition = P.Vec2.add(this.globalPosition, P.Vec2.multiply(P.Vec2.up, (100 * P.Game.deltaTime)));
-        }
-        if (P.Input.isKey("ArrowDown")) {
-            this.globalPosition = P.Vec2.add(this.globalPosition, P.Vec2.multiply(P.Vec2.down, (100 * P.Game.deltaTime)));
-        }
-        if (P.Input.isKey("ArrowLeft")) {
-            this.globalPosition = P.Vec2.add(this.globalPosition, P.Vec2.multiply(P.Vec2.left, (100 * P.Game.deltaTime)));
-        }
-        if (P.Input.isKey("ArrowRight")) {
-            this.globalPosition = P.Vec2.add(this.globalPosition, P.Vec2.multiply(P.Vec2.right, (100 * P.Game.deltaTime)));
-        }
-        if (P.Input.isKey("Comma")) {
-            this.rotation--;
-        }
-        if (P.Input.isKey("Period")) {
-            this.rotation++;
-        }
-        if (P.Input.isKey("KeyI")) {
-            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.left, P.Game.deltaTime));
-        }
-        if (P.Input.isKey("KeyO")) {
-            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.right, P.Game.deltaTime));
-        }
-        if (P.Input.isKey("KeyK")) {
-            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.up, P.Game.deltaTime));
-        }
-        if (P.Input.isKey("KeyL")) {
-            this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.down, P.Game.deltaTime));
-        }
-        if (P.Input.isKeyPressed("Enter")) {
-            this.globalRotation = 0;
-        }
+//     onUpdate(): void {
+//         if (P.Input.isKey("ArrowUp")) {
+//             this.globalPosition = P.Vec2.add(this.globalPosition, P.Vec2.multiply(P.Vec2.up, (100 * P.Game.deltaTime)));
+//         }
+//         if (P.Input.isKey("ArrowDown")) {
+//             this.globalPosition = P.Vec2.add(this.globalPosition, P.Vec2.multiply(P.Vec2.down, (100 * P.Game.deltaTime)));
+//         }
+//         if (P.Input.isKey("ArrowLeft")) {
+//             this.globalPosition = P.Vec2.add(this.globalPosition, P.Vec2.multiply(P.Vec2.left, (100 * P.Game.deltaTime)));
+//         }
+//         if (P.Input.isKey("ArrowRight")) {
+//             this.globalPosition = P.Vec2.add(this.globalPosition, P.Vec2.multiply(P.Vec2.right, (100 * P.Game.deltaTime)));
+//         }
+//         if (P.Input.isKey("Comma")) {
+//             this.rotation--;
+//         }
+//         if (P.Input.isKey("Period")) {
+//             this.rotation++;
+//         }
+//         if (P.Input.isKey("KeyI")) {
+//             this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.left, P.Game.deltaTime));
+//         }
+//         if (P.Input.isKey("KeyO")) {
+//             this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.right, P.Game.deltaTime));
+//         }
+//         if (P.Input.isKey("KeyK")) {
+//             this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.up, P.Game.deltaTime));
+//         }
+//         if (P.Input.isKey("KeyL")) {
+//             this.scale = P.Vec2.add(this.scale, P.Vec2.multiply(P.Vec2.down, P.Game.deltaTime));
+//         }
+//         if (P.Input.isKeyPressed("Enter")) {
+//             this.globalRotation = 0;
+//         }
 
-        this.t += P.Game.deltaTime;
-        if (this.t > 1) {
-            this.t -= 1;
-        }
-        this.color = P.Color.fromHSV(this.t, 1, 1);
-    }
-}
-const myMover = P.Game.root.createChild(MyMover);
-myMover.name = "MyMover";
-const myRainbow = myMover.createChild(MyRainbow);
-myRainbow.name = "MyRainbow";
-myRainbow.image = "assets/sprites/enemy_A.png";
-const myChild = myMover.createChild(P.Sprite);
-myChild.name = "MyChild";
-myChild.position = P.Vec2.multiply(P.Vec2.right, 32);
-myChild.image = "assets/sprites/ship_B.png";
-myChild.color = P.Color.red;
+//         this.t += P.Game.deltaTime;
+//         if (this.t > 1) {
+//             this.t -= 1;
+//         }
+//         this.color = P.Color.fromHSV(this.t, 1, 1);
+//     }
+// }
+// const myMover = P.Game.root.createChild(MyMover);
+// myMover.name = "MyMover";
+// const myRainbow = myMover.createChild(MyRainbow);
+// myRainbow.name = "MyRainbow";
+// myRainbow.image = "assets/sprites/enemy_A.png";
+// const myChild = myMover.createChild(P.Sprite);
+// myChild.name = "MyChild";
+// myChild.position = P.Vec2.multiply(P.Vec2.right, 32);
+// myChild.image = "assets/sprites/ship_B.png";
+// myChild.color = P.Color.red;
 
 // class dragon extends Petrallengine.Node implements Petrallengine.IDrawable {
 //     myGon: ngon | null = null;
@@ -166,46 +166,42 @@ myChild.color = P.Color.red;
 //             this.myGon.bounds.size.y);
 //     }
 // }
-// class ngon extends Petrallengine.NgonCollider {
-//     myProp: number = 1;
+class ngon extends P.CircleCollider {
+    myProp: number = 1;
 
-//     onCreate(): void {
-//         this.sides = 5;
-//         this.radius = 100;
-//         this.position = Petrallengine.Vec2.right.scale(100);
-//     }
+    onCreate(): void {
+        this.radius = 100;
+    }
 
-//     onUpdate(): void {
-//         if (Petrallengine.Input.isKey("KeyW")) {
-//             this.position.translate(Petrallengine.Vec2.up.scale(100 * Petrallengine.Game.deltaTime));
-//         }
-//         if (Petrallengine.Input.isKey("KeyS")) {
-//             this.position.translate(Petrallengine.Vec2.down.scale(100 * Petrallengine.Game.deltaTime));
-//         }
-//         if (Petrallengine.Input.isKey("KeyA")) {
-//             this.position.translate(Petrallengine.Vec2.left.scale(100 * Petrallengine.Game.deltaTime));
-//         }
-//         if (Petrallengine.Input.isKey("KeyD")) {
-//             this.position.translate(Petrallengine.Vec2.right.scale(100 * Petrallengine.Game.deltaTime));
-//         }
-//         if (Petrallengine.Input.isKeyPressed("ArrowUp"))
-//             this.sides++;
-//         if (Petrallengine.Input.isKeyPressed("ArrowDown"))
-//             this.sides--;
-//         if (Petrallengine.Input.isKey("ArrowRight"))
-//             this.radius++;
-//         if (Petrallengine.Input.isKey("ArrowLeft"))
-//             this.radius--;
+    onUpdate(): void {
+        if (P.Input.isKey("KeyW")) {
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.up, 100 * P.Game.deltaTime));
+        }
+        if (P.Input.isKey("KeyS")) {
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.down, 100 * P.Game.deltaTime));
+        }
+        if (P.Input.isKey("KeyA")) {
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.left, 100 * P.Game.deltaTime));
+        }
+        if (P.Input.isKey("KeyD")) {
+            this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.right, 100 * P.Game.deltaTime));
+        }
+        // if (P.Input.isKeyPressed("ArrowUp"))
+        //     this.sides++;
+        // if (P.Input.isKeyPressed("ArrowDown"))
+        //     this.sides--;
+        if (P.Input.isKey("ArrowRight"))
+            this.radius++;
+        if (P.Input.isKey("ArrowLeft"))
+            this.radius--;
 
-//         this.rotation++;
+        this.rotation++;
 
-//         // let mat = Petrallengine.Mat3.inverse(Petrallengine.Mat3.makeScaling(Petrallengine.Vec2.one.scale(1.01)));
-//         // this.position.transform(mat);
-
-//         this.regenerate();
-//     }
-// }
-// Petrallengine.Game.root.createChild(dragon).createChild(ngon);
+        // let mat = Petrallengine.Mat3.inverse(Petrallengine.Mat3.makeScaling(Petrallengine.Vec2.one.scale(1.01)));
+        // this.position.transform(mat);
+    }
+}
+P.Game.root.createChild(ngon);
 
 // let mat: Petrallengine.Mat3;
 // mat = Petrallengine.Mat3.identity;

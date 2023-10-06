@@ -22,7 +22,7 @@ export default class CircleCollider extends Collider {
             Vec2.add(this.globalPosition, new Vec2(this._radius, this._radius)));
     }
 
-    debugDraw(context: CanvasRenderingContext2D): void {
+    onDebugDraw(context: CanvasRenderingContext2D): void {
         this.regenerate();
 
         // Draw vertices
@@ -31,6 +31,6 @@ export default class CircleCollider extends Collider {
         context.arc(this.globalPosition.x, this.globalPosition.y, this.radius, 0, 360);
         context.stroke();
 
-        super.debugDraw(context);
+        super.onDebugDraw(context);
     }
 }

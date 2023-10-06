@@ -18,7 +18,7 @@ export default abstract class ConvexCollider extends Collider {
     /** The axes of this collider for SAT. */
     get axes() { return this._axes.slice(); }
 
-    debugDraw(context: CanvasRenderingContext2D): void {
+    onDebugDraw(context: CanvasRenderingContext2D): void {
         this.regenerate();
 
         // Draw vertices
@@ -42,5 +42,7 @@ export default abstract class ConvexCollider extends Collider {
             this._bounds.min.y,
             this._bounds.size.x,
             this._bounds.size.y);
+
+        super.onDebugDraw(context);
     }
 }

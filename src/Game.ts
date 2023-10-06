@@ -2,10 +2,11 @@
  * @author Petraller <me@petraller.com>
  */
 
+import { isDrawable } from './nodes/IDrawable';
+import { isDebugDrawable } from './nodes/IDebugDrawable';
+import Node from './nodes/Node';
 import Camera from './systems/Camera';
 import Input from './systems/Input';
-import Node from './nodes/Node';
-import { isDrawable } from './nodes/IDrawable';
 import Physics from './systems/Physics';
 
 /**
@@ -148,6 +149,15 @@ export default class Game {
                 //     // Draw debug
                 //     node.debugDraw(context);
                 // }
+
+                // Draw drawables
+                if (isDebugDrawable(node)) {
+                    context.save();
+
+                    node.onDebugDraw.call(node, context);
+
+                    context.restore();
+                }
 
                 // Iterate children
                 for (let child of node.children) {
