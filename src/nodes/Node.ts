@@ -2,11 +2,11 @@
  * @author Petraller <me@petraller.com>
  */
 
+import { Snowflake, makeSnowflake } from '../Snowflake';
 import Vec2 from '../structures/Vec2';
 import Mat3 from '../structures/Mat3';
-import { Snowflake, makeSnowflake } from '../Snowflake';
 
-type Constructor<T> = { new(...args: any[]): T };
+export type Constructor<T> = { new(...args: any[]): T };
 
 /**
  * Base class for all nodes in the scene tree.

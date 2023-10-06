@@ -2,9 +2,9 @@
  * @author Petraller <me@petraller.com>
  */
 
-import Bounds from '../structures/Bounds';
 import IDebugDrawable from './IDebugDrawable';
 import Node from './Node';
+import Bounds from '../structures/Bounds';
 
 /**
  * 32-bit bitmask used for collisions.

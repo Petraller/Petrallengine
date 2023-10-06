@@ -2,8 +2,6 @@
  * @author Petraller <me@petraller.com>
  */
 
-import Bounds from '../structures/Bounds';
-import Collider from './Collider';
 import Node from './Node';
 import Vec2 from '../structures/Vec2';
 
@@ -17,10 +15,6 @@ import Vec2 from '../structures/Vec2';
  */
 export default abstract class Body extends Node {
     private _velocity: Vec2 = Vec2.zero;
-
-    constructor(flag?: any, name: string = "New Node") {
-        super(flag, name);
-    }
 
     /** The velocity of this body. */
     get velocity() { return this._velocity; }
