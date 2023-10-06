@@ -71,8 +71,8 @@ export default class Color implements ICopyable, IEquatable {
     static get blue() { return new Color(0, 0, 1); }
     /** Green. */
     static get green() { return new Color(0, 1, 0); }
-    /** Teal. */
-    static get teal() { return new Color(0, 1, 1); }
+    /** Cyan. */
+    static get cyan() { return new Color(0, 1, 1); }
     /** Red. */
     static get red() { return new Color(1, 0, 0); }
     /** Magenta. */
