@@ -13,7 +13,7 @@ import Vec2 from '../structures/Vec2';
  * - onCollisionUpdate
  * - onCollisionExit
  */
-export default abstract class Body extends Node {
+export default class Body extends Node {
     private _velocity: Vec2 = Vec2.zero;
 
     /** The velocity of this body. */

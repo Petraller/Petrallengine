@@ -4,10 +4,12 @@
 
 export * from "./Snowflake";
 export { default as Game } from "./Game";
-export { type default as IDrawable } from "./nodes/IDrawable";
 export { default as Body } from "./nodes/Body";
 export { default as CircleCollider } from "./nodes/CircleCollider";
 export { default as Collider } from "./nodes/Collider";
+export { type default as IDebugDrawable } from "./nodes/IDebugDrawable";
+export { type default as IDrawable } from "./nodes/IDrawable";
+export { default as LineCollider } from "./nodes/LineCollider";
 export { default as Node } from "./nodes/Node";
 export { default as RigidBody } from "./nodes/RigidBody";
 export { default as Sprite } from "./nodes/Sprite";

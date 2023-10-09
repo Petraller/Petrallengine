@@ -169,6 +169,9 @@ if (true) {
             if (P.Input.isKeyPressed("Space"))
                 this.reset();
         }
+        onCollisionEnter(other: P.Body): void {
+            console.log(other.name);
+        }
     }
     class MyCollider extends P.CircleCollider {
         onCreate(): void {
@@ -181,12 +184,35 @@ if (true) {
                 this.radius++;
         }
     }
-    const b1 = P.Game.root.createChild(MyBody).createChild(MyCollider).parent as MyBody;
+    const b1 = P.Game.root.createChild(MyBody);
     b1.startingPos = P.Vec2.multiply(P.Vec2.left, 100);
     b1.keys = ["KeyD", "KeyS", "KeyA", "KeyW"];
-    b1.reset();
+    b1.name = "WASDCircle";
+    const n = 4;
+    for (let i = 0; i < n; ++i) {
+        const c = b1.createChild(MyCollider);
+        c.position = P.Vec2.multiply(P.Vec2.rotate(P.Vec2.right, 360 * i / n), 50);
+    }
     const b2 = P.Game.root.createChild(MyBody).createChild(MyCollider).parent as MyBody;
     b2.startingPos = P.Vec2.multiply(P.Vec2.right, 100);
     b2.keys = ["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"];
-    b2.reset();
+    b2.name = "ArrowCircle";
+
+    // const wall1 = P.Game.root.createChild(P.RigidBody).createChild(P.LineCollider);
+    // wall1.parent!.name = "WallL";
+    // wall1.start = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.1));
+    // wall1.end = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.9));
+    // (wall1.parent as P.RigidBody).mass = Infinity;
+    // const wall2 = P.Game.root.createChild(P.RigidBody).createChild(P.LineCollider);
+    // wall2.parent!.name = "WallD";
+    // wall2.start = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.9));
+    // wall2.end = P.Input.normalizedToWorld(new P.Vec2(0.9, 0.9));
+    // const wall3 = P.Game.root.createChild(P.RigidBody).createChild(P.LineCollider);
+    // wall3.parent!.name = "WallR";
+    // wall3.start = P.Input.normalizedToWorld(new P.Vec2(0.9, 0.9));
+    // wall3.end = P.Input.normalizedToWorld(new P.Vec2(0.9, 0.1));
+    // const wall4 = P.Game.root.createChild(P.RigidBody).createChild(P.LineCollider);
+    // wall4.parent!.name = "WallU";
+    // wall4.start = P.Input.normalizedToWorld(new P.Vec2(0.9, 0.1));
+    // wall4.end = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.1));
 }

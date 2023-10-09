@@ -2,8 +2,8 @@
  * @author Petraller <me@petraller.com>
  */
 
-import Bounds from '../structures/Bounds';
 import Collider from './Collider';
+import Bounds from '../structures/Bounds';
 import Vec2 from '../structures/Vec2';
 
 /**
