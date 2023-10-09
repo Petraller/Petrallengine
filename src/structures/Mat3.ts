@@ -25,12 +25,6 @@ export default class Mat3 implements ICopyable, IEquatable {
     }
 
     copy = () => new Mat3(this._m);
-    copyFrom = (other: Mat3) => {
-        for (let r = 0; r < 3; ++r)
-            for (let c = 0; c < 3; ++c)
-                this._m[r][c] = other._m[r][c];
-        return this;
-    }
     equals = (other: Mat3) => {
         for (let r = 0; r < 3; ++r)
             for (let c = 0; c < 3; ++c)

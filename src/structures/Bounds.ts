@@ -17,12 +17,11 @@ export default class Bounds implements ICopyable, IEquatable {
     max: Vec2 = Vec2.zero;
 
     constructor(min: Vec2, max: Vec2) {
-        this.min.copyFrom(min);
-        this.max.copyFrom(max);
+        this.min = min.copy();
+        this.max = max.copy();
     }
 
     copy = () => new Bounds(this.min, this.max);
-    copyFrom = (other: Bounds) => { this.min.copyFrom(other.min); this.max.copyFrom(other.max); return this; };
     equals = (other: Bounds) => this.min.equals(other.min) && this.max.equals(other.max);
 
     /** The size of the bounds. */

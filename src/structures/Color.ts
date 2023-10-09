@@ -27,7 +27,6 @@ export default class Color implements ICopyable, IEquatable {
     }
 
     copy = () => new Color(this.r, this.g, this.b, this.a);
-    copyFrom = (other: Color) => { this.r = other.r; this.g = other.g; this.b = other.b, this.a = other.a; return this; };
     equals = (other: Color) => this.r == other.r && this.g == other.g && this.b == other.b && this.a == other.a;
 
     /**

@@ -20,7 +20,6 @@ export default class Vec2 implements ICopyable, IEquatable {
     }
 
     copy = () => new Vec2(this.x, this.y);
-    copyFrom = (other: Vec2) => { this._x = other.x; this._y = other.y; return this; };
     equals = (other: Vec2) => this.x === other.x && this.y === other.y;
 
     /** The x-component. */
