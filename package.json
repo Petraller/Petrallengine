@@ -10,7 +10,7 @@
   "scripts": {
     "clean": "rm ./dist/*.*",
     "build": "parcel build",
-    "dev": "parcel ./src/index.html --dist-dir dev"
+    "dev": "(rm -r .parcel-cache/ || true) && parcel ./src/index.html --dist-dir dev"
   },
   "source": "./src/Petrallengine.ts",
   "module": "./dist/Petrallengine.mjs",
