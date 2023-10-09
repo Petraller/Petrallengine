@@ -61,28 +61,35 @@ export default class Physics {
 
         // --- COLLISION DETECTION ---
 
-        let collisions: CollisionInfo[] = []; // all collisions this iteration
-        let pairsCalled: Set<SnowflakePair> = new Set<SnowflakePair>(); // pairs of bodies triggered this iteration
-        function triggerBody(c1: Collider, c2: Collider) {
+        type Collision = [Collider, Collider, CollisionInfo];
+        let collisions: Collision[] = []; // all collisions this iteration
+        let bodyPairsCalled: Set<SnowflakePair> = new Set<SnowflakePair>(); // pairs of bodies triggered this iteration
+        function collideBodies(c1: Collider, c2: Collider, col: CollisionInfo) {
             const b1 = Physics.bodies.get(Physics.colliderBodies.get(c1.id)!)!;
             const b2 = Physics.bodies.get(Physics.colliderBodies.get(c2.id)!)!;
             const pair = makeSnowflakePair(b1.id, b2.id);
 
-            if (!Physics.pairsCollided.has(pair)) {
-                // Call collision enter callback
-                Physics.pairsCollided.add(pair);
-                b1.onCollisionEnter?.call(b1, b2);
-                b2.onCollisionEnter?.call(b2, b1);
-            }
-            else {
-                // Call collision update callback
-                b1.onCollisionUpdate?.call(b1, b2);
-                b2.onCollisionUpdate?.call(b2, b1);
+            if (!bodyPairsCalled.has(pair)) {
+                // Callbacks
+                if (!Physics.pairsCollided.has(pair)) {
+                    // Call collision enter callback
+                    Physics.pairsCollided.add(pair);
+                    b1.onCollisionEnter?.call(b1, b2);
+                    b2.onCollisionEnter?.call(b2, b1);
+                }
+                else {
+                    // Call collision update callback
+                    b1.onCollisionUpdate?.call(b1, b2);
+                    b2.onCollisionUpdate?.call(b2, b1);
+                }
+
+                // Mark this pair as being called this frame
+                bodyPairsCalled.add(pair);
             }
 
-            // Mark this pair as being called this frame
-            if (!pairsCalled.has(pair))
-                pairsCalled.add(pair);
+            // Register collision between bodies for resolution
+            if (col.willIntersect)
+                collisions.push([c1, c2, col]);
         }
 
         // Get colliders as array
@@ -139,28 +146,10 @@ export default class Physics {
                 if (ci instanceof CircleCollider && cj instanceof CircleCollider) {
                     // Circle-circle
                     const col = Physics.circleCircleIntersection(
-                        ci.globalPosition, Vec2.multiply(bi.velocity, Game.deltaTime), ci.radius,
-                        cj.globalPosition, Vec2.multiply(bj.velocity, Game.deltaTime), cj.radius);
+                        ci.globalPosition, Vec2.multiply(bi.velocity, Game.deltaTime), Vec2.dot(Vec2.half, ci.globalScale) * ci.radius,
+                        cj.globalPosition, Vec2.multiply(bj.velocity, Game.deltaTime), Vec2.dot(Vec2.half, cj.globalScale) * cj.radius);
                     if (col.isIntersecting || col.willIntersect) {
-                        triggerBody(ci, cj);
-                    }
-                    if (col.willIntersect) {
-                        collisions.push(col);
-                        triggerBody(ci, cj);
-
-                        // Only respond if both are RBs
-                        if (bi instanceof RigidBody && bj instanceof RigidBody) {
-                            const normal = Vec2.subtract(col.intersectPos1, col.intersectPos2).normalized;
-                            const res = Physics.response(normal, col.intersectTime,
-                                Vec2.multiply(bi.velocity, Game.deltaTime), bi.mass, col.intersectPos1,
-                                Vec2.multiply(bj.velocity, Game.deltaTime), bj.mass, col.intersectPos2);
-                            bi.velocity = Vec2.divide(res.reflVel1, Game.deltaTime);
-                            bj.velocity = Vec2.divide(res.reflVel2, Game.deltaTime);
-                            const ciOff = Vec2.subtract(ci.globalPosition, bi.globalPosition);
-                            const cjOff = Vec2.subtract(cj.globalPosition, bj.globalPosition);
-                            nextPos.set(bi, Vec2.subtract(res.reflPos1, ciOff));
-                            nextPos.set(bj, Vec2.subtract(res.reflPos2, cjOff));
-                        }
+                        collideBodies(ci, cj, col);
                     }
                     continue;
                 }
@@ -172,26 +161,10 @@ export default class Physics {
                     const bcircle = (ccircle == ci) ? bi : bj;
                     const bline = (cline == ci) ? bi : bj;
                     const col = Physics.circleLineSegmentIntersection(
-                        ccircle.globalPosition, ccircle.radius, Vec2.multiply(bcircle.velocity, Game.deltaTime),
+                        ccircle.globalPosition, Vec2.dot(Vec2.half, ccircle.globalScale) * ccircle.radius, Vec2.multiply(bcircle.velocity, Game.deltaTime),
                         Vec2.transform(cline.globalTransform, cline.start), Vec2.transform(cline.globalTransform, cline.end));
                     if (col.isIntersecting || col.willIntersect) {
-                        triggerBody(ci, cj);
-                    }
-                    if (col.willIntersect) {
-                        collisions.push(col);
-                        triggerBody(ci, cj);
-
-                        // Only respond if both are RBs
-                        // if (bi instanceof RigidBody && bj instanceof RigidBody) {
-                        //     const normal = col.normalAtCollision.copy();
-                        //     const res = Physics.response(normal, col.intersectTime,
-                        //         Vec2.multiply(bi.velocity, Game.deltaTime), bi.mass, col.intersectPos,
-                        //         Vec2.multiply(bj.velocity, Game.deltaTime), bj.mass, col.intersectPos);
-                        //     bi.velocity = Vec2.divide(res.reflVel1, Game.deltaTime);
-                        //     bj.velocity = Vec2.divide(res.reflVel2, Game.deltaTime);
-                        //     nextPos.set(bi, res.reflPos1);
-                        //     nextPos.set(bj, res.reflPos2);
-                        // }
+                        collideBodies(ci, cj, col);
                     }
                     continue;
                 }
@@ -213,7 +186,7 @@ export default class Physics {
         // Clear uncalled pairs
         for (const pair of Physics.pairsCollided.values()) {
             const [b1id, b2id] = breakSnowflakePair(pair);
-            if (pairsCalled.has(pair)) {
+            if (bodyPairsCalled.has(pair)) {
                 continue;
             }
             const [b1, b2] = [Physics.bodies.get(b1id)!, Physics.bodies.get(b2id)!];

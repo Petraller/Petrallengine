@@ -147,7 +147,7 @@ if (false) {
 
 // --- COLLIDERS DEMO ---
 if (true) {
-    class MyBody extends P.Body {
+    class MyBody extends P.RigidBody {
         startingPos: P.Vec2 = P.Vec2.multiply(P.Vec2.left, 100);
         acceleration = 1000;
         drag = 0.98;
