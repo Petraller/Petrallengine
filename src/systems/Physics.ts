@@ -25,7 +25,7 @@ type SnowflakePair = Snowflake;
 function makeSnowflakePair(id1: Snowflake, id2: Snowflake) {
     if (id1 < id2)
         return id1 + '|' + id2;
-    return id2 + '|' + id2;
+    return id2 + '|' + id1;
 }
 function breakSnowflakePair(pair: SnowflakePair): [Snowflake, Snowflake] {
     const items = pair.split('|');
