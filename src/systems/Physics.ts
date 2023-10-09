@@ -36,6 +36,7 @@ function breakSnowflakePair(pair: SnowflakePair): [Snowflake, Snowflake] {
  * Static class for physics and collisions.
  */
 export default class Physics {
+    private static readonly PENETRATION_IMPULSE_STRENGTH = 10;
     private static singleton: Physics | null = null;
     private static bodies: Map<Snowflake, Body> = new Map<Snowflake, Body>();
     private static colliders: Map<Snowflake, Collider> = new Map<Snowflake, Collider>();
@@ -56,6 +57,7 @@ export default class Physics {
 
         type Collision = [Collider, Collider, CollisionInfo];
         let collisions: Collision[] = []; // all collisions this iteration
+        let bodyCollisionCount: Map<Body, number> = new Map<Body, number>(); // number of collisions per body this iteration
         let bodyPairsCalled: Set<SnowflakePair> = new Set<SnowflakePair>(); // pairs of bodies triggered this iteration
         function collideBodies(c1: Collider, c2: Collider, col: CollisionInfo) {
             const b1 = Physics.bodies.get(Physics.colliderBodies.get(c1.id)!)!;
@@ -81,8 +83,9 @@ export default class Physics {
             }
 
             // Register collision between bodies for resolution
-            if (col.willIntersect)
-                collisions.push([c1, c2, col]);
+            bodyCollisionCount.set(b1, (bodyCollisionCount.get(b1) ?? 0) + 1);
+            bodyCollisionCount.set(b2, (bodyCollisionCount.get(b2) ?? 0) + 1);
+            collisions.push([c1, c2, col]);
         }
 
         // Get colliders as array
@@ -210,25 +213,41 @@ export default class Physics {
 
             // Only respond if both are RBs
             if (b1 instanceof RigidBody && b2 instanceof RigidBody) {
-                const normal = Vec2.subtract(col.intersectPos1, col.intersectPos2).normalized;
-                const res = Physics.response(normal, col.intersectTime,
-                    Vec2.multiply(b1.velocity, Game.deltaTime), b1.mass, col.intersectPos1,
-                    Vec2.multiply(b2.velocity, Game.deltaTime), b2.mass, col.intersectPos2);
-                const c1Off = Vec2.subtract(c1.globalPosition, b1.globalPosition);
-                const c2Off = Vec2.subtract(c2.globalPosition, b2.globalPosition);
-                // b1.velocity = Vec2.divide(res.reflVel1, Game.deltaTime);
-                // b2.velocity = Vec2.divide(res.reflVel2, Game.deltaTime);
-                // cached.get(b1)!.pos = Vec2.subtract(res.reflPos1, c1Off);
-                // cached.get(b2)!.pos = Vec2.subtract(res.reflPos2, c2Off);
+                // Impulse response
+                if (col.willIntersect) {
+                    // Mass splitting
+                    const [m1, m2] = [b1.mass / (bodyCollisionCount.get(b1) ?? 1), b2.mass / (bodyCollisionCount.get(b2) ?? 1)];
 
-                const dp1 = Vec2.subtract(Vec2.subtract(res.reflPos1, c1Off), b1cache.pos);
-                const dp2 = Vec2.subtract(Vec2.subtract(res.reflPos2, c2Off), b2cache.pos);
-                const dv1 = Vec2.subtract(Vec2.divide(res.reflVel1, Game.deltaTime), b1cache.vel);
-                const dv2 = Vec2.subtract(Vec2.divide(res.reflVel2, Game.deltaTime), b2cache.vel);
-                b1cache.pos = Vec2.add(b1cache.pos, dp1);
-                b2cache.pos = Vec2.add(b2cache.pos, dp2);
-                b1cache.vel = Vec2.add(b1cache.vel, dv1);
-                b2cache.vel = Vec2.add(b2cache.vel, dv2);
+                    const normal = Vec2.subtract(col.intersectPos1, col.intersectPos2).normalized;
+                    const res = Physics.response(normal, col.intersectTime,
+                        Vec2.multiply(b1.velocity, Game.deltaTime), m1, col.intersectPos1,
+                        Vec2.multiply(b2.velocity, Game.deltaTime), m2, col.intersectPos2);
+                    const c1Off = Vec2.subtract(c1.globalPosition, b1.globalPosition);
+                    const c2Off = Vec2.subtract(c2.globalPosition, b2.globalPosition);
+                    // b1.velocity = Vec2.divide(res.reflVel1, Game.deltaTime);
+                    // b2.velocity = Vec2.divide(res.reflVel2, Game.deltaTime);
+                    // cached.get(b1)!.pos = Vec2.subtract(res.reflPos1, c1Off);
+                    // cached.get(b2)!.pos = Vec2.subtract(res.reflPos2, c2Off);
+
+                    // Accumulate deltas
+                    let dp1 = Vec2.subtract(Vec2.subtract(res.reflPos1, c1Off), b1cache.pos);
+                    let dp2 = Vec2.subtract(Vec2.subtract(res.reflPos2, c2Off), b2cache.pos);
+                    let dv1 = Vec2.subtract(Vec2.divide(res.reflVel1, 2 * Game.deltaTime), b1cache.vel);
+                    let dv2 = Vec2.subtract(Vec2.divide(res.reflVel2, 2 * Game.deltaTime), b2cache.vel);
+
+                    b1cache.pos = Vec2.add(b1cache.pos, dp1);
+                    b2cache.pos = Vec2.add(b2cache.pos, dp2);
+                    b1cache.vel = Vec2.add(b1cache.vel, dv1);
+                    b2cache.vel = Vec2.add(b2cache.vel, dv2);
+                }
+
+                // Penetration response
+                if (col.isIntersecting) {
+                    const normal = Vec2.subtract(c1.globalPosition, c2.globalPosition).normalized;
+                    const w = Physics.massToWeights(b1.mass, b2.mass);
+                    b1cache.vel = Vec2.add(b1cache.vel, Vec2.multiply(normal, Physics.PENETRATION_IMPULSE_STRENGTH * w[0]));
+                    b2cache.vel = Vec2.add(b2cache.vel, Vec2.multiply(normal, -Physics.PENETRATION_IMPULSE_STRENGTH * w[1]));
+                }
             }
         }
 
@@ -671,8 +690,9 @@ export default class Physics {
         const a2 = Vec2.dot(vel2, normal);
 
         // Factor of normal to add
-        const f1 = -2 * (a1 - a2) * (mass2 < Infinity ? (mass2 / (mass1 + mass2)) : 1);
-        const f2 = +2 * (a1 - a2) * (mass1 < Infinity ? (mass1 / (mass1 + mass2)) : 1);
+        const w = Physics.massToWeights(mass1, mass2);
+        const f1 = -2 * (a1 - a2) * w[0];
+        const f2 = +2 * (a1 - a2) * w[1];
 
         output.reflVel1 = Vec2.add(vel1, Vec2.multiply(normal, f1));
         output.reflVel2 = Vec2.add(vel2, Vec2.multiply(normal, f2));
@@ -680,5 +700,12 @@ export default class Physics {
         output.reflPos2 = Vec2.add(intersectPos2, Vec2.multiply(output.reflVel2, (1 - intersectTime)));
 
         return output;
+    }
+
+    private static massToWeights(m1: number, m2: number) {
+        return [
+            m2 < Infinity ? (m2 / (m1 + m2)) : 1,
+            m1 < Infinity ? (m1 / (m1 + m2)) : 1
+        ];
     }
 }
