@@ -6,7 +6,7 @@ import Node from './Node';
 import Vec2 from '../structures/Vec2';
 
 /**
- * Base class for all physics-based nodes.
+ * Base class for all physics-based nodes that responds to collisions but not physics.
  * 
  * Overrideable callbacks:
  * - onCollisionEnter

@@ -8,7 +8,6 @@ export { type default as IDrawable } from "./nodes/IDrawable";
 export { default as Body } from "./nodes/Body";
 export { default as CircleCollider } from "./nodes/CircleCollider";
 export { default as Collider } from "./nodes/Collider";
-export { default as CollisionBody } from "./nodes/CollisionBody";
 export { default as Node } from "./nodes/Node";
 export { default as RigidBody } from "./nodes/RigidBody";
 export { default as Sprite } from "./nodes/Sprite";
