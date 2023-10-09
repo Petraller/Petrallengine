@@ -10,6 +10,7 @@ import Collider from '../nodes/Collider';
 import ConvexCollider from '../nodes/ConvexCollider';
 import Bounds from '../structures/Bounds';
 import Vec2 from '../structures/Vec2';
+import RigidBody from '../nodes/RigidBody';
 
 interface CollisionInfo {
 }
@@ -52,6 +53,18 @@ export default class Physics {
     }
 
     tick() {
+        // Store next calculated positions for each body
+        let nextPos: Map<RigidBody, Vec2> = new Map<RigidBody, Vec2>();
+        for (const b of Physics.bodies.values()) {
+            // Only save RBs
+            if (!(b instanceof RigidBody))
+                continue;
+
+            nextPos.set(b, Vec2.add(b.globalPosition, Vec2.multiply(b.velocity, Game.deltaTime)));
+        }
+
+        // --- COLLISION DETECTION ---
+
         let collisions: CollisionInfo[] = [];
         let pairsCalled: Set<SnowflakePair> = new Set<SnowflakePair>();
         function triggerBody(c1: Collider, c2: Collider) {
@@ -107,8 +120,8 @@ export default class Physics {
                 }
 
                 // Extend bounds
-                const bndi = Bounds.extend(ci.bounds, bi.velocity);
-                const bndj = Bounds.extend(cj.bounds, bj.velocity);
+                const bndi = Bounds.extend(ci.bounds, Vec2.multiply(bi.velocity, Game.deltaTime));
+                const bndj = Bounds.extend(cj.bounds, Vec2.multiply(bj.velocity, Game.deltaTime));
 
                 // X limits
                 if (bndj.min.x > bndi.max.x) {
@@ -130,11 +143,23 @@ export default class Physics {
                 if (ci instanceof CircleCollider && cj instanceof CircleCollider) {
                     // Circle-circle
                     const col = Physics.circleCircleIntersection(
-                        ci.globalPosition, Vec2.zero, ci.radius,
-                        cj.globalPosition, Vec2.zero, cj.radius);
+                        ci.globalPosition, Vec2.multiply(bi.velocity, Game.deltaTime), ci.radius,
+                        cj.globalPosition, Vec2.multiply(bj.velocity, Game.deltaTime), cj.radius);
                     if (col.willIntersect) {
                         collisions.push(col);
                         triggerBody(ci, cj);
+
+                        // Only respond if both are RBs
+                        if (bi instanceof RigidBody && bj instanceof RigidBody) {
+                            const normal = Vec2.subtract(col.intersectPos1, col.intersectPos2);
+                            const res = Physics.circleCircleResponse(normal, col.intersectTime,
+                                Vec2.multiply(bi.velocity, Game.deltaTime), bi.mass, col.intersectPos1,
+                                Vec2.multiply(bj.velocity, Game.deltaTime), bj.mass, col.intersectPos2);
+                            bi.velocity = Vec2.divide(res.reflVel1, Game.deltaTime);
+                            bj.velocity = Vec2.divide(res.reflVel2, Game.deltaTime);
+                            nextPos.set(bi, res.reflPos1);
+                            nextPos.set(bj, res.reflPos2);
+                        }
                     }
                     continue;
                 }
@@ -164,6 +189,12 @@ export default class Physics {
             Physics.pairsCollided.delete(pair);
             b1.onCollisionExit?.call(b1, b2);
             b2.onCollisionExit?.call(b2, b1);
+        }
+
+        // --- PHYSICS STEP ---
+
+        for (const pair of nextPos) {
+            pair[0].globalPosition = pair[1];
         }
 
         return collisions;
@@ -267,10 +298,10 @@ export default class Physics {
 
         // Check if interior or exterior intersection
         output.isInterior = (relPos.sqrLength < (radius1 - radius2) * (radius1 - radius2));
-        if (!output.isInterior && relPos.sqrLength < (radius1 + radius2) * (radius1 + radius2)) {
-            // Overlapping circles, I don't care about this case
-            return output;
-        }
+        // if (!output.isInterior && relPos.sqrLength < (radius1 + radius2) * (radius1 + radius2)) {
+        //     // Overlapping circles, I don't care about this case
+        //     return output;
+        // }
 
         // Relative circle
         const relCirclePos = pos2.copy();

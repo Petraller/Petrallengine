@@ -13,7 +13,7 @@ P.Game.create();
 // }
 
 // --- COLOR LERP DEMO ---
-if (true) {
+if (false) {
     function color(c1: P.Color, c2: P.Color, interpolationMethod: (c1: P.Color, c2: P.Color, t: number) => P.Color) {
         const container = document.createElement("div");
         container.style.display = "flex";
@@ -46,7 +46,7 @@ if (true) {
 }
 
 // --- BASIC DEMO ---
-if (true) {
+if (false) {
     class MyParent extends P.Sprite {
         readonly SPEED = 100;
 
@@ -147,51 +147,27 @@ if (true) {
 
 // --- COLLIDERS DEMO ---
 if (true) {
-    class MyBody extends P.Body {
-        onCreate(): void {
-            this.position = P.Vec2.multiply(P.Vec2.left, 100);
+    class MyBody extends P.RigidBody {
+        startingPos: P.Vec2 = P.Vec2.multiply(P.Vec2.left, 100);
+        acceleration = 1000;
+        drag = 0.98;
+        keys: [string, string, string, string] = ["KeyD", "KeyS", "KeyA", "KeyW"];
+        reset(): void {
+            this.position = this.startingPos.copy();
+            this.velocity = P.Vec2.zero;
+        }
+        onStart(): void {
+            this.reset();
         }
         onUpdate(): void {
-            if (P.Input.isKey("KeyW")) {
-                this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.up, 100 * P.Game.deltaTime));
+            for (let k = 0; k < this.keys.length; ++k) {
+                if (P.Input.isKey(this.keys[k])) {
+                    this.velocity = P.Vec2.add(this.velocity, P.Vec2.multiply(P.Vec2.rotate(P.Vec2.right, k * 90), this.acceleration * P.Game.deltaTime));
+                }
             }
-            if (P.Input.isKey("KeyS")) {
-                this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.down, 100 * P.Game.deltaTime));
-            }
-            if (P.Input.isKey("KeyA")) {
-                this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.left, 100 * P.Game.deltaTime));
-            }
-            if (P.Input.isKey("KeyD")) {
-                this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.right, 100 * P.Game.deltaTime));
-            }
-        }
-    }
-    class MyBody2 extends P.Body {
-        onCreate(): void {
-            this.position = P.Vec2.multiply(P.Vec2.right, 100);
-        }
-        onUpdate(): void {
-            if (P.Input.isKey("ArrowUp")) {
-                this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.up, 100 * P.Game.deltaTime));
-            }
-            if (P.Input.isKey("ArrowDown")) {
-                this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.down, 100 * P.Game.deltaTime));
-            }
-            if (P.Input.isKey("ArrowLeft")) {
-                this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.left, 100 * P.Game.deltaTime));
-            }
-            if (P.Input.isKey("ArrowRight")) {
-                this.position = P.Vec2.add(this.position, P.Vec2.multiply(P.Vec2.right, 100 * P.Game.deltaTime));
-            }
-        }
-        onCollisionEnter(other: P.Body): void {
-            console.log('enter');
-        }
-        onCollisionUpdate(other: P.Body): void {
-            console.log('update');
-        }
-        onCollisionExit(other: P.Body): void {
-            console.log('exit');
+            this.velocity = P.Vec2.multiply(this.velocity, this.drag);
+            if (P.Input.isKeyPressed("Space"))
+                this.reset();
         }
     }
     class MyCollider extends P.CircleCollider {
@@ -205,6 +181,12 @@ if (true) {
                 this.radius++;
         }
     }
-    P.Game.root.createChild(MyBody).createChild(MyCollider);
-    P.Game.root.createChild(MyBody2).createChild(MyCollider);
+    const b1 = P.Game.root.createChild(MyBody).createChild(MyCollider).parent as MyBody;
+    b1.startingPos = P.Vec2.multiply(P.Vec2.left, 100);
+    b1.keys = ["KeyD", "KeyS", "KeyA", "KeyW"];
+    b1.reset();
+    const b2 = P.Game.root.createChild(MyBody).createChild(MyCollider).parent as MyBody;
+    b2.startingPos = P.Vec2.multiply(P.Vec2.right, 100);
+    b2.keys = ["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"];
+    b2.reset();
 }

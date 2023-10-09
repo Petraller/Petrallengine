@@ -10,6 +10,7 @@ export { default as CircleCollider } from "./nodes/CircleCollider";
 export { default as Collider } from "./nodes/Collider";
 export { default as CollisionBody } from "./nodes/CollisionBody";
 export { default as Node } from "./nodes/Node";
+export { default as RigidBody } from "./nodes/RigidBody";
 export { default as Sprite } from "./nodes/Sprite";
 export { default as Bounds } from "./structures/Bounds";
 export { default as Color } from "./structures/Color";

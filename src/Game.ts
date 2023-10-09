@@ -189,7 +189,7 @@ export default class Game {
 
             const tEnd = Date.now();
             const dt = tEnd - tStart;
-            const wait = Math.max(ft - dt, 0);
+            const wait = Math.max(ft - dt, 1);
             Game._time += (Game._deltaTime = dt + wait);
             setTimeout(gameLoop, wait);
         };
