@@ -14,24 +14,10 @@ import Bounds from '../structures/Bounds';
 import Vec2 from '../structures/Vec2';
 
 interface CollisionInfo {
-}
-interface RayCircleInfo extends CollisionInfo {
     willIntersect: boolean,
-    //isInterior: boolean,
-    intersectTime: number,
-}
-interface CircleCircleInfo extends CollisionInfo {
-    willIntersect: boolean,
-    //isInterior: boolean,
     intersectTime: number,
     intersectPos1: Vec2,
     intersectPos2: Vec2,
-}
-interface CircleLineEdgeInfo extends CollisionInfo {
-    willIntersect: boolean,
-    normalAtCollision: Vec2,
-    intersectTime: number,
-    intersectPos: Vec2,
 }
 
 type SnowflakePair = Snowflake;
@@ -67,11 +53,8 @@ export default class Physics {
 
     tick() {
         // Store next calculated positions for each body
-        let nextPos: Map<RigidBody, Vec2> = new Map<RigidBody, Vec2>();
+        let nextPos: Map<Body, Vec2> = new Map<Body, Vec2>();
         for (const b of Physics.bodies.values()) {
-            // Only save RBs
-            if (!(b instanceof RigidBody))
-                continue;
 
             nextPos.set(b, Vec2.add(b.globalPosition, Vec2.multiply(b.velocity, Game.deltaTime)));
         }
@@ -200,16 +183,16 @@ export default class Physics {
                             triggerBody(ci, cj);
 
                             // Only respond if both are RBs
-                            if (bi instanceof RigidBody && bj instanceof RigidBody) {
-                                const normal = col.normalAtCollision.copy();
-                                const res = Physics.response(normal, col.intersectTime,
-                                    Vec2.multiply(bi.velocity, Game.deltaTime), bi.mass, col.intersectPos,
-                                    Vec2.multiply(bj.velocity, Game.deltaTime), bj.mass, col.intersectPos);
-                                bi.velocity = Vec2.divide(res.reflVel1, Game.deltaTime);
-                                bj.velocity = Vec2.divide(res.reflVel2, Game.deltaTime);
-                                nextPos.set(bi, res.reflPos1);
-                                nextPos.set(bj, res.reflPos2);
-                            }
+                            // if (bi instanceof RigidBody && bj instanceof RigidBody) {
+                            //     const normal = col.normalAtCollision.copy();
+                            //     const res = Physics.response(normal, col.intersectTime,
+                            //         Vec2.multiply(bi.velocity, Game.deltaTime), bi.mass, col.intersectPos,
+                            //         Vec2.multiply(bj.velocity, Game.deltaTime), bj.mass, col.intersectPos);
+                            //     bi.velocity = Vec2.divide(res.reflVel1, Game.deltaTime);
+                            //     bj.velocity = Vec2.divide(res.reflVel2, Game.deltaTime);
+                            //     nextPos.set(bi, res.reflPos1);
+                            //     nextPos.set(bj, res.reflPos2);
+                            // }
                         }
                         continue;
                     }
@@ -283,11 +266,11 @@ export default class Physics {
         velCircle: Vec2,
         posLine1: Vec2,
         posLine2: Vec2) {
-        let output: CircleLineEdgeInfo = {
+        let output: CollisionInfo = {
             willIntersect: false,
-            normalAtCollision: Vec2.zero,
             intersectTime: 0,
-            intersectPos: Vec2.zero,
+            intersectPos1: Vec2.zero,
+            intersectPos2: Vec2.zero,
         };
 
         // Line normal
@@ -315,10 +298,8 @@ export default class Physics {
 
                     // Current pos + displacement to intersect
                     // = Pos of intersect
-                    output.intersectPos = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-
-                    // Collision normal
-                    output.normalAtCollision = Vec2.multiply(lineNormal, -1);
+                    output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
+                    output.intersectPos2 = output.intersectPos1.copy();
 
                     return output;
                 }
@@ -355,10 +336,8 @@ export default class Physics {
 
                     // Current pos + displacement to intersect
                     // = Pos of intersect
-                    output.intersectPos = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-
-                    // Collision normal
-                    output.normalAtCollision = lineNormal.copy();
+                    output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
+                    output.intersectPos2 = output.intersectPos1.copy();
 
                     return output;
                 }
@@ -394,11 +373,11 @@ export default class Physics {
         velCircle: Vec2,
         posLine1: Vec2,
         posLine2: Vec2) {
-        let output: CircleLineEdgeInfo = {
+        let output: CollisionInfo = {
             willIntersect: false,
-            normalAtCollision: Vec2.zero,
             intersectTime: 0,
-            intersectPos: Vec2.zero,
+            intersectPos1: Vec2.zero,
+            intersectPos2: Vec2.zero,
         };
 
         if (withinBothLines) {
@@ -426,10 +405,8 @@ export default class Physics {
 
                     // Current pos + displacement to intersect
                     // = Pos of intersect
-                    output.intersectPos = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-
-                    // Collision normal
-                    output.normalAtCollision = Vec2.subtract(output.intersectPos, posLine1).normalized;
+                    output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
+                    output.intersectPos2 = output.intersectPos1.copy();
 
                     return output;
                 }
@@ -458,10 +435,8 @@ export default class Physics {
 
                     // Current pos + displacement to intersect
                     // = Pos of intersect
-                    output.intersectPos = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-
-                    // Collision normal
-                    output.normalAtCollision = Vec2.subtract(output.intersectPos, posLine2).normalized;
+                    output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
+                    output.intersectPos2 = output.intersectPos1.copy();
 
                     return output;
                 }
@@ -514,10 +489,8 @@ export default class Physics {
 
                     // Current pos + displacement to intersect
                     // = Pos of intersect
-                    output.intersectPos = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-
-                    // Collision normal
-                    output.normalAtCollision = Vec2.subtract(output.intersectPos, posLine1).normalized;
+                    output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
+                    output.intersectPos2 = output.intersectPos1.copy();
 
                     return output;
                 }
@@ -540,10 +513,8 @@ export default class Physics {
 
                     // Current pos + displacement to intersect
                     // = Pos of intersect
-                    output.intersectPos = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-
-                    // Collision normal
-                    output.normalAtCollision = Vec2.subtract(output.intersectPos, posLine2).normalized;
+                    output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
+                    output.intersectPos2 = output.intersectPos1.copy();
 
                     return output;
                 }
@@ -567,52 +538,10 @@ export default class Physics {
     //     return output;
     // }
 
-    private static rayCircleIntersection(posRay: Vec2, velRay: Vec2, posCircle: Vec2, radius: number) {
-        let output: RayCircleInfo = {
-            willIntersect: false,
-            //isInterior: false,
-            intersectTime: 0,
-        };
-
-        // Distance squared
-        const distSqr = Vec2.subtract(posRay, posCircle).sqrLength;
-
-        // Check if interior or exterior ray
-        //output.isInterior = (distSqr < radius * radius);
-
-        // Ray length
-        const rl = velRay.length;
-
-        // Delta from start to CPA
-        const m = Vec2.dot(Vec2.subtract(posCircle, posRay), velRay.normalized);
-        // if (!output.isInterior && m < 0 && distSqr > radius * radius)
-        //     return output;
-
-        // CPA
-        const nSqr = distSqr - m * m;
-        if (nSqr > radius * radius)
-            return output;
-
-        // Delta from collision point to CPA
-        const s = Math.sqrt(radius * radius - nSqr);
-
-        // Time to intersect
-        const it = /*output.isInterior
-            ? ((m + s) / rl)
-            :*/ ((m - s) / rl);
-
-        if (it >= 0 && it <= 1) {
-            output.willIntersect = true;
-            output.intersectTime = it;
-        }
-
-        return output;
-    }
-
     private static circleCircleIntersection(
         pos1: Vec2, vel1: Vec2, radius1: number,
         pos2: Vec2, vel2: Vec2, radius2: number) {
-        let output: CircleCircleInfo = {
+        let output: CollisionInfo = {
             willIntersect: false,
             //isInterior: false,
             intersectTime: 0,
@@ -648,7 +577,7 @@ export default class Physics {
         const relCircleRadius = /*output.isInterior ? Math.abs((radius1 - radius2)) :*/ radius1 + radius2;
 
         // Ray-circle
-        const col = Physics.rayCircleIntersection(relRayPos, relRayVel, relCirclePos, relCircleRadius);
+        const col = Physics.rayStaticCircleIntersection(relRayPos, relRayVel, relCirclePos, relCircleRadius);
 
         // Intersection points
         if (col.willIntersect) {
@@ -657,6 +586,52 @@ export default class Physics {
             output.intersectPos1 = Vec2.add(pos1, Vec2.multiply(vel1, col.intersectTime));
             output.intersectPos2 = Vec2.add(pos2, Vec2.multiply(vel2, col.intersectTime));
         }
+        return output;
+    }
+
+    private static rayStaticCircleIntersection(posRay: Vec2, velRay: Vec2, posCircle: Vec2, radius: number) {
+        let output: CollisionInfo = {
+            willIntersect: false,
+            //isInterior: false,
+            intersectTime: 0,
+            intersectPos1: Vec2.zero,
+            intersectPos2: Vec2.zero,
+        };
+
+        // Distance squared
+        const distSqr = Vec2.subtract(posRay, posCircle).sqrLength;
+
+        // Check if interior or exterior ray
+        //output.isInterior = (distSqr < radius * radius);
+
+        // Ray length
+        const rl = velRay.length;
+
+        // Delta from start to CPA
+        const m = Vec2.dot(Vec2.subtract(posCircle, posRay), velRay.normalized);
+        // if (!output.isInterior && m < 0 && distSqr > radius * radius)
+        //     return output;
+
+        // CPA
+        const nSqr = distSqr - m * m;
+        if (nSqr > radius * radius)
+            return output;
+
+        // Delta from collision point to CPA
+        const s = Math.sqrt(radius * radius - nSqr);
+
+        // Time to intersect
+        const it = /*output.isInterior
+            ? ((m + s) / rl)
+            :*/ ((m - s) / rl);
+
+        if (it >= 0 && it <= 1) {
+            output.willIntersect = true;
+            output.intersectTime = it;
+            output.intersectPos1 = Vec2.add(posRay, Vec2.multiply(velRay, output.intersectTime));
+            output.intersectPos1 = posCircle;
+        }
+
         return output;
     }
 

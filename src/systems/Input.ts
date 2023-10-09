@@ -141,6 +141,22 @@ export default class Input {
     }
 
     /**
+     * Returns the position on the canvas of a normalized canvas position.
+     * @returns The position on the canvas of a normalized canvas position.
+     */
+    static normalizedToCanvas(normalizedPos: Vec2) {
+        return Vec2.multiplyComponents(normalizedPos, new Vec2(Input.canvas!.width, Input.canvas!.height));
+    }
+
+    /**
+     * Returns the normalized position of a canvas position.
+     * @returns The normalized position of a canvas position.
+     */
+    static canvasToNormalized(canvasPos: Vec2) {
+        return Vec2.multiplyComponents(canvasPos, new Vec2(1 / Input.canvas!.width, 1 / Input.canvas!.height));
+    }
+
+    /**
      * Returns the position on the canvas of a world position.
      * @returns The position on the canvas of a world position.
      */
@@ -162,5 +178,21 @@ export default class Input {
             Mat3.inverse(Mat3.makeTransformation(Vec2.multiply(Camera.position, -1), -Camera.rotation, Camera.scale)),
             Vec2.add(canvasPos, Vec2.multiply(Vec2.fromObjWH(Input.canvas!), -0.5))
         );
+    }
+
+    /**
+     * Returns the normalized position on the canvas of a world position.
+     * @returns The normalized position on the canvas of a world position.
+     */
+    static worldToNormalized(worldPos: Vec2) {
+        return Input.canvasToNormalized(Input.worldToCanvas(worldPos));
+    }
+
+    /**
+     * Returns position in the world of a normalized canvas position.
+     * @returns The position in the world of a normalized canvas position.
+     */
+    static normalizedToWorld(normalizedPos: Vec2) {
+        return Input.canvasToWorld(Input.normalizedToCanvas(normalizedPos));
     }
 }

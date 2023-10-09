@@ -48,6 +48,8 @@ export default class Vec2 implements ICopyable, IEquatable {
 
     /** The zero vector. */
     static get zero() { return new Vec2(0, 0); }
+    /** The half vector. */
+    static get half() { return new Vec2(0.5, 0.5); }
     /** The unit vector. */
     static get one() { return new Vec2(1, 1); }
     /** The right vector. */
