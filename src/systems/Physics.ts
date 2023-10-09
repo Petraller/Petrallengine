@@ -191,11 +191,11 @@ export default class Physics {
         // --- COLLISION RESPONSE ---
 
         // Store next calculated values for each body
-        type Next = { pos: Vec2, vel: Vec2 };
-        let nexts: Map<Body, Next> = new Map<Body, Next>();
+        type Cached = { pos: Vec2, vel: Vec2 };
+        let cached: Map<Body, Cached> = new Map<Body, Cached>();
         for (const b of Physics.bodies.values()) {
-            nexts.set(b, {
-                pos: Vec2.add(b.globalPosition, Vec2.multiply(b.velocity, Game.deltaTime)),
+            cached.set(b, {
+                pos: b.globalPosition,
                 vel: b.velocity
             });
         }
@@ -205,6 +205,8 @@ export default class Physics {
             const [c1, c2, col] = collision;
             const b1 = Physics.bodies.get(Physics.colliderBodies.get(c1.id)!)!;
             const b2 = Physics.bodies.get(Physics.colliderBodies.get(c2.id)!)!;
+            let b1cache = cached.get(b1)!;
+            let b2cache = cached.get(b2)!;
 
             // Only respond if both are RBs
             if (b1 instanceof RigidBody && b2 instanceof RigidBody) {
@@ -214,27 +216,27 @@ export default class Physics {
                     Vec2.multiply(b2.velocity, Game.deltaTime), b2.mass, col.intersectPos2);
                 const c1Off = Vec2.subtract(c1.globalPosition, b1.globalPosition);
                 const c2Off = Vec2.subtract(c2.globalPosition, b2.globalPosition);
-                b1.velocity = Vec2.divide(res.reflVel1, Game.deltaTime);
-                b2.velocity = Vec2.divide(res.reflVel2, Game.deltaTime);
-                nexts.get(b1)!.pos = Vec2.subtract(res.reflPos1, c1Off);
-                nexts.get(b2)!.pos = Vec2.subtract(res.reflPos2, c2Off);
+                // b1.velocity = Vec2.divide(res.reflVel1, Game.deltaTime);
+                // b2.velocity = Vec2.divide(res.reflVel2, Game.deltaTime);
+                // cached.get(b1)!.pos = Vec2.subtract(res.reflPos1, c1Off);
+                // cached.get(b2)!.pos = Vec2.subtract(res.reflPos2, c2Off);
 
-                // const dp1 = Vec2.subtract(res.reflPos1, c1Off);
-                // const dp2 = Vec2.subtract(res.reflPos2, c2Off);
-                // const dv1 = Vec2.subtract(b1.velocity, Vec2.divide(res.reflVel1, Game.deltaTime));
-                // const dv2 = Vec2.subtract(b2.velocity, Vec2.divide(res.reflVel2, Game.deltaTime));
-                // nexts.get(b1)!.pos = dp1;
-                // nexts.get(b2)!.pos = dp2;
-                // nexts.get(b1)!.vel = Vec2.add(nexts.get(b1)!.vel, dv1);
-                // nexts.get(b2)!.vel = Vec2.add(nexts.get(b2)!.vel, dv2);
+                const dp1 = Vec2.subtract(Vec2.subtract(res.reflPos1, c1Off), b1cache.pos);
+                const dp2 = Vec2.subtract(Vec2.subtract(res.reflPos2, c2Off), b2cache.pos);
+                const dv1 = Vec2.subtract(Vec2.divide(res.reflVel1, Game.deltaTime), b1cache.vel);
+                const dv2 = Vec2.subtract(Vec2.divide(res.reflVel2, Game.deltaTime), b2cache.vel);
+                b1cache.pos = Vec2.add(b1cache.pos, dp1);
+                b2cache.pos = Vec2.add(b2cache.pos, dp2);
+                b1cache.vel = Vec2.add(b1cache.vel, dv1);
+                b2cache.vel = Vec2.add(b2cache.vel, dv2);
             }
         }
 
         // --- DYNAMICS ---
 
-        for (const [body, next] of nexts) {
-            //body.velocity = next.vel;
-            body.globalPosition = next.pos;
+        for (const [body, next] of cached) {
+            body.velocity = next.vel;
+            body.globalPosition = Vec2.add(next.pos, Vec2.multiply(next.vel, Game.deltaTime));
         }
     }
 

@@ -194,6 +194,7 @@ if (true) {
     b1.startingPos = P.Vec2.multiply(P.Vec2.left, 100);
     b1.keys = ["KeyD", "KeyS", "KeyA", "KeyW"];
     b1.name = "WASDCircle";
+    b1.mass = Infinity;
     const n = 4;
     for (let i = 0; i < n; ++i) {
         const c = b1.createChild(MyCollider);
