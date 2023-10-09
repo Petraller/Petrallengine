@@ -12,10 +12,10 @@ import Vec2 from '../structures/Vec2';
 export default class Input {
     private static singleton: Input | null = null;
     private static canvas: HTMLCanvasElement | null = null;
-    private static keyStates: Map<string, boolean> = new Map<string, boolean>();
-    private static keyTransits: Map<string, boolean> = new Map<string, boolean>();
-    private static mouseStates: Map<number, boolean> = new Map<number, boolean>();
-    private static mouseTransits: Map<number, boolean> = new Map<number, boolean>();
+    private static keyStates: Set<string> = new Set<string>();
+    private static keyTransits: Set<string> = new Set<string>();
+    private static mouseStates: Set<number> = new Set<number>();
+    private static mouseTransits: Set<number> = new Set<number>();
     private static mousePos: Vec2 = Vec2.zero;
 
     constructor(canvas: HTMLCanvasElement) {
@@ -29,13 +29,13 @@ export default class Input {
         Input.canvas = canvas;
         canvas.onmousedown = (ev) => {
             const b = ev.button;
-            Input.mouseStates.set(b, true);
-            Input.mouseTransits.set(b, true);
+            Input.mouseStates.add(b);
+            Input.mouseTransits.add(b);
         };
         canvas.onmouseup = canvas.onmouseleave = (ev) => {
             const b = ev.button;
-            Input.mouseStates.set(b, false);
-            Input.mouseTransits.set(b, true);
+            Input.mouseStates.delete(b);
+            Input.mouseTransits.add(b);
         };
         canvas.onmousemove = (ev) => {
             Input.mousePos = new Vec2(ev.offsetX, ev.offsetY);
@@ -45,14 +45,14 @@ export default class Input {
         window.onkeydown = (ev) => {
             const c = ev.code;
             if (!ev.repeat) {
-                Input.keyStates.set(c, true);
-                Input.keyTransits.set(c, true);
+                Input.keyStates.add(c);
+                Input.keyTransits.add(c);
             }
         };
         window.onkeyup = (ev) => {
             const c = ev.code;
-            Input.keyStates.set(c, false);
-            Input.keyTransits.set(c, true);
+            Input.keyStates.delete(c);
+            Input.keyTransits.add(c);
         };
     }
 
@@ -63,10 +63,10 @@ export default class Input {
      */
     endFrame() {
         for (let i of Input.keyTransits.keys()) {
-            Input.keyTransits.set(i, false);
+            Input.keyTransits.delete(i);
         }
         for (let i of Input.mouseTransits.keys()) {
-            Input.mouseTransits.set(i, false);
+            Input.mouseTransits.delete(i);
         }
     }
 
@@ -76,7 +76,7 @@ export default class Input {
      * @returns Whether the key is down.
      */
     static isKey(keyCode: string) {
-        return Input.keyStates.get(keyCode) ?? false;
+        return Input.keyStates.has(keyCode);
     }
 
     /**
@@ -85,7 +85,7 @@ export default class Input {
      * @returns Whether the key was pressed this frame.
      */
     static isKeyPressed(keyCode: string) {
-        return (Input.keyTransits.get(keyCode) ?? false) && Input.isKey(keyCode);
+        return Input.keyTransits.has(keyCode) && Input.isKey(keyCode);
     }
 
     /**
@@ -94,7 +94,7 @@ export default class Input {
      * @returns Whether the key was released this frame.
      */
     static isKeyReleased(keyCode: string) {
-        return (Input.keyTransits.get(keyCode) ?? false) && !Input.isKey(keyCode);
+        return Input.keyTransits.has(keyCode) && !Input.isKey(keyCode);
     }
 
     /**
@@ -103,7 +103,7 @@ export default class Input {
      * @returns Whether the mouse button is down.
      */
     static isMouse(button: number = 0) {
-        return Input.mouseStates.get(button) ?? false;
+        return Input.mouseStates.has(button);
     }
 
     /**
@@ -112,7 +112,7 @@ export default class Input {
      * @returns Whether the mouse button was pressed this frame.
      */
     static isMousePressed(button: number = 0) {
-        return (Input.mouseTransits.get(button) ?? false) && Input.isMouse(button);
+        return Input.mouseTransits.has(button) && Input.isMouse(button);
     }
 
     /**
@@ -121,7 +121,7 @@ export default class Input {
      * @returns Whether the mouse button was released this frame.
      */
     static isMouseReleased(button: number = 0) {
-        return (Input.mouseTransits.get(button) ?? false) && !Input.isMouse(button);
+        return Input.mouseTransits.has(button) && !Input.isMouse(button);
     }
 
     /**

@@ -20,7 +20,6 @@ export default class Path implements ICopyable {
     }
 
     copy = () => new Path(this.points);
-    copyFrom = (other: Path) => { this.points = other.points.slice(); return this; };
 
     /** The mean of all points. */
     get mean() {
