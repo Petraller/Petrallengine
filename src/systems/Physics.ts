@@ -14,6 +14,7 @@ import Bounds from '../structures/Bounds';
 import Vec2 from '../structures/Vec2';
 
 interface CollisionInfo {
+    isIntersecting: boolean,
     willIntersect: boolean,
     intersectTime: number,
     intersectPos1: Vec2,
@@ -35,7 +36,6 @@ function breakSnowflakePair(pair: SnowflakePair): [Snowflake, Snowflake] {
  * Static class for physics and collisions.
  */
 export default class Physics {
-    private static readonly MAX_COLLISION_STEPS = 10;
     private static singleton: Physics | null = null;
     private static bodies: Map<Snowflake, Body> = new Map<Snowflake, Body>();
     private static colliders: Map<Snowflake, Collider> = new Map<Snowflake, Collider>();
@@ -92,125 +92,123 @@ export default class Physics {
         colliders.sort((c1, c2) => c1.bounds.min.x - c2.bounds.min.x);
 
         // Iterate all colliders
-        let hasCollision = false;
-        let collisionIteration = 0;
-        do {
-            hasCollision = false;
-            ++collisionIteration;
-            for (let i = 0; i < colliders.length; i++) {
-                const ci = colliders[i];
+        for (let i = 0; i < colliders.length; i++) {
+            const ci = colliders[i];
+            ci.globalTransform;
+            ci.regenerate();
+            const bi = Physics.bodies.get(Physics.colliderBodies.get(ci.id)!)!;
+            for (let j = i + 1; j < colliders.length; j++) {
+                const cj = colliders[j];
                 ci.globalTransform;
-                ci.regenerate();
-                const bi = Physics.bodies.get(Physics.colliderBodies.get(ci.id)!)!;
-                for (let j = i + 1; j < colliders.length; j++) {
-                    const cj = colliders[j];
-                    ci.globalTransform;
-                    cj.regenerate();
-                    const bj = Physics.bodies.get(Physics.colliderBodies.get(cj.id)!)!;
+                cj.regenerate();
+                const bj = Physics.bodies.get(Physics.colliderBodies.get(cj.id)!)!;
 
-                    // Same body
-                    if (bi.id === bj.id) {
-                        continue;
+                // Same body
+                if (bi.id === bj.id) {
+                    continue;
+                }
+
+                // --- BROAD PHASE ---
+
+                // Non-intersecting layers
+                if (!ci.canCollideWith(cj)) {
+                    continue;
+                }
+
+                // Extend bounds
+                const bndi = Bounds.extend(ci.bounds, Vec2.multiply(bi.velocity, Game.deltaTime));
+                const bndj = Bounds.extend(cj.bounds, Vec2.multiply(bj.velocity, Game.deltaTime));
+
+                // X limits
+                if (bndj.min.x > bndi.max.x) {
+                    break;
+                }
+
+                // Y overlap
+                if (bndi.max.y < bndj.min.y || bndi.min.y > bndj.max.y) {
+                    continue;
+                }
+
+                // BB overlap
+                if (!bndi.overlaps(bndj)) {
+                    continue;
+                }
+
+                // --- NARROW PHASE ---
+
+                if (ci instanceof CircleCollider && cj instanceof CircleCollider) {
+                    // Circle-circle
+                    const col = Physics.circleCircleIntersection(
+                        ci.globalPosition, Vec2.multiply(bi.velocity, Game.deltaTime), ci.radius,
+                        cj.globalPosition, Vec2.multiply(bj.velocity, Game.deltaTime), cj.radius);
+                    if (col.isIntersecting || col.willIntersect) {
+                        triggerBody(ci, cj);
                     }
+                    if (col.willIntersect) {
+                        collisions.push(col);
+                        triggerBody(ci, cj);
 
-                    // --- BROAD PHASE ---
-
-                    // Non-intersecting layers
-                    if (!ci.canCollideWith(cj)) {
-                        continue;
-                    }
-
-                    // Extend bounds
-                    const bndi = Bounds.extend(ci.bounds, Vec2.multiply(bi.velocity, Game.deltaTime));
-                    const bndj = Bounds.extend(cj.bounds, Vec2.multiply(bj.velocity, Game.deltaTime));
-
-                    // X limits
-                    if (bndj.min.x > bndi.max.x) {
-                        break;
-                    }
-
-                    // Y overlap
-                    if (bndi.max.y < bndj.min.y || bndi.min.y > bndj.max.y) {
-                        continue;
-                    }
-
-                    // BB overlap
-                    if (!bndi.overlaps(bndj)) {
-                        continue;
-                    }
-
-                    // --- NARROW PHASE ---
-
-                    if (ci instanceof CircleCollider && cj instanceof CircleCollider) {
-                        // Circle-circle
-                        const col = Physics.circleCircleIntersection(
-                            ci.globalPosition, Vec2.multiply(bi.velocity, Game.deltaTime), ci.radius,
-                            cj.globalPosition, Vec2.multiply(bj.velocity, Game.deltaTime), cj.radius);
-                        if (col.willIntersect) {
-                            hasCollision = true;
-                            collisions.push(col);
-                            triggerBody(ci, cj);
-
-                            // Only respond if both are RBs
-                            if (bi instanceof RigidBody && bj instanceof RigidBody) {
-                                const normal = Vec2.subtract(col.intersectPos1, col.intersectPos2).normalized;
-                                const res = Physics.response(normal, col.intersectTime,
-                                    Vec2.multiply(bi.velocity, Game.deltaTime), bi.mass, col.intersectPos1,
-                                    Vec2.multiply(bj.velocity, Game.deltaTime), bj.mass, col.intersectPos2);
-                                bi.velocity = Vec2.divide(res.reflVel1, Game.deltaTime);
-                                bj.velocity = Vec2.divide(res.reflVel2, Game.deltaTime);
-                                const ciOff = Vec2.subtract(ci.globalPosition, bi.globalPosition);
-                                const cjOff = Vec2.subtract(cj.globalPosition, bj.globalPosition);
-                                nextPos.set(bi, Vec2.subtract(res.reflPos1, ciOff));
-                                nextPos.set(bj, Vec2.subtract(res.reflPos2, cjOff));
-                            }
+                        // Only respond if both are RBs
+                        if (bi instanceof RigidBody && bj instanceof RigidBody) {
+                            const normal = Vec2.subtract(col.intersectPos1, col.intersectPos2).normalized;
+                            const res = Physics.response(normal, col.intersectTime,
+                                Vec2.multiply(bi.velocity, Game.deltaTime), bi.mass, col.intersectPos1,
+                                Vec2.multiply(bj.velocity, Game.deltaTime), bj.mass, col.intersectPos2);
+                            bi.velocity = Vec2.divide(res.reflVel1, Game.deltaTime);
+                            bj.velocity = Vec2.divide(res.reflVel2, Game.deltaTime);
+                            const ciOff = Vec2.subtract(ci.globalPosition, bi.globalPosition);
+                            const cjOff = Vec2.subtract(cj.globalPosition, bj.globalPosition);
+                            nextPos.set(bi, Vec2.subtract(res.reflPos1, ciOff));
+                            nextPos.set(bj, Vec2.subtract(res.reflPos2, cjOff));
                         }
-                        continue;
                     }
-                    else if ((ci instanceof CircleCollider && cj instanceof LineCollider) ||
-                        ci instanceof LineCollider && cj instanceof CircleCollider) {
-                        // Circle-line
-                        const ccircle = (ci instanceof CircleCollider ? ci : cj) as CircleCollider;
-                        const cline = (ci instanceof LineCollider ? ci : cj) as LineCollider;
-                        const bcircle = (ccircle == ci) ? bi : bj;
-                        const bline = (cline == ci) ? bi : bj;
-                        const col = Physics.circleLineSegmentIntersection(
-                            ccircle.globalPosition, ccircle.radius, Vec2.multiply(bcircle.velocity, Game.deltaTime),
-                            Vec2.transform(cline.globalTransform, cline.start), Vec2.transform(cline.globalTransform, cline.end));
-                        if (col.willIntersect) {
-                            hasCollision = true;
-                            collisions.push(col);
-                            triggerBody(ci, cj);
+                    continue;
+                }
+                else if ((ci instanceof CircleCollider && cj instanceof LineCollider) ||
+                    ci instanceof LineCollider && cj instanceof CircleCollider) {
+                    // Circle-line
+                    const ccircle = (ci instanceof CircleCollider ? ci : cj) as CircleCollider;
+                    const cline = (ci instanceof LineCollider ? ci : cj) as LineCollider;
+                    const bcircle = (ccircle == ci) ? bi : bj;
+                    const bline = (cline == ci) ? bi : bj;
+                    const col = Physics.circleLineSegmentIntersection(
+                        ccircle.globalPosition, ccircle.radius, Vec2.multiply(bcircle.velocity, Game.deltaTime),
+                        Vec2.transform(cline.globalTransform, cline.start), Vec2.transform(cline.globalTransform, cline.end));
+                    if (col.isIntersecting || col.willIntersect) {
+                        triggerBody(ci, cj);
+                    }
+                    if (col.willIntersect) {
+                        collisions.push(col);
+                        triggerBody(ci, cj);
 
-                            // Only respond if both are RBs
-                            // if (bi instanceof RigidBody && bj instanceof RigidBody) {
-                            //     const normal = col.normalAtCollision.copy();
-                            //     const res = Physics.response(normal, col.intersectTime,
-                            //         Vec2.multiply(bi.velocity, Game.deltaTime), bi.mass, col.intersectPos,
-                            //         Vec2.multiply(bj.velocity, Game.deltaTime), bj.mass, col.intersectPos);
-                            //     bi.velocity = Vec2.divide(res.reflVel1, Game.deltaTime);
-                            //     bj.velocity = Vec2.divide(res.reflVel2, Game.deltaTime);
-                            //     nextPos.set(bi, res.reflPos1);
-                            //     nextPos.set(bj, res.reflPos2);
-                            // }
-                        }
-                        continue;
+                        // Only respond if both are RBs
+                        // if (bi instanceof RigidBody && bj instanceof RigidBody) {
+                        //     const normal = col.normalAtCollision.copy();
+                        //     const res = Physics.response(normal, col.intersectTime,
+                        //         Vec2.multiply(bi.velocity, Game.deltaTime), bi.mass, col.intersectPos,
+                        //         Vec2.multiply(bj.velocity, Game.deltaTime), bj.mass, col.intersectPos);
+                        //     bi.velocity = Vec2.divide(res.reflVel1, Game.deltaTime);
+                        //     bj.velocity = Vec2.divide(res.reflVel2, Game.deltaTime);
+                        //     nextPos.set(bi, res.reflPos1);
+                        //     nextPos.set(bj, res.reflPos2);
+                        // }
                     }
-                    else if (ci instanceof ConvexCollider && cj instanceof ConvexCollider) {
-                        // Polygon-polygon
-                        // TODO
-                        continue;
-                    }
-                    else if (
-                        (ci instanceof CircleCollider && cj instanceof ConvexCollider) ||
-                        (ci instanceof ConvexCollider && cj instanceof CircleCollider)) {
-                        // Circle-polygon
-                        // TODO
-                        continue;
-                    }
+                    continue;
+                }
+                else if (ci instanceof ConvexCollider && cj instanceof ConvexCollider) {
+                    // Polygon-polygon
+                    // TODO
+                    continue;
+                }
+                else if (
+                    (ci instanceof CircleCollider && cj instanceof ConvexCollider) ||
+                    (ci instanceof ConvexCollider && cj instanceof CircleCollider)) {
+                    // Circle-polygon
+                    // TODO
+                    continue;
                 }
             }
-        } while (hasCollision && collisionIteration < Physics.MAX_COLLISION_STEPS);
+        }
 
         // Clear uncalled pairs
         for (const pair of Physics.pairsCollided.values()) {
@@ -267,6 +265,7 @@ export default class Physics {
         posLine1: Vec2,
         posLine2: Vec2) {
         let output: CollisionInfo = {
+            isIntersecting: true,
             willIntersect: false,
             intersectTime: 0,
             intersectPos1: Vec2.zero,
@@ -355,13 +354,20 @@ export default class Physics {
         }
         else {
             // Circle between distant lines
-            return Physics.circleLineEdgeIntersection(
+            output = Physics.circleLineEdgeIntersection(
                 true,
                 posCircle,
                 radiusCircle,
                 velCircle,
                 posLine1,
                 posLine2);
+
+            // Parallel distance along line
+            const d = Vec2.dot(Vec2.subtract(posLine1, posCircle), Vec2.subtract(posLine2, posLine1).normalized);
+
+            // Overlap line segment
+            if (d >= -radiusCircle && d <= Vec2.subtract(posLine2, posLine1).length + radiusCircle)
+                output.isIntersecting = true;
         }
         return output;
     }
@@ -374,6 +380,7 @@ export default class Physics {
         posLine1: Vec2,
         posLine2: Vec2) {
         let output: CollisionInfo = {
+            isIntersecting: false,
             willIntersect: false,
             intersectTime: 0,
             intersectPos1: Vec2.zero,
@@ -542,6 +549,7 @@ export default class Physics {
         pos1: Vec2, vel1: Vec2, radius1: number,
         pos2: Vec2, vel2: Vec2, radius2: number) {
         let output: CollisionInfo = {
+            isIntersecting: false,
             willIntersect: false,
             //isInterior: false,
             intersectTime: 0,
@@ -551,13 +559,14 @@ export default class Physics {
 
         // Relative position of 1 from 2
         const relPos = Vec2.subtract(pos1, pos2);
+        output.isIntersecting = relPos.sqrLength <= (radius1 + radius2) * (radius1 + radius2);
 
         // Relative vel of 1 from 2
         const relvel = Vec2.subtract(vel1, vel2);
 
         // Zero relative velocity
         if (relvel.sqrLength === 0) {
-            output.willIntersect = relPos.sqrLength <= (radius1 + radius2) * (radius1 + radius2);
+            output.willIntersect = output.isIntersecting;
             return output;
         }
 
@@ -591,6 +600,7 @@ export default class Physics {
 
     private static rayStaticCircleIntersection(posRay: Vec2, velRay: Vec2, posCircle: Vec2, radius: number) {
         let output: CollisionInfo = {
+            isIntersecting: false,
             willIntersect: false,
             //isInterior: false,
             intersectTime: 0,
@@ -626,6 +636,7 @@ export default class Physics {
             :*/ ((m - s) / rl);
 
         if (it >= 0 && it <= 1) {
+            output.isIntersecting = distSqr <= radius * radius;
             output.willIntersect = true;
             output.intersectTime = it;
             output.intersectPos1 = Vec2.add(posRay, Vec2.multiply(velRay, output.intersectTime));

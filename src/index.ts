@@ -169,8 +169,14 @@ if (true) {
             if (P.Input.isKeyPressed("Space"))
                 this.reset();
         }
+        onCollisionEnter(other: P.Body): void {
+            console.log('enter');
+        }
         onCollisionUpdate(other: P.Body): void {
-            console.log(other.name);
+            console.log('update');
+        }
+        onCollisionExit(other: P.Body): void {
+            console.log('exit');
         }
     }
     class MyCollider extends P.CircleCollider {
