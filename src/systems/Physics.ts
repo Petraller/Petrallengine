@@ -191,11 +191,11 @@ export default class Physics {
                     const col = Physics.circleCircleIntersection({
                         position: ci.globalPosition,
                         velocity: Vec2.multiply(bi.velocity, Game.deltaTime),
-                        radius: Vec2.dot(Vec2.half, ci.globalScale) * ci.radius
+                        radius: ci.globalRadius
                     }, {
                         position: cj.globalPosition,
                         velocity: Vec2.multiply(bj.velocity, Game.deltaTime),
-                        radius: Vec2.dot(Vec2.half, cj.globalScale) * cj.radius
+                        radius: cj.globalRadius
                     });
                     if (col.isIntersecting || col.willIntersect) {
                         collideBodies(ci, cj, col);
@@ -209,9 +209,15 @@ export default class Physics {
                     const cline = (ci instanceof LineCollider ? ci : cj) as LineCollider;
                     const bcircle = (ccircle == ci) ? bi : bj;
                     const bline = (cline == ci) ? bi : bj;
-                    const col = Physics.circleLineSegmentIntersection(
-                        ccircle.globalPosition, Vec2.dot(Vec2.half, ccircle.globalScale) * ccircle.radius, Vec2.multiply(bcircle.velocity, Game.deltaTime),
-                        Vec2.transform(cline.globalTransform, cline.start), Vec2.transform(cline.globalTransform, cline.end));
+                    const col = Physics.circleLineSegmentIntersection({
+                        position: ccircle.globalPosition,
+                        velocity: Vec2.multiply(bcircle.velocity, Game.deltaTime),
+                        radius: ccircle.globalRadius
+                    }, {
+                        position: cline.globalStart,
+                        velocity: Vec2.multiply(bline.velocity, Game.deltaTime),
+                        direction: cline.globalDirection
+                    });
                     if (col.isIntersecting || col.willIntersect) {
                         collideBodies(ccircle, cline, col);
                     }
@@ -339,12 +345,99 @@ export default class Physics {
         Physics.bodyColliders.get(owner.id)?.add(collider.id);
     }
 
-    private static circleLineSegmentIntersection(
-        posCircle: Vec2,
-        radiusCircle: number,
-        velCircle: Vec2,
-        posLine1: Vec2,
-        posLine2: Vec2) {
+    private static circleLineSegmentIntersection(c1: CircleInput, c2: LineSegmentInput) {
+        function lineEdgeCase(withinBothLines: boolean, c1: CircleInput, c2: LineSegmentInput) {
+            let output: CollisionOutput = {
+                isIntersecting: false,
+                willIntersect: false,
+                intersectTime: 0,
+                intersectPos1: Vec2.zero,
+                intersectPos2: Vec2.zero,
+                contactPos: Vec2.zero,
+            };
+
+            // Line segment points
+            const lineStart = c2.position.copy();
+            const lineMid = Vec2.add(c2.position, Vec2.multiply(c2.direction, 0.5));
+            const lineEnd = Vec2.add(c2.position, c2.direction);
+
+            // Relative vel of 1 from 2
+            const relVel = Vec2.subtract(c1.velocity, c2.velocity);
+            const relVelN = relVel.normal.normalized;
+
+            let closer: Vec2 = c2.position;
+            let dist: number = 0;
+
+            if (withinBothLines) {
+                // Closer to start
+                if (Vec2.dot(Vec2.subtract(lineMid, c1.position), c2.direction) < 0) {
+                    closer = c1.position;
+                }
+                // Closer to end
+                else {
+                    closer = lineEnd;
+                }
+
+                dist = Vec2.dot(Vec2.subtract(closer, c1.position), relVelN);
+            }
+            else {
+                // Perpendicular distance to start, end
+                const dStart = Vec2.dot(Vec2.subtract(lineStart, c1.position), relVelN);
+                const dEnd = Vec2.dot(Vec2.subtract(lineEnd, c1.position), relVelN);
+                const dStartAbs = Math.abs(dStart);
+                const dEndAbs = Math.abs(dEnd);
+
+                dist = dEnd;
+
+                // No collision
+                if (dStartAbs > c1.radius && dEndAbs > c1.radius) {
+                    return output;
+                }
+                // Two possible collisions
+                else if (dStartAbs <= c1.radius && dEndAbs <= c1.radius) {
+                    // V distance to start, end
+                    const m0 = Vec2.dot(Vec2.subtract(lineStart, c1.position), relVel);
+                    const m1 = Vec2.dot(Vec2.subtract(lineEnd, c1.position), relVel);
+                    const m0Abs = Math.abs(m0);
+                    const m1Abs = Math.abs(m1);
+
+                    // Closer to start
+                    if (m0Abs < m1Abs) {
+                        closer = lineStart;
+                        dist = dStart;
+                    }
+                }
+                // Start possible collision only
+                else if (dStartAbs <= c1.radius) {
+                    closer = lineStart;
+                    dist = dStart;
+                }
+                // Else end possible collision only
+            }
+
+            // Delta from start to CPA
+            const m = Vec2.dot(Vec2.subtract(closer, c1.position), relVel.normalized);
+            if (m <= 0)
+                return output;
+
+            // Delta from collision pt to CPA
+            const s = Math.sqrt(c1.radius * c1.radius - dist * dist);
+            if (Math.abs(dist) > c1.radius)
+                return output;
+
+            // Time to intersect
+            const it = (m - s) / relVel.length;
+
+            if (it <= 1) {
+                output.willIntersect = true;
+                output.intersectTime = it;
+                output.intersectPos1 = Vec2.add(c1.position, Vec2.multiply(c1.velocity, output.intersectTime));
+                output.intersectPos2 = Vec2.add(c2.position, Vec2.multiply(c2.velocity, output.intersectTime));
+                output.contactPos = closer.copy();
+            }
+            return output;
+        }
+
         let output: CollisionOutput = {
             isIntersecting: true,
             willIntersect: false,
@@ -355,262 +448,77 @@ export default class Physics {
         };
 
         // Line normal
-        const lineNormal = Vec2.subtract(posLine2, posLine1).normal.normalized;
+        const lineNormal = c2.direction.normal.normalized;
 
-        // N.(Bs - P0) <= -r
-        // Circle in inner half plane
-        const hp = Vec2.dot(lineNormal, Vec2.subtract(posCircle, posLine1));
-        if (hp <= -radiusCircle) {
-            // Extrude points
-            const p0 = Vec2.subtract(posLine1, Vec2.multiply(lineNormal, radiusCircle));
-            const p1 = Vec2.subtract(posLine2, Vec2.multiply(lineNormal, radiusCircle));
+        // Relative vel of 1 from 2
+        const relVel = Vec2.subtract(c1.velocity, c2.velocity);
 
-            // Moving into segment
-            if (Vec2.dot(velCircle.normal, Vec2.subtract(p0, posCircle))
-                * Vec2.dot(velCircle.normal, Vec2.subtract(p1, posCircle)) < 0) {
-                // Perpendicular distance / perpendicular velocity
-                // = Time to intersect
-                const it = (Vec2.dot(lineNormal, Vec2.subtract(posLine1, posCircle)) - radiusCircle)
-                    / Vec2.dot(lineNormal, velCircle);
+        // Parallel distance along line
+        const d = Vec2.dot(Vec2.subtract(c1.position, c2.position), c2.direction.normalized);
 
-                if (it >= 0 && it <= 1) {
-                    output.willIntersect = true;
-                    output.intersectTime = it;
+        // Zero relative velocity
+        if (relVel.sqrLength === 0) {
+            console.log('zero relvel');
 
-                    // Current pos + displacement to intersect
-                    // = Pos of intersect
-                    output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-                    output.intersectPos2 = Vec2.subtract(posCircle, Vec2.multiply(lineNormal, hp));
-
-                    return output;
-                }
-            }
-            // Moving out of segment
-            else {
-                return Physics.circleLineEdgeIntersection(
-                    false,
-                    posCircle,
-                    radiusCircle,
-                    velCircle,
-                    posLine1,
-                    posLine2);
-            }
+            output.isIntersecting = (d >= -c1.radius && d <= c2.direction.length + c1.radius);
+            return output;
         }
-        // N.(Bs - P0) >= r
-        // Circle in outer half plane
-        else if (hp >= radiusCircle) {
-            // Extrude points
-            const p0 = Vec2.add(posLine1, Vec2.multiply(lineNormal, radiusCircle));
-            const p1 = Vec2.add(posLine2, Vec2.multiply(lineNormal, radiusCircle));
 
-            // Moving into segment
-            if (Vec2.dot(velCircle.normal, Vec2.subtract(p0, posCircle))
-                * Vec2.dot(velCircle.normal, Vec2.subtract(p1, posCircle)) < 0) {
-                // Perpendicular distance / perpendicular velocity
-                // = Time to intersect
-                const it = (Vec2.dot(lineNormal, Vec2.subtract(posLine1, posCircle)) + radiusCircle)
-                    / Vec2.dot(lineNormal, velCircle);
+        // Signed distance of circle from line segment
+        const sd = Vec2.dot(lineNormal, Vec2.subtract(c1.position, c2.position));
+        if (sd > -c1.radius && sd < c1.radius) {
+            console.log('edge case');
 
-                if (it >= 0 && it <= 1) {
-                    output.willIntersect = true;
-                    output.intersectTime = it;
-
-                    // Current pos + displacement to intersect
-                    // = Pos of intersect
-                    output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-                    output.intersectPos2 = Vec2.subtract(posCircle, Vec2.multiply(lineNormal, hp));
-
-                    return output;
-                }
-            }
-            // Moving out of segment
-            else {
-                return Physics.circleLineEdgeIntersection(
-                    false,
-                    posCircle,
-                    radiusCircle,
-                    velCircle,
-                    posLine1,
-                    posLine2);
-            }
-        }
-        else {
             // Circle between distant lines
-            output = Physics.circleLineEdgeIntersection(
-                true,
-                posCircle,
-                radiusCircle,
-                velCircle,
-                posLine1,
-                posLine2);
-
-            // Parallel distance along line
-            const d = Vec2.dot(Vec2.subtract(posLine1, posCircle), Vec2.subtract(posLine2, posLine1).normalized);
+            output = lineEdgeCase(true, c1, c2);
 
             // Overlap line segment
-            if (d >= -radiusCircle && d <= Vec2.subtract(posLine2, posLine1).length + radiusCircle)
-                output.isIntersecting = true;
-        }
-        return output;
-    }
-
-    private static circleLineEdgeIntersection(
-        withinBothLines: boolean,
-        posCircle: Vec2,
-        radiusCircle: number,
-        velCircle: Vec2,
-        posLine1: Vec2,
-        posLine2: Vec2) {
-        let output: CollisionOutput = {
-            isIntersecting: false,
-            willIntersect: false,
-            intersectTime: 0,
-            intersectPos1: Vec2.zero,
-            intersectPos2: Vec2.zero,
-            contactPos: Vec2.zero,
-        };
-
-        if (withinBothLines) {
-            // Closer to pos1
-            if (Vec2.dot(Vec2.subtract(posLine1, posCircle), Vec2.subtract(posLine2, posLine1)) > 0) {
-                // Delta from start to CPA
-                const m = Vec2.dot(Vec2.subtract(posLine1, posCircle), velCircle) / velCircle.length;
-                if (m <= 0)
-                    return output;
-
-                // CPA
-                const dist = Vec2.dot(Vec2.subtract(posLine1, posCircle), velCircle.normal.normalized);
-                if (Math.abs(dist) > radiusCircle)
-                    return output;
-
-                // Delta from collision pt to CPA
-                const s = Math.sqrt(radiusCircle * radiusCircle - dist * dist);
-
-                // Time to intersect
-                const it = (m - s) / velCircle.length;
-
-                if (it <= 1) {
-                    output.willIntersect = true;
-                    output.intersectTime = it;
-
-                    // Current pos + displacement to intersect
-                    // = Pos of intersect
-                    output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-                    output.intersectPos2 = posLine1.copy();
-
-                    return output;
-                }
-            }
-            // Closer to pos2
-            else {
-                // Delta from start to CPA
-                const m = Vec2.dot(Vec2.subtract(posLine2, posCircle), velCircle) / velCircle.length;
-                if (m <= 0)
-                    return output;
-
-                // CPA
-                const dist = Vec2.dot(Vec2.subtract(posLine2, posCircle), velCircle.normal.normalized);
-                if (Math.abs(dist) > radiusCircle)
-                    return output;
-
-                // Delta from collision pt to CPA
-                const s = Math.sqrt(radiusCircle * radiusCircle - dist * dist);
-
-                // Time to intersect
-                const it = (m - s) / velCircle.length;
-
-                if (it <= 1) {
-                    output.willIntersect = true;
-                    output.intersectTime = it;
-
-                    // Current pos + displacement to intersect
-                    // = Pos of intersect
-                    output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-                    output.intersectPos2 = posLine2.copy();
-
-                    return output;
-                }
-            }
+            output.isIntersecting = (d >= -c1.radius && d <= c2.direction.length + c1.radius);
         }
         else {
-            let p0Side = false;
+            console.log('normal case');
 
-            // Perpendicular distance to p0, p1
-            const d0 = Vec2.dot(Vec2.subtract(posLine1, posCircle), velCircle.normal.normalized);
-            const d1 = Vec2.dot(Vec2.subtract(posLine2, posCircle), velCircle.normal.normalized);
-            const d0Abs = Math.abs(d0);
-            const d1Abs = Math.abs(d1);
+            let extrudeFn = (pos: Vec2) => pos.copy();
+            let itFn = () => -1;
+            let contactFn = (ipos1: Vec2) => ipos1.copy();
 
-            // No collision
-            if (d0Abs > radiusCircle && d1Abs > radiusCircle)
-                return output;
-            // Two possible collisions
-            else if (d0Abs <= radiusCircle && d1Abs <= radiusCircle) {
-                // V distance to p0, p1
-                const m0 = Vec2.dot(Vec2.subtract(posLine1, posCircle), velCircle);
-                const m1 = Vec2.dot(Vec2.subtract(posLine2, posCircle), velCircle);
-                const m0Abs = Math.abs(m0);
-                const m1Abs = Math.abs(m1);
-
-                // Closer to p0
-                if (m0Abs < m1Abs)
-                    p0Side = true;
+            // Circle in inner half plane opposite direction of normal
+            if (sd <= -c1.radius) {
+                extrudeFn = (pos: Vec2) => Vec2.subtract(pos, Vec2.multiply(lineNormal, c1.radius));
+                itFn = () => -(sd + c1.radius) / Vec2.dot(lineNormal, relVel);
+                contactFn = (ipos1: Vec2) => Vec2.add(ipos1, Vec2.multiply(lineNormal, c1.radius));
             }
-            // p0 possible collision only
-            else if (d0Abs <= radiusCircle)
-                p0Side = true;
-            // Else p1 possible collision only
+            // Circle in outer half plane in direction of normal
+            else if (sd >= c1.radius) {
+                extrudeFn = (pos: Vec2) => Vec2.add(pos, Vec2.multiply(lineNormal, c1.radius));
+                itFn = () => -(sd - c1.radius) / Vec2.dot(lineNormal, relVel);
+                contactFn = (ipos1: Vec2) => Vec2.subtract(ipos1, Vec2.multiply(lineNormal, c1.radius));
+            }
 
-            if (p0Side) {
-                // Delta from start to CPA
-                const m = Vec2.dot(Vec2.subtract(posLine1, posCircle), velCircle) / velCircle.length;
-                if (m <= 0)
-                    return output;
+            // Extrude points
+            const p0 = extrudeFn(c2.position);
+            const p1 = extrudeFn(Vec2.add(c2.position, c2.direction));
 
-                // Delta from collision pt to CPA
-                const s = Math.sqrt(radiusCircle * radiusCircle - d0 * d0);
+            // Moving into segment
+            if (Vec2.dot(relVel.normal, Vec2.subtract(p0, c1.position))
+                * Vec2.dot(relVel.normal, Vec2.subtract(p1, c1.position)) < 0) {
+                // Perpendicular distance / perpendicular velocity
+                // = Time to intersect
+                const it = itFn();
 
-                // Time to intersect
-                const it = (m - s) / velCircle.length;
-
-                if (it <= 1) {
+                if (it >= 0 && it <= 1) {
                     output.willIntersect = true;
                     output.intersectTime = it;
-
-                    // Current pos + displacement to intersect
-                    // = Pos of intersect
-                    output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-                    output.intersectPos2 = posLine1.copy();
-
-                    return output;
+                    output.intersectPos1 = Vec2.add(c1.position, Vec2.multiply(c1.velocity, output.intersectTime));
+                    output.intersectPos2 = Vec2.add(c2.position, Vec2.multiply(c2.velocity, output.intersectTime));
+                    output.contactPos = contactFn(output.intersectPos1);
                 }
             }
+            // Moving out of segment
             else {
-                // Delta from start to CPA
-                const m = Vec2.dot(Vec2.subtract(posLine2, posCircle), velCircle) / velCircle.length;
-                if (m <= 0)
-                    return output;
-
-                // Delta from collision pt to CPA
-                const s = Math.sqrt(radiusCircle * radiusCircle - d1 * d1);
-
-                // Time to intersect
-                const it = (m - s) / velCircle.length;
-
-                if (it <= 1) {
-                    output.willIntersect = true;
-                    output.intersectTime = it;
-
-                    // Current pos + displacement to intersect
-                    // = Pos of intersect
-                    output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-                    output.intersectPos2 = posLine2.copy();
-
-                    return output;
-                }
+                output = lineEdgeCase(false, c1, c2);
             }
         }
-
         return output;
     }
 
@@ -636,12 +544,10 @@ export default class Physics {
 
         // Zero relative velocity
         if (relVel.sqrLength === 0) {
-            output.willIntersect = output.isIntersecting;
             return output;
         }
 
         // Convert to ray-circle problem
-        // With ray at 1 and circle at 2
         const relRayPos = c1.position.copy();
         const relRayVel = relVel.copy();
         const relCirclePos = c2.position.copy();
