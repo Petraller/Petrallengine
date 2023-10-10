@@ -174,6 +174,9 @@ if (true) {
                 }
             }
             if (P.Input.isKey("KeyQ")) {
+                this.rotation--;
+            }
+            if (P.Input.isKey("KeyE")) {
                 this.rotation++;
             }
             this.velocity = P.Vec2.multiply(this.velocity, this.drag);
@@ -205,13 +208,13 @@ if (true) {
     b1.startingPos = P.Vec2.multiply(P.Vec2.left, 100);
     b1.keys = ["KeyD", "KeyS", "KeyA", "KeyW"];
     b1.name = "WASDCircle";
-    b1.mass = Infinity;
     b1.scale = new P.Vec2(1, 0.5);
     const n = 4;
     for (let i = 0; i < n; ++i) {
         const c = b1.createChild(MyCollider);
         c.position = P.Vec2.multiply(P.Vec2.rotate(P.Vec2.right, 360 * i / n), 50);
     }
+
     const b2 = P.Game.root.createChild(MyBody).createChild(MyCollider).parent as MyBody;
     b2.startingPos = P.Vec2.multiply(P.Vec2.right, 100);
     b2.keys = ["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"];
@@ -221,23 +224,27 @@ if (true) {
     wall1.parent!.name = "WallL";
     wall1.globalStart = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.1));
     wall1.globalEnd = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.9));
+    wall1.restitution = 0;
     (wall1.parent as P.RigidBody).mass = Infinity;
 
     const wall2 = P.Game.root.createChild(P.RigidBody).createChild(P.LineCollider);
     wall2.parent!.name = "WallD";
     wall2.globalStart = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.9));
     wall2.globalEnd = P.Input.normalizedToWorld(new P.Vec2(0.9, 0.9));
+    wall2.restitution = 0;
     (wall2.parent as P.RigidBody).mass = Infinity;
 
     const wall3 = P.Game.root.createChild(P.RigidBody).createChild(P.LineCollider);
     wall3.parent!.name = "WallR";
     wall3.globalStart = P.Input.normalizedToWorld(new P.Vec2(0.9, 0.9));
     wall3.globalEnd = P.Input.normalizedToWorld(new P.Vec2(0.9, 0.1));
+    wall3.restitution = 0;
     (wall3.parent as P.RigidBody).mass = Infinity;
 
     const wall4 = P.Game.root.createChild(P.RigidBody).createChild(P.LineCollider);
     wall4.parent!.name = "WallU";
     wall4.globalStart = P.Input.normalizedToWorld(new P.Vec2(0.9, 0.1));
     wall4.globalEnd = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.1));
+    wall4.restitution = 0;
     (wall4.parent as P.RigidBody).mass = Infinity;
 }
