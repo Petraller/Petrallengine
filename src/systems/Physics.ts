@@ -47,8 +47,8 @@ interface LineSegmentInput extends CollisionInput {
 }
 
 interface CollisionOutput {
-    /** Whether colliders was already intersecting this frame. */
-    isIntersecting: boolean;
+    /** The depth of penetration if already intersecting this frame. */
+    penetrationDepth: number;
     /** Whether colliders will intersect this frame. */
     willIntersect: boolean;
     /** Time to intersection. */
@@ -134,9 +134,7 @@ export default class Physics {
 
             // DEBUG
             if (col.willIntersect) {
-                this.debugContacts.set(col.intersectPos1, 0.2);
-                this.debugContacts.set(col.intersectPos2, 0.2);
-                this.debugContacts.set(col.contactPos, 0.2);
+                this.debugContacts.set(col.contactPos, 0.1);
             }
         }
 
@@ -202,7 +200,7 @@ export default class Physics {
                         velocity: Vec2.multiply(bj.velocity, Game.deltaTime),
                         radius: cj.globalRadius
                     });
-                    if (col.isIntersecting || col.willIntersect) {
+                    if (col.penetrationDepth > 0 || col.willIntersect) {
                         collideBodies(ci, cj, col);
                     }
                     continue;
@@ -223,7 +221,7 @@ export default class Physics {
                         velocity: Vec2.multiply(bline.velocity, Game.deltaTime),
                         direction: cline.globalDirection
                     });
-                    if (col.isIntersecting || col.willIntersect) {
+                    if (col.penetrationDepth > 0 || col.willIntersect) {
                         collideBodies(ccircle, cline, col);
                     }
                     continue;
@@ -318,9 +316,9 @@ export default class Physics {
                 }
 
                 // Penetration response
-                if (col.isIntersecting) {
-                    b1cache.vel = Vec2.add(b1cache.vel, Vec2.multiply(col.contactNormal, Physics.PENETRATION_IMPULSE_STRENGTH * w[0]));
-                    b2cache.vel = Vec2.add(b2cache.vel, Vec2.multiply(col.contactNormal, -Physics.PENETRATION_IMPULSE_STRENGTH * w[1]));
+                if (col.penetrationDepth > 0) {
+                    b1cache.vel = Vec2.add(b1cache.vel, Vec2.multiply(col.contactNormal, Physics.PENETRATION_IMPULSE_STRENGTH * col.penetrationDepth * w[0]));
+                    b2cache.vel = Vec2.add(b2cache.vel, Vec2.multiply(col.contactNormal, -Physics.PENETRATION_IMPULSE_STRENGTH * col.penetrationDepth * w[1]));
                 }
             }
         }
@@ -361,31 +359,40 @@ export default class Physics {
     }
 
     private static circleLineSegmentIntersection(c1: CircleInput, c2: LineSegmentInput) {
-        // Line segment points
+        let output: CollisionOutput = {
+            penetrationDepth: 0,
+            willIntersect: false,
+            intersectTime: 0,
+            intersectPos1: Vec2.zero,
+            intersectPos2: Vec2.zero,
+            contactPos: Vec2.zero,
+            contactNormal: Vec2.zero,
+        };
+
+        // Line properties
         const lineStart = Vec2.subtract(c2.position, c2.direction);
         const lineMid = c2.position.copy();
         const lineEnd = Vec2.add(c2.position, c2.direction);
-
-        // Line normal
+        const lineDirNorm = c2.direction.normalized;
         const lineNormal = c2.direction.normal.normalized;
 
         // Relative vel of 1 from 2
         const relVel = Vec2.subtract(c1.velocity, c2.velocity);
 
         // Parallel distance along line
-        const d = Vec2.dot(Vec2.subtract(c1.position, c2.position), c2.direction.normalized);
+        const d = Vec2.dot(Vec2.subtract(c1.position, c2.position), lineDirNorm);
+
+        // Closest point on line
+        const cpline = Vec2.add(c2.position, Vec2.multiply(lineDirNorm, Math.clamp(d, -c2.direction.length, c2.direction.length)));
+        output.contactNormal = Vec2.subtract(c1.position, cpline).normalized;
+        output.penetrationDepth = Math.max(c1.radius - Vec2.subtract(c1.position, cpline).length, 0);
+
+        // Zero relative velocity
+        if (relVel.sqrLength === 0) {
+            return output;
+        }
 
         function lineEdgeCase(withinBothLines: boolean) {
-            let output: CollisionOutput = {
-                isIntersecting: false,
-                willIntersect: false,
-                intersectTime: 0,
-                intersectPos1: Vec2.zero,
-                intersectPos2: Vec2.zero,
-                contactPos: Vec2.zero,
-                contactNormal: Vec2.zero,
-            };
-
             // Relative vel normal
             const relVelN = relVel.normal.normalized;
 
@@ -401,10 +408,6 @@ export default class Physics {
                 else {
                     closer = lineEnd;
                 }
-
-                // Touching closer point or overlapping line
-                output.isIntersecting = (Vec2.subtract(closer, c1.position).sqrLength <= c1.radius * c1.radius)
-                    || (d >= -c2.direction.length && d <= c2.direction.length);
 
                 dist = Vec2.dot(Vec2.subtract(closer, c1.position), relVelN);
             }
@@ -446,12 +449,12 @@ export default class Physics {
             // Delta from start to CPA
             const m = Vec2.dot(Vec2.subtract(closer, c1.position), relVel.normalized);
             if (m <= 0)
-                return output;
+                return;
 
             // Delta from collision pt to CPA
             const s = Math.sqrt(c1.radius * c1.radius - dist * dist);
             if (Math.abs(dist) > c1.radius)
-                return output;
+                return;
 
             // Time to intersect
             const it = (m - s) / relVel.length;
@@ -462,32 +465,14 @@ export default class Physics {
                 output.intersectPos1 = Vec2.add(c1.position, Vec2.multiply(c1.velocity, output.intersectTime));
                 output.intersectPos2 = Vec2.add(c2.position, Vec2.multiply(c2.velocity, output.intersectTime));
                 output.contactPos = closer.copy();
-                output.contactNormal = Vec2.subtract(output.intersectPos1, output.contactPos).normalized;
             }
-            return output;
-        }
-
-        let output: CollisionOutput = {
-            isIntersecting: false,
-            willIntersect: false,
-            intersectTime: 0,
-            intersectPos1: Vec2.zero,
-            intersectPos2: Vec2.zero,
-            contactPos: Vec2.zero,
-            contactNormal: Vec2.zero,
-        };
-
-        // Zero relative velocity
-        if (relVel.sqrLength === 0) {
-            output.isIntersecting = (d >= -c2.direction.length - c1.radius && d <= c2.direction.length + c1.radius);
-            return output;
         }
 
         // Signed distance of circle from line segment
         const sd = Vec2.dot(lineNormal, Vec2.subtract(c1.position, c2.position));
         if (sd > -c1.radius && sd < c1.radius) {
             // Circle between distant lines
-            output = lineEdgeCase(true);
+            lineEdgeCase(true);
         }
         else {
             let extrudeFn = (pos: Vec2) => pos.copy();
@@ -524,12 +509,11 @@ export default class Physics {
                     output.intersectPos1 = Vec2.add(c1.position, Vec2.multiply(c1.velocity, output.intersectTime));
                     output.intersectPos2 = Vec2.add(c2.position, Vec2.multiply(c2.velocity, output.intersectTime));
                     output.contactPos = contactFn(output.intersectPos1);
-                    output.contactNormal = Vec2.subtract(output.intersectPos1, output.contactPos).normalized;
                 }
             }
             // Moving out of segment
             else {
-                output = lineEdgeCase(false);
+                lineEdgeCase(false);
             }
         }
         return output;
@@ -537,13 +521,13 @@ export default class Physics {
 
     private static circleCircleIntersection(c1: CircleInput, c2: CircleInput) {
         let output: CollisionOutput = {
-            isIntersecting: false,
+            penetrationDepth: 0,
             willIntersect: false,
             intersectTime: 0,
             intersectPos1: Vec2.zero,
             intersectPos2: Vec2.zero,
             contactPos: Vec2.zero,
-            contactNormal: Vec2.zero,
+            contactNormal: Vec2.subtract(c1.position, c2.position).normalized,
         };
 
         // Relative circle radius
@@ -551,7 +535,7 @@ export default class Physics {
 
         // Relative position of 1 from 2
         const relPos = Vec2.subtract(c1.position, c2.position);
-        output.isIntersecting = relPos.sqrLength <= relCircleRadius * relCircleRadius;
+        output.penetrationDepth = Math.max(relCircleRadius - relPos.length, 0);
 
         // Relative vel of 1 from 2
         const relVel = Vec2.subtract(c1.velocity, c2.velocity);
