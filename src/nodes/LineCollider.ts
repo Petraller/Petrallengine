@@ -13,43 +13,58 @@ import Vec2 from '../structures/Vec2';
 export default class LineCollider extends Collider {
     private static readonly BOUNDS_PADDING = 10;
 
-    private _direction: Vec2 = Vec2.right;
+    private _direction: Vec2 = Vec2.multiply(Vec2.right, 100);
 
-    /** The offset of the end from the start of the line segment. */
+    /** The start of the line segment. */
+    get start() { return Vec2.add(this.position, this._direction); }
+    set start(value: Vec2) {
+        this._direction = Vec2.subtract(this.end, value);
+    }
+
+    /** The end of the line segment. */
+    get end() { return Vec2.subtract(this.position, this._direction); }
+    set end(value: Vec2) {
+        this._direction = Vec2.subtract(value, this.start);
+    }
+
+    /** The offset of the end from the middle of the line segment. */
     get direction() { return this._direction.copy(); }
     set direction(value: Vec2) {
         this._direction = value.copy();
     }
 
-    /** The offset of the global end from the global start of the line segment. */
-    get globalDirection() { return Vec2.transform(this.globalTransform, this._direction); }
-    set globalDirection(value: Vec2) {
-        this._direction = Vec2.transform(Mat3.inverse(this.globalTransform), value);
-    }
-
-    /** The global start of the line segment. Effectively the Node's position. */
-    get globalStart() { return this.globalPosition; }
+    /** The global start of the line segment. */
+    get globalStart() { return Vec2.transform(this.globalTransform, this.start); }
     set globalStart(value: Vec2) {
-        this.globalPosition = value.copy();
+        this.start = Vec2.transform(Mat3.inverse(this.globalTransform), value);
     }
 
     /** The global end of the line segment. */
-    get globalEnd() { return this.globalDirection; }
+    get globalEnd() { return Vec2.transform(this.globalTransform, this.end); }
     set globalEnd(value: Vec2) {
-        this.globalDirection = Vec2.subtract(value, this.globalPosition);
+        this.end = Vec2.transform(Mat3.inverse(this.globalTransform), value);
+    }
+
+    /** The offset of the global end from the global middle of the line segment. */
+    get globalDirection() { return Vec2.divide(Vec2.subtract(this.globalStart, this.globalEnd), 2); }
+    set globalDirection(value: Vec2) {
+        this.globalStart = Vec2.subtract(this.globalPosition, value);
+        this.globalEnd = Vec2.add(this.globalPosition, value);
     }
 
     regenerate() {
         this._bounds = Bounds.fromVertices([
-            Vec2.subtract(this.globalPosition, new Vec2(LineCollider.BOUNDS_PADDING, LineCollider.BOUNDS_PADDING)),
-            Vec2.add(Vec2.add(this.globalPosition, this.globalDirection), new Vec2(LineCollider.BOUNDS_PADDING, LineCollider.BOUNDS_PADDING))
+            Vec2.subtract(this.globalStart, new Vec2(LineCollider.BOUNDS_PADDING, LineCollider.BOUNDS_PADDING)),
+            Vec2.subtract(this.globalEnd, new Vec2(LineCollider.BOUNDS_PADDING, LineCollider.BOUNDS_PADDING)),
+            Vec2.add(this.globalStart, new Vec2(LineCollider.BOUNDS_PADDING, LineCollider.BOUNDS_PADDING)),
+            Vec2.add(this.globalEnd, new Vec2(LineCollider.BOUNDS_PADDING, LineCollider.BOUNDS_PADDING))
         ]);
     }
 
     onDebugDraw(context: CanvasRenderingContext2D): void {
         // Draw vertices
-        const sGlobal = this.globalPosition;
-        const eGlobal = Vec2.add(this.globalPosition, this.globalDirection);
+        const sGlobal = this.globalStart;
+        const eGlobal = this.globalEnd;
         context.strokeStyle = "#ff00ff";
         context.beginPath();
         context.moveTo(sGlobal.x, sGlobal.y);

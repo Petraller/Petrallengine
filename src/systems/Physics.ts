@@ -59,6 +59,8 @@ interface CollisionOutput {
     intersectPos2: Vec2;
     /** Contact point of the colliders in world coordinates. */
     contactPos: Vec2;
+    /** Normal to the contact point of the colliders in world coordinates. */
+    contactNormal: Vec2;
 }
 
 type SnowflakePair = Snowflake;
@@ -131,8 +133,11 @@ export default class Physics {
             collisions.push([c1, c2, col]);
 
             // DEBUG
-            if (col.willIntersect)
+            if (col.willIntersect) {
+                this.debugContacts.set(col.intersectPos1, 0.2);
+                this.debugContacts.set(col.intersectPos2, 0.2);
                 this.debugContacts.set(col.contactPos, 0.2);
+            }
         }
 
         // Get colliders as array
@@ -214,7 +219,7 @@ export default class Physics {
                         velocity: Vec2.multiply(bcircle.velocity, Game.deltaTime),
                         radius: ccircle.globalRadius
                     }, {
-                        position: cline.globalStart,
+                        position: cline.globalPosition,
                         velocity: Vec2.multiply(bline.velocity, Game.deltaTime),
                         direction: cline.globalDirection
                     });
@@ -272,27 +277,37 @@ export default class Physics {
 
             // Only respond if both are RBs
             if (b1 instanceof RigidBody && b2 instanceof RigidBody) {
+                // Mass splitting
+                let [m1, m2] = [b1.mass / (bodyCollisionCount.get(b1) ?? 1), b2.mass / (bodyCollisionCount.get(b2) ?? 1)];
+
+                // Infinite mass case
+                if (b1.mass === Infinity && b2.mass === Infinity)
+                    [m1, m2] = [1, 1];
+
+                const w = Physics.massToWeights(m1, m2);
+
                 // Impulse response
                 if (col.willIntersect) {
-                    // Mass splitting
-                    const [m1, m2] = [b1.mass / (bodyCollisionCount.get(b1) ?? 1), b2.mass / (bodyCollisionCount.get(b2) ?? 1)];
+                    // Magnitude of velocity in direction of normal
+                    const [a1, a2] = [
+                        Vec2.dot(Vec2.multiply(b1.velocity, Game.deltaTime), col.contactNormal),
+                        Vec2.dot(Vec2.multiply(b2.velocity, Game.deltaTime), col.contactNormal)];
 
-                    const normal = Vec2.subtract(col.intersectPos1, col.intersectPos2).normalized;
-                    const res = Physics.response(normal, col.intersectTime,
-                        Vec2.multiply(b1.velocity, Game.deltaTime), m1, col.intersectPos1,
-                        Vec2.multiply(b2.velocity, Game.deltaTime), m2, col.intersectPos2);
+                    // Get calculated reflected velocities and position
+                    const reflVel1 = Vec2.add(Vec2.multiply(b1.velocity, Game.deltaTime), Vec2.multiply(col.contactNormal, 2 * (a2 - a1) * w[0]));
+                    const reflVel2 = Vec2.add(Vec2.multiply(b2.velocity, Game.deltaTime), Vec2.multiply(col.contactNormal, 2 * (a1 - a2) * w[1]));
+                    const reflPos1 = Vec2.add(col.intersectPos1, Vec2.multiply(reflVel1, (1 - col.intersectTime)));
+                    const reflPos2 = Vec2.add(col.intersectPos2, Vec2.multiply(reflVel2, (1 - col.intersectTime)));
+
+                    // Offset of collider from body
                     const c1Off = Vec2.subtract(c1.globalPosition, b1.globalPosition);
                     const c2Off = Vec2.subtract(c2.globalPosition, b2.globalPosition);
-                    // b1.velocity = Vec2.divide(res.reflVel1, Game.deltaTime);
-                    // b2.velocity = Vec2.divide(res.reflVel2, Game.deltaTime);
-                    // cached.get(b1)!.pos = Vec2.subtract(res.reflPos1, c1Off);
-                    // cached.get(b2)!.pos = Vec2.subtract(res.reflPos2, c2Off);
 
                     // Accumulate deltas
-                    let dp1 = Vec2.subtract(Vec2.subtract(res.reflPos1, c1Off), b1cache.pos);
-                    let dp2 = Vec2.subtract(Vec2.subtract(res.reflPos2, c2Off), b2cache.pos);
-                    let dv1 = Vec2.subtract(Vec2.divide(res.reflVel1, 2 * Game.deltaTime), b1cache.vel);
-                    let dv2 = Vec2.subtract(Vec2.divide(res.reflVel2, 2 * Game.deltaTime), b2cache.vel);
+                    let dp1 = Vec2.subtract(Vec2.subtract(reflPos1, c1Off), b1cache.pos);
+                    let dp2 = Vec2.subtract(Vec2.subtract(reflPos2, c2Off), b2cache.pos);
+                    let dv1 = Vec2.subtract(Vec2.divide(reflVel1, Game.deltaTime), b1cache.vel);
+                    let dv2 = Vec2.subtract(Vec2.divide(reflVel2, Game.deltaTime), b2cache.vel);
 
                     b1cache.pos = Vec2.add(b1cache.pos, dp1);
                     b2cache.pos = Vec2.add(b2cache.pos, dp2);
@@ -302,10 +317,8 @@ export default class Physics {
 
                 // Penetration response
                 if (col.isIntersecting) {
-                    const normal = Vec2.subtract(c1.globalPosition, c2.globalPosition).normalized;
-                    const w = Physics.massToWeights(b1.mass, b2.mass);
-                    b1cache.vel = Vec2.add(b1cache.vel, Vec2.multiply(normal, Physics.PENETRATION_IMPULSE_STRENGTH * w[0]));
-                    b2cache.vel = Vec2.add(b2cache.vel, Vec2.multiply(normal, -Physics.PENETRATION_IMPULSE_STRENGTH * w[1]));
+                    b1cache.vel = Vec2.add(b1cache.vel, Vec2.multiply(col.contactNormal, Physics.PENETRATION_IMPULSE_STRENGTH * w[0]));
+                    b2cache.vel = Vec2.add(b2cache.vel, Vec2.multiply(col.contactNormal, -Physics.PENETRATION_IMPULSE_STRENGTH * w[1]));
                 }
             }
         }
@@ -346,7 +359,21 @@ export default class Physics {
     }
 
     private static circleLineSegmentIntersection(c1: CircleInput, c2: LineSegmentInput) {
-        function lineEdgeCase(withinBothLines: boolean, c1: CircleInput, c2: LineSegmentInput) {
+        // Line segment points
+        const lineStart = Vec2.subtract(c2.position, c2.direction);
+        const lineMid = c2.position.copy();
+        const lineEnd = Vec2.add(c2.position, c2.direction);
+
+        // Line normal
+        const lineNormal = c2.direction.normal.normalized;
+
+        // Relative vel of 1 from 2
+        const relVel = Vec2.subtract(c1.velocity, c2.velocity);
+
+        // Parallel distance along line
+        const d = Vec2.dot(Vec2.subtract(c1.position, c2.position), c2.direction.normalized);
+
+        function lineEdgeCase(withinBothLines: boolean) {
             let output: CollisionOutput = {
                 isIntersecting: false,
                 willIntersect: false,
@@ -354,29 +381,28 @@ export default class Physics {
                 intersectPos1: Vec2.zero,
                 intersectPos2: Vec2.zero,
                 contactPos: Vec2.zero,
+                contactNormal: Vec2.zero,
             };
 
-            // Line segment points
-            const lineStart = c2.position.copy();
-            const lineMid = Vec2.add(c2.position, Vec2.multiply(c2.direction, 0.5));
-            const lineEnd = Vec2.add(c2.position, c2.direction);
-
-            // Relative vel of 1 from 2
-            const relVel = Vec2.subtract(c1.velocity, c2.velocity);
+            // Relative vel normal
             const relVelN = relVel.normal.normalized;
 
-            let closer: Vec2 = c2.position;
+            let closer: Vec2 = lineEnd;
             let dist: number = 0;
 
             if (withinBothLines) {
                 // Closer to start
-                if (Vec2.dot(Vec2.subtract(lineMid, c1.position), c2.direction) < 0) {
-                    closer = c1.position;
+                if (Vec2.dot(Vec2.subtract(c1.position, lineMid), c2.direction) < 0) {
+                    closer = lineStart;
                 }
                 // Closer to end
                 else {
                     closer = lineEnd;
                 }
+
+                // Touching closer point or overlapping line
+                output.isIntersecting = (Vec2.subtract(closer, c1.position).sqrLength <= c1.radius * c1.radius)
+                    || (d >= -c2.direction.length && d <= c2.direction.length);
 
                 dist = Vec2.dot(Vec2.subtract(closer, c1.position), relVelN);
             }
@@ -428,56 +454,40 @@ export default class Physics {
             // Time to intersect
             const it = (m - s) / relVel.length;
 
-            if (it <= 1) {
+            if (it >= 0 && it <= 1) {
                 output.willIntersect = true;
                 output.intersectTime = it;
                 output.intersectPos1 = Vec2.add(c1.position, Vec2.multiply(c1.velocity, output.intersectTime));
                 output.intersectPos2 = Vec2.add(c2.position, Vec2.multiply(c2.velocity, output.intersectTime));
                 output.contactPos = closer.copy();
+                output.contactNormal = Vec2.subtract(output.intersectPos1, output.contactPos).normalized;
             }
             return output;
         }
 
         let output: CollisionOutput = {
-            isIntersecting: true,
+            isIntersecting: false,
             willIntersect: false,
             intersectTime: 0,
             intersectPos1: Vec2.zero,
             intersectPos2: Vec2.zero,
             contactPos: Vec2.zero,
+            contactNormal: Vec2.zero,
         };
-
-        // Line normal
-        const lineNormal = c2.direction.normal.normalized;
-
-        // Relative vel of 1 from 2
-        const relVel = Vec2.subtract(c1.velocity, c2.velocity);
-
-        // Parallel distance along line
-        const d = Vec2.dot(Vec2.subtract(c1.position, c2.position), c2.direction.normalized);
 
         // Zero relative velocity
         if (relVel.sqrLength === 0) {
-            console.log('zero relvel');
-
-            output.isIntersecting = (d >= -c1.radius && d <= c2.direction.length + c1.radius);
+            output.isIntersecting = (d >= -c2.direction.length - c1.radius && d <= c2.direction.length + c1.radius);
             return output;
         }
 
         // Signed distance of circle from line segment
         const sd = Vec2.dot(lineNormal, Vec2.subtract(c1.position, c2.position));
         if (sd > -c1.radius && sd < c1.radius) {
-            console.log('edge case');
-
             // Circle between distant lines
-            output = lineEdgeCase(true, c1, c2);
-
-            // Overlap line segment
-            output.isIntersecting = (d >= -c1.radius && d <= c2.direction.length + c1.radius);
+            output = lineEdgeCase(true);
         }
         else {
-            console.log('normal case');
-
             let extrudeFn = (pos: Vec2) => pos.copy();
             let itFn = () => -1;
             let contactFn = (ipos1: Vec2) => ipos1.copy();
@@ -496,12 +506,12 @@ export default class Physics {
             }
 
             // Extrude points
-            const p0 = extrudeFn(c2.position);
-            const p1 = extrudeFn(Vec2.add(c2.position, c2.direction));
+            const pStart = extrudeFn(lineStart);
+            const pEnd = extrudeFn(lineEnd);
 
             // Moving into segment
-            if (Vec2.dot(relVel.normal, Vec2.subtract(p0, c1.position))
-                * Vec2.dot(relVel.normal, Vec2.subtract(p1, c1.position)) < 0) {
+            if (Vec2.dot(relVel.normal, Vec2.subtract(pStart, c1.position))
+                * Vec2.dot(relVel.normal, Vec2.subtract(pEnd, c1.position)) < 0) {
                 // Perpendicular distance / perpendicular velocity
                 // = Time to intersect
                 const it = itFn();
@@ -512,11 +522,12 @@ export default class Physics {
                     output.intersectPos1 = Vec2.add(c1.position, Vec2.multiply(c1.velocity, output.intersectTime));
                     output.intersectPos2 = Vec2.add(c2.position, Vec2.multiply(c2.velocity, output.intersectTime));
                     output.contactPos = contactFn(output.intersectPos1);
+                    output.contactNormal = Vec2.subtract(output.intersectPos1, output.contactPos).normalized;
                 }
             }
             // Moving out of segment
             else {
-                output = lineEdgeCase(false, c1, c2);
+                output = lineEdgeCase(false);
             }
         }
         return output;
@@ -530,6 +541,7 @@ export default class Physics {
             intersectPos1: Vec2.zero,
             intersectPos2: Vec2.zero,
             contactPos: Vec2.zero,
+            contactNormal: Vec2.zero,
         };
 
         // Relative circle radius
@@ -577,35 +589,8 @@ export default class Physics {
             output.intersectPos1 = Vec2.add(c1.position, Vec2.multiply(c1.velocity, output.intersectTime));
             output.intersectPos2 = Vec2.add(c2.position, Vec2.multiply(c2.velocity, output.intersectTime));
             output.contactPos = Vec2.lerp(output.intersectPos1, output.intersectPos2, c1.radius / (c1.radius + c2.radius));
+            output.contactNormal = Vec2.subtract(output.intersectPos1, output.intersectPos2).normalized;
         }
-        return output;
-    }
-
-    private static response(
-        normal: Vec2, intersectTime: number,
-        vel1: Vec2, mass1: number, intersectPos1: Vec2,
-        vel2: Vec2, mass2: number, intersectPos2: Vec2) {
-        let output = {
-            reflVel1: Vec2.zero,
-            reflVel2: Vec2.zero,
-            reflPos1: Vec2.zero,
-            reflPos2: Vec2.zero,
-        };
-
-        // Magnitude of velocity in direction of normal
-        const a1 = Vec2.dot(vel1, normal);
-        const a2 = Vec2.dot(vel2, normal);
-
-        // Factor of normal to add
-        const w = Physics.massToWeights(mass1, mass2);
-        const f1 = -2 * (a1 - a2) * w[0];
-        const f2 = +2 * (a1 - a2) * w[1];
-
-        output.reflVel1 = Vec2.add(vel1, Vec2.multiply(normal, f1));
-        output.reflVel2 = Vec2.add(vel2, Vec2.multiply(normal, f2));
-        output.reflPos1 = Vec2.add(intersectPos1, Vec2.multiply(output.reflVel1, (1 - intersectTime)));
-        output.reflPos2 = Vec2.add(intersectPos2, Vec2.multiply(output.reflVel2, (1 - intersectTime)));
-
         return output;
     }
 
