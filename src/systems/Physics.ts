@@ -278,7 +278,7 @@ export default class Physics {
 
                 // Infinite mass case
                 if (b1.mass === Infinity && b2.mass === Infinity)
-                    [m1, m2] = [1, 1];
+                    continue;
 
                 const w = Physics.massToWeights(m1, m2);
 
