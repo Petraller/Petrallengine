@@ -288,14 +288,16 @@ export default class Physics {
 
                 // Impulse response
                 if (col.willIntersect) {
+                    const restitution = (c1.restitution + c2.restitution) / 2;
+
                     // Magnitude of velocity in direction of normal
                     const [a1, a2] = [
                         Vec2.dot(Vec2.multiply(b1.velocity, Game.deltaTime), col.contactNormal),
                         Vec2.dot(Vec2.multiply(b2.velocity, Game.deltaTime), col.contactNormal)];
 
                     // Get calculated reflected velocities and position
-                    const reflVel1 = Vec2.add(Vec2.multiply(b1.velocity, Game.deltaTime), Vec2.multiply(col.contactNormal, 2 * (a2 - a1) * w[0]));
-                    const reflVel2 = Vec2.add(Vec2.multiply(b2.velocity, Game.deltaTime), Vec2.multiply(col.contactNormal, 2 * (a1 - a2) * w[1]));
+                    const reflVel1 = Vec2.multiply(Vec2.add(Vec2.multiply(b1.velocity, Game.deltaTime), Vec2.multiply(col.contactNormal, 2 * (a2 - a1) * w[0])), restitution);
+                    const reflVel2 = Vec2.multiply(Vec2.add(Vec2.multiply(b2.velocity, Game.deltaTime), Vec2.multiply(col.contactNormal, 2 * (a1 - a2) * w[1])), restitution);
                     const reflPos1 = Vec2.add(col.intersectPos1, Vec2.multiply(reflVel1, (1 - col.intersectTime)));
                     const reflPos2 = Vec2.add(col.intersectPos2, Vec2.multiply(reflVel2, (1 - col.intersectTime)));
 

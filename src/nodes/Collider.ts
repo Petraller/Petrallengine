@@ -18,6 +18,7 @@ export type Mask = number;
  */
 export default abstract class Collider extends Node implements IDebugDrawable {
     protected _bounds = Bounds.zero;
+    protected _restitution = 1;
 
     /** The layers this body is part of. */
     layers: Mask = 0x00000001;
@@ -26,6 +27,16 @@ export default abstract class Collider extends Node implements IDebugDrawable {
 
     /** The globally positioned bounds of this collider. */
     get bounds() { return this._bounds.copy(); }
+
+    /** 
+     * The "bounciness" of this collider.
+     * 
+     * A value of 0 is perfectly inelastic.
+     * A value of 1 is perfectly elastic.
+     * A value above 1 is energy generating.
+     */
+    get restitution() { return this._restitution; }
+    set restitution(value: number) { this._restitution = Math.max(value, 0); }
 
     /**
      * Regenerates the cached properties of the collider.
