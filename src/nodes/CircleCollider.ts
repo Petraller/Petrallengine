@@ -16,17 +16,20 @@ export default class CircleCollider extends Collider {
     get radius() { return this._radius; }
     set radius(value: number) { this._radius = Math.max(value, 0); }
 
+    /** The global radius of the circle. */
+    get globalRadius() { return Vec2.dot(Vec2.half, this.globalScale) * this._radius; }
+
     regenerate() {
         this._bounds = new Bounds(
-            Vec2.subtract(this.globalPosition, new Vec2(this._radius, this._radius)),
-            Vec2.add(this.globalPosition, new Vec2(this._radius, this._radius)));
+            Vec2.subtract(this.globalPosition, new Vec2(this.globalRadius, this.globalRadius)),
+            Vec2.add(this.globalPosition, new Vec2(this.globalRadius, this.globalRadius)));
     }
 
     onDebugDraw(context: CanvasRenderingContext2D): void {
         // Draw vertices
         context.strokeStyle = "#ff00ff";
         context.beginPath();
-        context.arc(this.globalPosition.x, this.globalPosition.y, this.radius, 0, 360);
+        context.arc(this.globalPosition.x, this.globalPosition.y, this.globalRadius, 0, 360);
         context.stroke();
 
         super.onDebugDraw(context);
