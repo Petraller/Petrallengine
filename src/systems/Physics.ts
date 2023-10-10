@@ -14,10 +14,15 @@ import Bounds from '../structures/Bounds';
 import Vec2 from '../structures/Vec2';
 
 interface CollisionInfo {
+    /** Whether colliders was already intersecting this frame. */
     isIntersecting: boolean,
+    /** Whether colliders will intersect this frame. */
     willIntersect: boolean,
+    /** Time to intersection. */
     intersectTime: number,
+    /** Intersection point of first collider in world coordinates. */
     intersectPos1: Vec2,
+    /** Intersection point of second collider in world coordinates. */
     intersectPos2: Vec2,
 }
 
