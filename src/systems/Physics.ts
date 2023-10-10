@@ -160,7 +160,7 @@ export default class Physics {
                         ccircle.globalPosition, Vec2.dot(Vec2.half, ccircle.globalScale) * ccircle.radius, Vec2.multiply(bcircle.velocity, Game.deltaTime),
                         Vec2.transform(cline.globalTransform, cline.start), Vec2.transform(cline.globalTransform, cline.end));
                     if (col.isIntersecting || col.willIntersect) {
-                        collideBodies(ci, cj, col);
+                        collideBodies(ccircle, cline, col);
                     }
                     continue;
                 }
@@ -326,7 +326,7 @@ export default class Physics {
                     // Current pos + displacement to intersect
                     // = Pos of intersect
                     output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-                    output.intersectPos2 = output.intersectPos1.copy();
+                    output.intersectPos2 = Vec2.subtract(posCircle, Vec2.multiply(lineNormal, hp));
 
                     return output;
                 }
@@ -364,7 +364,7 @@ export default class Physics {
                     // Current pos + displacement to intersect
                     // = Pos of intersect
                     output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-                    output.intersectPos2 = output.intersectPos1.copy();
+                    output.intersectPos2 = Vec2.subtract(posCircle, Vec2.multiply(lineNormal, hp));
 
                     return output;
                 }
@@ -441,7 +441,7 @@ export default class Physics {
                     // Current pos + displacement to intersect
                     // = Pos of intersect
                     output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-                    output.intersectPos2 = output.intersectPos1.copy();
+                    output.intersectPos2 = posLine1.copy();
 
                     return output;
                 }
@@ -471,7 +471,7 @@ export default class Physics {
                     // Current pos + displacement to intersect
                     // = Pos of intersect
                     output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-                    output.intersectPos2 = output.intersectPos1.copy();
+                    output.intersectPos2 = posLine2.copy();
 
                     return output;
                 }
@@ -525,7 +525,7 @@ export default class Physics {
                     // Current pos + displacement to intersect
                     // = Pos of intersect
                     output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-                    output.intersectPos2 = output.intersectPos1.copy();
+                    output.intersectPos2 = posLine1.copy();
 
                     return output;
                 }
@@ -549,7 +549,7 @@ export default class Physics {
                     // Current pos + displacement to intersect
                     // = Pos of intersect
                     output.intersectPos1 = Vec2.add(posCircle, Vec2.multiply(velCircle, output.intersectTime));
-                    output.intersectPos2 = output.intersectPos1.copy();
+                    output.intersectPos2 = posLine2.copy();
 
                     return output;
                 }
