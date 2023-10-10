@@ -110,18 +110,16 @@ export default class Physics {
             const pair = makeSnowflakePair(b1.id, b2.id);
 
             if (!bodyPairsCalled.has(pair)) {
-                // Callbacks
+                // Call collision enter callback
                 if (!Physics.pairsCollided.has(pair)) {
-                    // Call collision enter callback
                     Physics.pairsCollided.add(pair);
                     b1.onCollisionEnter?.call(b1, b2);
                     b2.onCollisionEnter?.call(b2, b1);
                 }
-                else {
-                    // Call collision update callback
-                    b1.onCollisionUpdate?.call(b1, b2);
-                    b2.onCollisionUpdate?.call(b2, b1);
-                }
+
+                // Call collision update callback
+                b1.onCollisionUpdate?.call(b1, b2);
+                b2.onCollisionUpdate?.call(b2, b1);
 
                 // Mark this pair as being called this frame
                 bodyPairsCalled.add(pair);
