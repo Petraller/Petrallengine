@@ -184,6 +184,18 @@ export default class Game {
             }
             debugDraw(Game.rootNode);
 
+            // Physics general debug draw
+            for (let contact of physics.debugContacts) {
+                context.strokeStyle = "#ff0000";
+                context.beginPath();
+                context.arc(contact[0].x, contact[0].y, 4, 0, 360);
+                context.stroke();
+
+                physics.debugContacts.set(contact[0], contact[1] - this.deltaTime);
+                if (contact[1] < 0)
+                    physics.debugContacts.delete(contact[0]);
+            }
+
             // Clear transition flags
             input.endFrame();
 
