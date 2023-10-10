@@ -20,7 +20,7 @@ export interface IDrawable {
 /**
  * Interface for all drawables.
  */
-interface IDebugDrawable {
+export interface IDebugDrawable {
     /**
      * Called when debug drawn.
      * @param context The canvas rendering context.
@@ -70,12 +70,6 @@ export interface ICopyable {
      * @returns The copy of the object.
      */
     copy(): ICopyable;
-    /**
-     * Copies the value of another object.
-     * @param other The other object.
-     * @returns This object after copying.
-     */
-    copyFrom(other: ICopyable): ICopyable;
 }
 /**
  * @author Petraller <me@petraller.com>
@@ -100,7 +94,6 @@ type Matrix = [Row, Row, Row];
 export class Mat3 implements ICopyable, IEquatable {
     constructor(m?: Matrix);
     copy: () => Mat3;
-    copyFrom: (other: Mat3) => this;
     equals: (other: Mat3) => boolean;
     /** The determinant of this matrix. */
     get determinant(): number;
@@ -232,7 +225,6 @@ export class Mat3 implements ICopyable, IEquatable {
 export class Vec2 implements ICopyable, IEquatable {
     constructor(x: number, y: number);
     copy: () => Vec2;
-    copyFrom: (other: Vec2) => this;
     equals: (other: Vec2) => boolean;
     /** The x-component. */
     get x(): number;
@@ -252,6 +244,8 @@ export class Vec2 implements ICopyable, IEquatable {
     get maxComponent(): number;
     /** The zero vector. */
     static get zero(): Vec2;
+    /** The half vector. */
+    static get half(): Vec2;
     /** The unit vector. */
     static get one(): Vec2;
     /** The right vector. */
@@ -498,14 +492,14 @@ export class Node {
     onUpdate?(): void;
 }
 /**
- * Base class for all physics-based nodes.
+ * Base class for all physics-based nodes that responds to collisions but not physics.
  *
  * Overrideable callbacks:
  * - onCollisionEnter
  * - onCollisionUpdate
  * - onCollisionExit
  */
-export abstract class Body extends Node {
+export class Body extends Node {
     /** The velocity of this body. */
     get velocity(): Vec2;
     set velocity(value: Vec2);
@@ -535,7 +529,6 @@ export class Bounds implements ICopyable, IEquatable {
     max: Vec2;
     constructor(min: Vec2, max: Vec2);
     copy: () => Bounds;
-    copyFrom: (other: Bounds) => this;
     equals: (other: Bounds) => boolean;
     /** The size of the bounds. */
     get size(): Vec2;
@@ -611,12 +604,22 @@ type Mask = number;
  */
 export abstract class Collider extends Node implements IDebugDrawable {
     protected _bounds: Bounds;
+    protected _restitution: number;
     /** The layers this body is part of. */
     layers: Mask;
     /** The layers this body can interact with. */
     filter: Mask;
     /** The globally positioned bounds of this collider. */
     get bounds(): Bounds;
+    /**
+     * The "bounciness" of this collider.
+     *
+     * A value of 0 is perfectly inelastic.
+     * A value of 1 is perfectly elastic.
+     * A value above 1 is energy generating.
+     */
+    get restitution(): number;
+    set restitution(value: number);
     /**
      * Regenerates the cached properties of the collider.
      *
@@ -706,6 +709,16 @@ export class Input {
      */
     static get mousePositionNormalized(): Vec2;
     /**
+     * Returns the position on the canvas of a normalized canvas position.
+     * @returns The position on the canvas of a normalized canvas position.
+     */
+    static normalizedToCanvas(normalizedPos: Vec2): Vec2;
+    /**
+     * Returns the normalized position of a canvas position.
+     * @returns The normalized position of a canvas position.
+     */
+    static canvasToNormalized(canvasPos: Vec2): Vec2;
+    /**
      * Returns the position on the canvas of a world position.
      * @returns The position on the canvas of a world position.
      */
@@ -715,6 +728,16 @@ export class Input {
      * @returns The position in the world of a canvas position.
      */
     static canvasToWorld(canvasPos: Vec2): Vec2;
+    /**
+     * Returns the normalized position on the canvas of a world position.
+     * @returns The normalized position on the canvas of a world position.
+     */
+    static worldToNormalized(worldPos: Vec2): Vec2;
+    /**
+     * Returns position in the world of a normalized canvas position.
+     * @returns The position in the world of a normalized canvas position.
+     */
+    static normalizedToWorld(normalizedPos: Vec2): Vec2;
 }
 /**
  * A node that has a circle collider shape.
@@ -723,17 +746,51 @@ export class CircleCollider extends Collider {
     /** The radius of the circle. */
     get radius(): number;
     set radius(value: number);
+    /** The global radius of the circle. */
+    get globalRadius(): number;
     regenerate(): void;
     onDebugDraw(context: CanvasRenderingContext2D): void;
 }
-interface CollisionInfo {
+/**
+ * A node that has a single line segment collider shape.
+ */
+export class LineCollider extends Collider {
+    /** The offset of the end from the middle of the line segment. */
+    get direction(): Vec2;
+    set direction(value: Vec2);
+    /** The start of the line segment. */
+    get start(): Vec2;
+    set start(value: Vec2);
+    /** The end of the line segment. */
+    get end(): Vec2;
+    set end(value: Vec2);
+    /** The global start of the line segment. */
+    get globalStart(): Vec2;
+    set globalStart(value: Vec2);
+    /** The global end of the line segment. */
+    get globalEnd(): Vec2;
+    set globalEnd(value: Vec2);
+    /** The offset of the global end from the global middle of the line segment. */
+    get globalDirection(): Vec2;
+    regenerate(): void;
+    onDebugDraw(context: CanvasRenderingContext2D): void;
+}
+/**
+ * A node that responds to physics and collisions.
+*/
+export class RigidBody extends Body {
+    mass: number;
+    _force: Vec2;
+    _gravity: Vec2;
+    addForce(force: Vec2): void;
 }
 /**
  * Static class for physics and collisions.
  */
 export class Physics {
+    debugContacts: Map<Vec2, number>;
     constructor();
-    tick(): CollisionInfo[];
+    tick(): void;
     static registerBody(body: Body): void;
     static registerCollider(collider: Collider, owner: Body): void;
 }
@@ -773,11 +830,6 @@ export class Game {
     static get deltaTime(): number;
 }
 /**
- * A node that responds to collisions but not physics.
-*/
-export class CollisionBody extends Body {
-}
-/**
  * Representation of a RGBA color.
  */
 export class Color implements ICopyable, IEquatable {
@@ -791,7 +843,6 @@ export class Color implements ICopyable, IEquatable {
     a: number;
     constructor(r: number, g: number, b: number, a?: number);
     copy: () => Color;
-    copyFrom: (other: Color) => this;
     equals: (other: Color) => boolean;
     /**
      * Converts the color to its #RRGGBBAA hexadecimal string representation.

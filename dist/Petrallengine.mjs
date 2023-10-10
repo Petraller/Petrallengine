@@ -148,11 +148,6 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
         this._x = 0;
         this._y = 0;
         this.copy = ()=>new $8ec4c8ffa911853c$export$2e2bcd8739ae039(this.x, this.y);
-        this.copyFrom = (other)=>{
-            this._x = other.x;
-            this._y = other.y;
-            return this;
-        };
         this.equals = (other)=>this.x === other.x && this.y === other.y;
         this._x = x;
         this._y = y;
@@ -184,6 +179,9 @@ class $8ec4c8ffa911853c$export$2e2bcd8739ae039 {
     }
     /** The zero vector. */ static get zero() {
         return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(0, 0);
+    }
+    /** The half vector. */ static get half() {
+        return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(0.5, 0.5);
     }
     /** The unit vector. */ static get one() {
         return new $8ec4c8ffa911853c$export$2e2bcd8739ae039(1, 1);
@@ -379,10 +377,6 @@ class $a53cef81bd683a5b$export$2e2bcd8739ae039 {
             ]
         ];
         this.copy = ()=>new $a53cef81bd683a5b$export$2e2bcd8739ae039(this._m);
-        this.copyFrom = (other)=>{
-            for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)this._m[r][c] = other._m[r][c];
-            return this;
-        };
         this.equals = (other)=>{
             for(let r = 0; r < 3; ++r)for(let c = 0; c < 3; ++c)if (this._m[r][c] !== other._m[r][c]) return false;
             return true;
@@ -881,11 +875,6 @@ class $b31606e820d5109e$export$2e2bcd8739ae039 {
         /** The minimum components. */ this.min = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
         /** The maximum components. */ this.max = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
         this.copy = ()=>new $b31606e820d5109e$export$2e2bcd8739ae039(this.min, this.max);
-        this.copyFrom = (other)=>{
-            this.min.copyFrom(other.min);
-            this.max.copyFrom(other.max);
-            return this;
-        };
         this.equals = (other)=>this.min.equals(other.min) && this.max.equals(other.max);
         /**
      * Determines if a point exists inside this bounds.
@@ -897,8 +886,8 @@ class $b31606e820d5109e$export$2e2bcd8739ae039 {
      * @param other The other bounds.
      * @returns Whether the bounds overlap.
      */ this.overlaps = (other)=>this.min.x <= other.max.x && this.max.x >= other.min.x && this.max.y >= other.min.y && this.min.y <= other.max.y;
-        this.min.copyFrom(min);
-        this.max.copyFrom(max);
+        this.min = min.copy();
+        this.max = max.copy();
     }
     /** The size of the bounds. */ get size() {
         return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.max, this.min);
@@ -1001,6 +990,18 @@ class $084fb6562cdf6a86$export$2e2bcd8739ae039 extends (0, $3f8760cc7c29435c$exp
     /** The globally positioned bounds of this collider. */ get bounds() {
         return this._bounds.copy();
     }
+    /** 
+     * The "bounciness" of this collider.
+     * 
+     * A value of 0 is perfectly inelastic.
+     * A value of 1 is perfectly elastic.
+     * A value above 1 is energy generating.
+     */ get restitution() {
+        return this._restitution;
+    }
+    set restitution(value) {
+        this._restitution = Math.max(value, 0);
+    }
     /**
      * Determines if this collider can interact with another collider based on their layers.
      * @param other The other collider.
@@ -1016,6 +1017,7 @@ class $084fb6562cdf6a86$export$2e2bcd8739ae039 extends (0, $3f8760cc7c29435c$exp
     constructor(...args){
         super(...args);
         this._bounds = (0, $b31606e820d5109e$export$2e2bcd8739ae039).zero;
+        this._restitution = 1;
         /** The layers this body is part of. */ this.layers = 0x00000001;
         /** The layers this body can interact with. */ this.filter = 0x00000001;
     }
@@ -1058,16 +1060,16 @@ class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
         this.canvas = null;
     })();
     static #_2 = (()=>{
-        this.keyStates = new Map();
+        this.keyStates = new Set();
     })();
     static #_3 = (()=>{
-        this.keyTransits = new Map();
+        this.keyTransits = new Set();
     })();
     static #_4 = (()=>{
-        this.mouseStates = new Map();
+        this.mouseStates = new Set();
     })();
     static #_5 = (()=>{
-        this.mouseTransits = new Map();
+        this.mouseTransits = new Set();
     })();
     static #_6 = (()=>{
         this.mousePos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
@@ -1082,13 +1084,13 @@ class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
         $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas = canvas;
         canvas.onmousedown = (ev)=>{
             const b = ev.button;
-            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseStates.set(b, true);
-            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.set(b, true);
+            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseStates.add(b);
+            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.add(b);
         };
         canvas.onmouseup = canvas.onmouseleave = (ev)=>{
             const b = ev.button;
-            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseStates.set(b, false);
-            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.set(b, true);
+            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseStates.delete(b);
+            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.add(b);
         };
         canvas.onmousemove = (ev)=>{
             $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mousePos = new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(ev.offsetX, ev.offsetY);
@@ -1097,14 +1099,14 @@ class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
         window.onkeydown = (ev)=>{
             const c = ev.code;
             if (!ev.repeat) {
-                $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyStates.set(c, true);
-                $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.set(c, true);
+                $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyStates.add(c);
+                $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.add(c);
             }
         };
         window.onkeyup = (ev)=>{
             const c = ev.code;
-            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyStates.set(c, false);
-            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.set(c, true);
+            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyStates.delete(c);
+            $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.add(c);
         };
     }
     /**
@@ -1112,50 +1114,50 @@ class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
      * 
      * Called by `Petrallengine.create`.
      */ endFrame() {
-        for (let i of $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.keys())$35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.set(i, false);
-        for (let i of $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.keys())$35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.set(i, false);
+        for (let i of $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.keys())$35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.delete(i);
+        for (let i of $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.keys())$35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.delete(i);
     }
     /**
      * Returns whether a keyboard key is down.
      * @param keyCode The code of the key.
      * @returns Whether the key is down.
      */ static isKey(keyCode) {
-        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyStates.get(keyCode) ?? false;
+        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyStates.has(keyCode);
     }
     /**
      * Returns whether a keyboard key was pressed this frame.
      * @param keyCode The code of the key.
      * @returns Whether the key was pressed this frame.
      */ static isKeyPressed(keyCode) {
-        return ($35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.get(keyCode) ?? false) && $35fd48d1ddd84d0f$export$2e2bcd8739ae039.isKey(keyCode);
+        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.has(keyCode) && $35fd48d1ddd84d0f$export$2e2bcd8739ae039.isKey(keyCode);
     }
     /**
      * Returns whether a keyboard key was released this frame.
      * @param keyCode The code of the key.
      * @returns Whether the key was released this frame.
      */ static isKeyReleased(keyCode) {
-        return ($35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.get(keyCode) ?? false) && !$35fd48d1ddd84d0f$export$2e2bcd8739ae039.isKey(keyCode);
+        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.has(keyCode) && !$35fd48d1ddd84d0f$export$2e2bcd8739ae039.isKey(keyCode);
     }
     /**
      * Returns whether a mouse button is down.
      * @param button The mouse button.
      * @returns Whether the mouse button is down.
      */ static isMouse(button = 0) {
-        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseStates.get(button) ?? false;
+        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseStates.has(button);
     }
     /**
      * Returns whether a mouse button was pressed this frame.
      * @param button The mouse button.
      * @returns Whether the mouse button was pressed this frame.
      */ static isMousePressed(button = 0) {
-        return ($35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.get(button) ?? false) && $35fd48d1ddd84d0f$export$2e2bcd8739ae039.isMouse(button);
+        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.has(button) && $35fd48d1ddd84d0f$export$2e2bcd8739ae039.isMouse(button);
     }
     /**
      * Returns whether a mouse button was released this frame.
      * @param button The mouse button.
      * @returns Whether the mouse button was released this frame.
      */ static isMouseReleased(button = 0) {
-        return ($35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.get(button) ?? false) && !$35fd48d1ddd84d0f$export$2e2bcd8739ae039.isMouse(button);
+        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.mouseTransits.has(button) && !$35fd48d1ddd84d0f$export$2e2bcd8739ae039.isMouse(button);
     }
     /**
      * Returns the position of the mouse in the canvas.
@@ -1170,6 +1172,18 @@ class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
         return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiplyComponents($35fd48d1ddd84d0f$export$2e2bcd8739ae039.mousePos, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(1 / $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas.width, 1 / $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas.height));
     }
     /**
+     * Returns the position on the canvas of a normalized canvas position.
+     * @returns The position on the canvas of a normalized canvas position.
+     */ static normalizedToCanvas(normalizedPos) {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiplyComponents(normalizedPos, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)($35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas.width, $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas.height));
+    }
+    /**
+     * Returns the normalized position of a canvas position.
+     * @returns The normalized position of a canvas position.
+     */ static canvasToNormalized(canvasPos) {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiplyComponents(canvasPos, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(1 / $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas.width, 1 / $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas.height));
+    }
+    /**
      * Returns the position on the canvas of a world position.
      * @returns The position on the canvas of a world position.
      */ static worldToCanvas(worldPos) {
@@ -1181,12 +1195,25 @@ class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
      */ static canvasToWorld(canvasPos) {
         return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).transform((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).inverse((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).makeTransformation((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $511d31ae5212a454$export$2e2bcd8739ae039).position, -1), -(0, $511d31ae5212a454$export$2e2bcd8739ae039).rotation, (0, $511d31ae5212a454$export$2e2bcd8739ae039).scale)), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(canvasPos, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).fromObjWH($35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvas), -0.5)));
     }
+    /**
+     * Returns the normalized position on the canvas of a world position.
+     * @returns The normalized position on the canvas of a world position.
+     */ static worldToNormalized(worldPos) {
+        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvasToNormalized($35fd48d1ddd84d0f$export$2e2bcd8739ae039.worldToCanvas(worldPos));
+    }
+    /**
+     * Returns position in the world of a normalized canvas position.
+     * @returns The position in the world of a normalized canvas position.
+     */ static normalizedToWorld(normalizedPos) {
+        return $35fd48d1ddd84d0f$export$2e2bcd8739ae039.canvasToWorld($35fd48d1ddd84d0f$export$2e2bcd8739ae039.normalizedToCanvas(normalizedPos));
+    }
 }
 
 
 /**
  * @author Petraller <me@petraller.com>
- */ /**
+ */ 
+/**
  * @author Petraller <me@petraller.com>
  */ 
 
@@ -1198,14 +1225,17 @@ class $e59215a0bab84dac$export$2e2bcd8739ae039 extends (0, $084fb6562cdf6a86$exp
     set radius(value) {
         this._radius = Math.max(value, 0);
     }
+    /** The global radius of the circle. */ get globalRadius() {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).half, this.globalScale) * this._radius;
+    }
     regenerate() {
-        this._bounds = new (0, $b31606e820d5109e$export$2e2bcd8739ae039)((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.globalPosition, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(this._radius, this._radius)), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(this.globalPosition, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(this._radius, this._radius)));
+        this._bounds = new (0, $b31606e820d5109e$export$2e2bcd8739ae039)((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.globalPosition, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(this.globalRadius, this.globalRadius)), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(this.globalPosition, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(this.globalRadius, this.globalRadius)));
     }
     onDebugDraw(context) {
         // Draw vertices
         context.strokeStyle = "#ff00ff";
         context.beginPath();
-        context.arc(this.globalPosition.x, this.globalPosition.y, this.radius, 0, 360);
+        context.arc(this.globalPosition.x, this.globalPosition.y, this.globalRadius, 0, 360);
         context.stroke();
         super.onDebugDraw(context);
     }
@@ -1249,11 +1279,120 @@ class $2f54bffac7b55ad5$export$2e2bcd8739ae039 extends (0, $084fb6562cdf6a86$exp
 }
 
 
+/**
+ * @author Petraller <me@petraller.com>
+ */ 
 
 
+
+class $ab128ccc83fbab1a$export$2e2bcd8739ae039 extends (0, $084fb6562cdf6a86$export$2e2bcd8739ae039) {
+    static #_ = (()=>{
+        this.BOUNDS_PADDING = 10;
+    })();
+    /** The offset of the end from the middle of the line segment. */ get direction() {
+        return this._direction.copy();
+    }
+    set direction(value) {
+        this._direction = value.copy();
+    }
+    /** The start of the line segment. */ get start() {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.position, this._direction);
+    }
+    set start(value) {
+        const end = this.end;
+        this.position = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).divide((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(value, end), 2);
+        this._direction = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(end, this.position);
+    }
+    /** The end of the line segment. */ get end() {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(this.position, this._direction);
+    }
+    set end(value) {
+        const start = this.start;
+        this.position = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).divide((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(start, value), 2);
+        this._direction = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.position, start);
+    }
+    /** The global start of the line segment. */ get globalStart() {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).transform(this.globalTransform, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(this._direction, -1));
+    }
+    set globalStart(value) {
+        const end = this.globalEnd;
+        this.globalPosition = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).divide((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(value, end), 2);
+        this._direction = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).transform((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).inverse(this.globalTransform), value), -1);
+    }
+    /** The global end of the line segment. */ get globalEnd() {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).transform(this.globalTransform, this._direction);
+    }
+    set globalEnd(value) {
+        const start = this.globalStart;
+        this.globalPosition = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).divide((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(start, value), 2);
+        this._direction = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).transform((0, $a53cef81bd683a5b$export$2e2bcd8739ae039).inverse(this.globalTransform), value);
+    }
+    /** The offset of the global end from the global middle of the line segment. */ get globalDirection() {
+        return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).divide((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.globalEnd, this.globalStart), 2);
+    }
+    regenerate() {
+        this._bounds = (0, $b31606e820d5109e$export$2e2bcd8739ae039).fromVertices([
+            (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.globalStart, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)($ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING, $ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING)),
+            (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.globalEnd, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)($ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING, $ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING)),
+            (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(this.globalStart, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)($ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING, $ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING)),
+            (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(this.globalEnd, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)($ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING, $ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING))
+        ]);
+    }
+    onDebugDraw(context) {
+        // Draw vertices
+        const sGlobal = this.globalStart;
+        const eGlobal = this.globalEnd;
+        context.strokeStyle = "#ff00ff";
+        context.beginPath();
+        context.moveTo(sGlobal.x, sGlobal.y);
+        context.lineTo(eGlobal.x, eGlobal.y);
+        context.stroke();
+        super.onDebugDraw(context);
+    }
+    constructor(...args){
+        super(...args);
+        this._direction = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).right, 100);
+    }
+}
+
+
+/**
+ * @author Petraller <me@petraller.com>
+ */ 
+
+var $ffe9b9059661caa3$export$e5420644cab0dad8;
+(function(EForceType) {
+    EForceType[EForceType["Impulse"] = 0] = "Impulse";
+    EForceType[EForceType["Constant"] = 1] = "Constant";
+})($ffe9b9059661caa3$export$e5420644cab0dad8 || ($ffe9b9059661caa3$export$e5420644cab0dad8 = {}));
+class $ffe9b9059661caa3$export$2e2bcd8739ae039 extends (0, $46a097085382b218$export$2e2bcd8739ae039) {
+    addForce(force) {}
+    constructor(...args){
+        super(...args);
+        this.mass = 1;
+        this._force = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
+        this._gravity = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).down;
+    }
+}
+
+
+
+
+class $faf0e2bf52520646$var$RBVec {
+    constructor(positional, rotational){
+        /** The positional component. */ this.pos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
+        /** The rotational component. */ this.rot = 0;
+        this.copy = ()=>new $faf0e2bf52520646$var$RBVec(this.pos, this.rot);
+        this.pos = positional.copy();
+        this.rot = rotational;
+    }
+    /** The zero vector. */ static get zero() {
+        return new $faf0e2bf52520646$var$RBVec((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, 0);
+    }
+}
 function $faf0e2bf52520646$var$makeSnowflakePair(id1, id2) {
     if (id1 < id2) return id1 + "|" + id2;
-    return id2 + "|" + id2;
+    return id2 + "|" + id1;
 }
 function $faf0e2bf52520646$var$breakSnowflakePair(pair) {
     const items = pair.split("|");
@@ -1264,24 +1403,29 @@ function $faf0e2bf52520646$var$breakSnowflakePair(pair) {
 }
 class $faf0e2bf52520646$export$2e2bcd8739ae039 {
     static #_ = (()=>{
-        this.singleton = null;
+        this.PENETRATION_IMPULSE_STRENGTH = 10;
     })();
     static #_1 = (()=>{
-        this.bodies = new Map();
+        this.singleton = null;
     })();
     static #_2 = (()=>{
-        this.colliders = new Map();
+        this.bodies = new Map();
     })();
     static #_3 = (()=>{
-        this.bodyColliders = new Map();
+        this.colliders = new Map();
     })();
     static #_4 = (()=>{
-        this.colliderBodies = new Map();
+        this.bodyColliders = new Map();
     })();
     static #_5 = (()=>{
+        this.colliderBodies = new Map();
+    })();
+    static #_6 = (()=>{
         this.pairsCollided = new Set();
     })();
     constructor(){
+        // DEBUG
+        this.debugContacts = new Map();
         if ($faf0e2bf52520646$export$2e2bcd8739ae039.singleton) {
             console.warn("Physics is used as a static class, do not create additional objects of Physics");
             return;
@@ -1289,25 +1433,37 @@ class $faf0e2bf52520646$export$2e2bcd8739ae039 {
         $faf0e2bf52520646$export$2e2bcd8739ae039.singleton = this;
     }
     tick() {
-        let collisions = [];
-        let pairsCalled = new Set();
-        function triggerBody(c1, c2) {
+        let collisions = []; // all collisions this iteration
+        let bodyCollisionCount = new Map(); // number of collisions per body this iteration
+        let bodyPairsCalled = new Set(); // pairs of bodies triggered this iteration
+        const collideBodies = (c1, c2, col)=>{
             const b1 = $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get($faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.get(c1.id));
             const b2 = $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get($faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.get(c2.id));
             const pair = $faf0e2bf52520646$var$makeSnowflakePair(b1.id, b2.id);
-            if (!$faf0e2bf52520646$export$2e2bcd8739ae039.pairsCollided.has(pair)) {
+            if (!bodyPairsCalled.has(pair)) {
                 // Call collision enter callback
-                $faf0e2bf52520646$export$2e2bcd8739ae039.pairsCollided.add(pair);
-                b1.onCollisionEnter?.call(b1, b2);
-                b2.onCollisionEnter?.call(b2, b1);
-            } else {
+                if (!$faf0e2bf52520646$export$2e2bcd8739ae039.pairsCollided.has(pair)) {
+                    $faf0e2bf52520646$export$2e2bcd8739ae039.pairsCollided.add(pair);
+                    b1.onCollisionEnter?.call(b1, b2);
+                    b2.onCollisionEnter?.call(b2, b1);
+                }
                 // Call collision update callback
                 b1.onCollisionUpdate?.call(b1, b2);
                 b2.onCollisionUpdate?.call(b2, b1);
+                // Mark this pair as being called this frame
+                bodyPairsCalled.add(pair);
             }
-            // Mark this pair as being called this frame
-            if (!pairsCalled.has(pair)) pairsCalled.add(pair);
-        }
+            // Register collision between bodies for resolution
+            bodyCollisionCount.set(b1, (bodyCollisionCount.get(b1) ?? 0) + 1);
+            bodyCollisionCount.set(b2, (bodyCollisionCount.get(b2) ?? 0) + 1);
+            collisions.push([
+                c1,
+                c2,
+                col
+            ]);
+            // DEBUG
+            if (col.willIntersect) this.debugContacts.set(col.contactPos, 0.1);
+        };
         // Get colliders as array
         let colliders = Array.from($faf0e2bf52520646$export$2e2bcd8739ae039.colliders.values());
         // Sort by min x
@@ -1329,8 +1485,8 @@ class $faf0e2bf52520646$export$2e2bcd8739ae039 {
                 // Non-intersecting layers
                 if (!ci.canCollideWith(cj)) continue;
                 // Extend bounds
-                const bndi = (0, $b31606e820d5109e$export$2e2bcd8739ae039).extend(ci.bounds, bi.velocity);
-                const bndj = (0, $b31606e820d5109e$export$2e2bcd8739ae039).extend(cj.bounds, bj.velocity);
+                const bndi = (0, $b31606e820d5109e$export$2e2bcd8739ae039).extend(ci.bounds, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(bi.velocity, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime));
+                const bndj = (0, $b31606e820d5109e$export$2e2bcd8739ae039).extend(cj.bounds, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(bj.velocity, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime));
                 // X limits
                 if (bndj.min.x > bndi.max.x) break;
                 // Y overlap
@@ -1340,21 +1496,42 @@ class $faf0e2bf52520646$export$2e2bcd8739ae039 {
                 // --- NARROW PHASE ---
                 if (ci instanceof (0, $e59215a0bab84dac$export$2e2bcd8739ae039) && cj instanceof (0, $e59215a0bab84dac$export$2e2bcd8739ae039)) {
                     // Circle-circle
-                    const col = $faf0e2bf52520646$export$2e2bcd8739ae039.circleCircleIntersection(ci.globalPosition, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, ci.radius, cj.globalPosition, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero, cj.radius);
-                    if (col.willIntersect) {
-                        collisions.push(col);
-                        triggerBody(ci, cj);
-                    }
+                    const col = $faf0e2bf52520646$export$2e2bcd8739ae039.circleCircleIntersection({
+                        position: ci.globalPosition,
+                        velocity: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(bi.velocity, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime),
+                        radius: ci.globalRadius
+                    }, {
+                        position: cj.globalPosition,
+                        velocity: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(bj.velocity, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime),
+                        radius: cj.globalRadius
+                    });
+                    if (col.penetrationDepth > 0 || col.willIntersect) collideBodies(ci, cj, col);
+                    continue;
+                } else if (ci instanceof (0, $e59215a0bab84dac$export$2e2bcd8739ae039) && cj instanceof (0, $ab128ccc83fbab1a$export$2e2bcd8739ae039) || ci instanceof (0, $ab128ccc83fbab1a$export$2e2bcd8739ae039) && cj instanceof (0, $e59215a0bab84dac$export$2e2bcd8739ae039)) {
+                    // Circle-line
+                    const ccircle = ci instanceof (0, $e59215a0bab84dac$export$2e2bcd8739ae039) ? ci : cj;
+                    const cline = ci instanceof (0, $ab128ccc83fbab1a$export$2e2bcd8739ae039) ? ci : cj;
+                    const bcircle = ccircle == ci ? bi : bj;
+                    const bline = cline == ci ? bi : bj;
+                    const col = $faf0e2bf52520646$export$2e2bcd8739ae039.circleLineSegmentIntersection({
+                        position: ccircle.globalPosition,
+                        velocity: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(bcircle.velocity, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime),
+                        radius: ccircle.globalRadius
+                    }, {
+                        position: cline.globalPosition,
+                        velocity: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(bline.velocity, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime),
+                        direction: cline.globalDirection
+                    });
+                    if (col.penetrationDepth > 0 || col.willIntersect) collideBodies(ccircle, cline, col);
                     continue;
                 } else if (ci instanceof (0, $2f54bffac7b55ad5$export$2e2bcd8739ae039) && cj instanceof (0, $2f54bffac7b55ad5$export$2e2bcd8739ae039)) continue;
                 else if (ci instanceof (0, $e59215a0bab84dac$export$2e2bcd8739ae039) && cj instanceof (0, $2f54bffac7b55ad5$export$2e2bcd8739ae039) || ci instanceof (0, $2f54bffac7b55ad5$export$2e2bcd8739ae039) && cj instanceof (0, $e59215a0bab84dac$export$2e2bcd8739ae039)) continue;
-                console.error(`Colliders ${typeof ci} and ${typeof cj} not supported by collision detection`);
             }
         }
         // Clear uncalled pairs
         for (const pair of $faf0e2bf52520646$export$2e2bcd8739ae039.pairsCollided.values()){
             const [b1id, b2id] = $faf0e2bf52520646$var$breakSnowflakePair(pair);
-            if (pairsCalled.has(pair)) continue;
+            if (bodyPairsCalled.has(pair)) continue;
             const [b1, b2] = [
                 $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get(b1id),
                 $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get(b2id)
@@ -1363,7 +1540,69 @@ class $faf0e2bf52520646$export$2e2bcd8739ae039 {
             b1.onCollisionExit?.call(b1, b2);
             b2.onCollisionExit?.call(b2, b1);
         }
-        return collisions;
+        let cached = new Map();
+        for (const b of $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.values())cached.set(b, {
+            pos: b.globalPosition,
+            vel: b.velocity
+        });
+        // Solve collisions
+        for (const collision of collisions){
+            const [c1, c2, col] = collision;
+            const b1 = $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get($faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.get(c1.id));
+            const b2 = $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get($faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.get(c2.id));
+            let b1cache = cached.get(b1);
+            let b2cache = cached.get(b2);
+            // Only respond if both are RBs
+            if (b1 instanceof (0, $ffe9b9059661caa3$export$2e2bcd8739ae039) && b2 instanceof (0, $ffe9b9059661caa3$export$2e2bcd8739ae039)) {
+                // Mass splitting
+                let [m1, m2] = [
+                    b1.mass / (bodyCollisionCount.get(b1) ?? 1),
+                    b2.mass / (bodyCollisionCount.get(b2) ?? 1)
+                ];
+                // Infinite mass case
+                if (b1.mass === Infinity && b2.mass === Infinity) continue;
+                const w = $faf0e2bf52520646$export$2e2bcd8739ae039.massToWeights(m1, m2);
+                // Impulse response
+                if (col.willIntersect) {
+                    const restitution = (c1.restitution + c2.restitution) / 2;
+                    // Magnitude of velocity in direction of normal
+                    const [a1, a2] = [
+                        (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(b1.velocity, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime), col.contactNormal),
+                        (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(b2.velocity, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime), col.contactNormal)
+                    ];
+                    // Get calculated reflected velocities and position
+                    const reflVel1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(b1.velocity, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(col.contactNormal, 2 * (a2 - a1) * w[0])), restitution);
+                    const reflVel2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(b2.velocity, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(col.contactNormal, 2 * (a1 - a2) * w[1])), restitution);
+                    const reflPos1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(col.intersectPos1, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(reflVel1, 1 - col.intersectTime));
+                    const reflPos2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(col.intersectPos2, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(reflVel2, 1 - col.intersectTime));
+                    // Offset of collider from body
+                    const c1Off = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(c1.globalPosition, b1.globalPosition);
+                    const c2Off = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(c2.globalPosition, b2.globalPosition);
+                    // Accumulate deltas
+                    let dp1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(reflPos1, c1Off), b1cache.pos);
+                    let dp2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(reflPos2, c2Off), b2cache.pos);
+                    let dv1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).divide(reflVel1, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime), b1cache.vel);
+                    let dv2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).divide(reflVel2, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime), b2cache.vel);
+                    b1cache.pos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b1cache.pos, dp1);
+                    b2cache.pos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b2cache.pos, dp2);
+                    b1cache.vel = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b1cache.vel, dv1);
+                    b2cache.vel = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b2cache.vel, dv2);
+                }
+                // Penetration response
+                if (col.penetrationDepth > 0) {
+                    b1cache.vel = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b1cache.vel, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(col.contactNormal, $faf0e2bf52520646$export$2e2bcd8739ae039.PENETRATION_IMPULSE_STRENGTH * col.penetrationDepth * w[0]));
+                    b2cache.vel = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b2cache.vel, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(col.contactNormal, -$faf0e2bf52520646$export$2e2bcd8739ae039.PENETRATION_IMPULSE_STRENGTH * col.penetrationDepth * w[1]));
+                }
+                // Normal response
+                b1cache.pos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b1cache.pos, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(col.contactNormal, (1 + col.penetrationDepth) * w[0]));
+                b2cache.pos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b2cache.pos, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(col.contactNormal, -(1 + col.penetrationDepth) * w[1]));
+            }
+        }
+        // --- DYNAMICS ---
+        for (const [body, next] of cached){
+            body.velocity = next.vel;
+            body.globalPosition = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(next.pos, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(next.vel, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime));
+        }
     }
     static registerBody(body) {
         if ($faf0e2bf52520646$export$2e2bcd8739ae039.bodies.has(body.id) || $faf0e2bf52520646$export$2e2bcd8739ae039.bodyColliders.has(body.id)) {
@@ -1390,92 +1629,172 @@ class $faf0e2bf52520646$export$2e2bcd8739ae039 {
         $faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.set(collider.id, owner.id);
         $faf0e2bf52520646$export$2e2bcd8739ae039.bodyColliders.get(owner.id)?.add(collider.id);
     }
-    static rayCircleIntersection(posRay, velRay, posCircle, radius) {
+    static circleLineSegmentIntersection(c1, c2) {
         let output = {
+            penetrationDepth: 0,
             willIntersect: false,
-            isInterior: false,
-            intersectTime: 0
+            intersectTime: 0,
+            intersectPos1: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero,
+            intersectPos2: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero,
+            contactPos: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero,
+            contactNormal: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero
         };
+        // Line properties
+        const lineStart = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(c2.position, c2.direction);
+        const lineMid = c2.position.copy();
+        const lineEnd = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(c2.position, c2.direction);
+        const lineDirNorm = c2.direction.normalized;
+        const lineNormal = c2.direction.normal.normalized;
+        // Relative vel of 1 from 2
+        const relVel = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(c1.velocity, c2.velocity);
+        // Parallel distance along line
+        const d = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(c1.position, c2.position), lineDirNorm);
+        // Closest point on line
+        const cpline = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(c2.position, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(lineDirNorm, Math.clamp(d, -c2.direction.length, c2.direction.length)));
+        output.contactNormal = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(c1.position, cpline).normalized;
+        output.penetrationDepth = Math.max(c1.radius - (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(c1.position, cpline).length, 0);
+        // Zero relative velocity
+        if (relVel.sqrLength === 0) return output;
+        function lineEdgeCase(withinBothLines) {
+            // Relative vel normal
+            const relVelN = relVel.normal.normalized;
+            let closer = lineEnd;
+            let dist = 0;
+            if (withinBothLines) {
+                // Closer to start
+                if ((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(c1.position, lineMid), c2.direction) < 0) closer = lineStart;
+                else closer = lineEnd;
+                dist = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(closer, c1.position), relVelN);
+            } else {
+                // Perpendicular distance to start, end
+                const dStart = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(lineStart, c1.position), relVelN);
+                const dEnd = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(lineEnd, c1.position), relVelN);
+                const dStartAbs = Math.abs(dStart);
+                const dEndAbs = Math.abs(dEnd);
+                dist = dEnd;
+                // No collision
+                if (dStartAbs > c1.radius && dEndAbs > c1.radius) return output;
+                else if (dStartAbs <= c1.radius && dEndAbs <= c1.radius) {
+                    // V distance to start, end
+                    const m0 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(lineStart, c1.position), relVel);
+                    const m1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(lineEnd, c1.position), relVel);
+                    const m0Abs = Math.abs(m0);
+                    const m1Abs = Math.abs(m1);
+                    // Closer to start
+                    if (m0Abs < m1Abs) {
+                        closer = lineStart;
+                        dist = dStart;
+                    }
+                } else if (dStartAbs <= c1.radius) {
+                    closer = lineStart;
+                    dist = dStart;
+                }
+            // Else end possible collision only
+            }
+            // Delta from start to CPA
+            const m = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(closer, c1.position), relVel.normalized);
+            if (m <= 0) return;
+            // Delta from collision pt to CPA
+            const s = Math.sqrt(c1.radius * c1.radius - dist * dist);
+            if (Math.abs(dist) > c1.radius) return;
+            // Time to intersect
+            const it = (m - s) / relVel.length;
+            if (it >= 0 && it <= 1) {
+                output.willIntersect = true;
+                output.intersectTime = it;
+                output.intersectPos1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(c1.position, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(c1.velocity, output.intersectTime));
+                output.intersectPos2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(c2.position, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(c2.velocity, output.intersectTime));
+                output.contactPos = closer.copy();
+            }
+        }
+        // Signed distance of circle from line segment
+        const sd = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot(lineNormal, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(c1.position, c2.position));
+        if (sd > -c1.radius && sd < c1.radius) // Circle between distant lines
+        lineEdgeCase(true);
+        else {
+            let extrudeFn = (pos)=>pos.copy();
+            let itFn = ()=>-1;
+            let contactFn = (ipos1)=>ipos1.copy();
+            // Circle in inner half plane opposite direction of normal
+            if (sd <= -c1.radius) {
+                extrudeFn = (pos)=>(0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(pos, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(lineNormal, c1.radius));
+                itFn = ()=>-(sd + c1.radius) / (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot(lineNormal, relVel);
+                contactFn = (ipos1)=>(0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(ipos1, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(lineNormal, c1.radius));
+            } else if (sd >= c1.radius) {
+                extrudeFn = (pos)=>(0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(pos, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(lineNormal, c1.radius));
+                itFn = ()=>-(sd - c1.radius) / (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot(lineNormal, relVel);
+                contactFn = (ipos1)=>(0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(ipos1, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(lineNormal, c1.radius));
+            }
+            // Extrude points
+            const pStart = extrudeFn(lineStart);
+            const pEnd = extrudeFn(lineEnd);
+            // Moving into segment
+            if ((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot(relVel.normal, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(pStart, c1.position)) * (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot(relVel.normal, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(pEnd, c1.position)) < 0) {
+                // Perpendicular distance / perpendicular velocity
+                // = Time to intersect
+                const it = itFn();
+                if (it >= 0 && it <= 1) {
+                    output.willIntersect = true;
+                    output.intersectTime = it;
+                    output.intersectPos1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(c1.position, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(c1.velocity, output.intersectTime));
+                    output.intersectPos2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(c2.position, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(c2.velocity, output.intersectTime));
+                    output.contactPos = contactFn(output.intersectPos1);
+                }
+            } else lineEdgeCase(false);
+        }
+        return output;
+    }
+    static circleCircleIntersection(c1, c2) {
+        let output = {
+            penetrationDepth: 0,
+            willIntersect: false,
+            intersectTime: 0,
+            intersectPos1: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero,
+            intersectPos2: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero,
+            contactPos: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero,
+            contactNormal: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(c1.position, c2.position).normalized
+        };
+        // Relative circle radius
+        const relCircleRadius = c1.radius + c2.radius;
+        // Relative position of 1 from 2
+        const relPos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(c1.position, c2.position);
+        output.penetrationDepth = Math.max(relCircleRadius - relPos.length, 0);
+        // Relative vel of 1 from 2
+        const relVel = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(c1.velocity, c2.velocity);
+        // Zero relative velocity
+        if (relVel.sqrLength === 0) return output;
+        // Convert to ray-circle problem
+        const relRayPos = c1.position.copy();
+        const relRayVel = relVel.copy();
+        const relCirclePos = c2.position.copy();
         // Distance squared
-        const distSqr = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(posRay, posCircle).sqrLength;
-        // Check if interior or exterior ray
-        output.isInterior = distSqr < radius * radius;
+        const distSqr = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(relRayPos, relCirclePos).sqrLength;
         // Ray length
-        const rl = velRay.length;
+        const rl = relRayVel.length;
         // Delta from start to CPA
-        const m = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(posCircle, posRay), velRay.normalized);
-        if (!output.isInterior && m < 0 && distSqr > radius * radius) return output;
+        const m = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(relCirclePos, relRayPos), relRayVel.normalized);
         // CPA
         const nSqr = distSqr - m * m;
-        if (nSqr > radius * radius) return output;
+        if (nSqr > relCircleRadius * relCircleRadius) return output;
         // Delta from collision point to CPA
-        const s = Math.sqrt(radius * radius - nSqr);
+        const s = Math.sqrt(relCircleRadius * relCircleRadius - nSqr);
         // Time to intersect
-        const it = output.isInterior ? (m + s) / rl : (m - s) / rl;
+        const it = (m - s) / rl;
         if (it >= 0 && it <= 1) {
             output.willIntersect = true;
             output.intersectTime = it;
+            output.intersectPos1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(c1.position, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(c1.velocity, output.intersectTime));
+            output.intersectPos2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(c2.position, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(c2.velocity, output.intersectTime));
+            output.contactPos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).lerp(output.intersectPos1, output.intersectPos2, c1.radius / (c1.radius + c2.radius));
+            output.contactNormal = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(output.intersectPos1, output.intersectPos2).normalized;
         }
         return output;
     }
-    static circleCircleIntersection(pos1, vel1, radius1, pos2, vel2, radius2) {
-        let output = {
-            willIntersect: false,
-            isInterior: false,
-            intersectTime: 0,
-            intersectPos1: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero,
-            intersectPos2: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero
-        };
-        // Relative position of 1 from 2
-        const relPos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(pos1, pos2);
-        // Relative vel of 1 from 2
-        const relvel = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(vel1, vel2);
-        // Zero relative velocity
-        if (relvel.sqrLength === 0) {
-            output.willIntersect = relPos.sqrLength <= (radius1 + radius2) * (radius1 + radius2);
-            return output;
-        }
-        // Relative ray
-        const relRayPos = pos1.copy();
-        const relRayVel = relvel;
-        // Check if interior or exterior intersection
-        output.isInterior = relPos.sqrLength < (radius1 - radius2) * (radius1 - radius2);
-        if (!output.isInterior && relPos.sqrLength < (radius1 + radius2) * (radius1 + radius2)) // Overlapping circles, I don't care about this case
-        return output;
-        // Relative circle
-        const relCirclePos = pos2.copy();
-        const relCircleRadius = output.isInterior ? Math.abs(radius1 - radius2) : radius1 + radius2;
-        // Ray-circle
-        const col = $faf0e2bf52520646$export$2e2bcd8739ae039.rayCircleIntersection(relRayPos, relRayVel, relCirclePos, relCircleRadius);
-        // Intersection points
-        if (col.willIntersect) {
-            output.willIntersect = col.willIntersect;
-            output.intersectTime = col.intersectTime;
-            output.intersectPos1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(pos1, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(vel1, col.intersectTime));
-            output.intersectPos2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(pos2, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(vel2, col.intersectTime));
-        }
-        return output;
-    }
-    static circleCircleResponse(normal, intersectTime, vel1, mass1, intersectPos1, vel2, mass2, intersectPos2) {
-        let output = {
-            reflVel1: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero,
-            reflVel2: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero,
-            reflPos1: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero,
-            reflPos2: (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero
-        };
-        // Just in case
-        const n = normal.normalized;
-        // Magnitude of velocity in direction of normal
-        const a1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot(vel1, n);
-        const a2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot(vel2, n);
-        // Factor of normal to add
-        const f1 = -2 * (a1 - a2) * (mass2 < Infinity ? mass2 / (mass1 + mass2) : 1);
-        const f2 = 2 * (a1 - a2) * (mass1 < Infinity ? mass1 / (mass1 + mass2) : 1);
-        output.reflVel1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(vel1, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(n, f1));
-        output.reflVel2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(vel2, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(n, f2));
-        output.reflPos1 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(intersectPos1, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(output.reflVel1, 1 - intersectTime));
-        output.reflPos2 = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(intersectPos2, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(output.reflVel2, 1 - intersectTime));
-        return output;
+    static massToWeights(m1, m2) {
+        return [
+            m2 < Infinity ? m2 / (m1 + m2) : 1,
+            m1 < Infinity ? m1 / (m1 + m2) : 1
+        ];
     }
 }
 
@@ -1609,11 +1928,20 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
                 for (let child of node.children)debugDraw(child);
             }
             debugDraw($05bad183ec6d4f44$export$2e2bcd8739ae039.rootNode);
+            // Physics general debug draw
+            for (let contact of physics.debugContacts){
+                context.strokeStyle = "#ff0000";
+                context.beginPath();
+                context.arc(contact[0].x, contact[0].y, 4, 0, 360);
+                context.stroke();
+                physics.debugContacts.set(contact[0], contact[1] - this.deltaTime);
+                if (contact[1] < 0) physics.debugContacts.delete(contact[0]);
+            }
             // Clear transition flags
             input.endFrame();
             const tEnd = Date.now();
             const dt = tEnd - tStart;
-            const wait = Math.max(ft - dt, 0);
+            const wait = Math.max(ft - dt, 1);
             $05bad183ec6d4f44$export$2e2bcd8739ae039._time += $05bad183ec6d4f44$export$2e2bcd8739ae039._deltaTime = dt + wait;
             setTimeout(gameLoop, wait);
         };
@@ -1635,11 +1963,6 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
 
 
 
-/**
- * @author Petraller <me@petraller.com>
- */ 
-class $d5bbfaa4a2882b39$export$2e2bcd8739ae039 extends (0, $46a097085382b218$export$2e2bcd8739ae039) {
-}
 
 
 
@@ -1655,12 +1978,6 @@ class $65b04c82fca59f60$export$2e2bcd8739ae039 {
         /** The blue component. */ this.b = 0;
         /** The alpha component. */ this.a = 1;
         this.copy = ()=>new $65b04c82fca59f60$export$2e2bcd8739ae039(this.r, this.g, this.b, this.a);
-        this.copyFrom = (other)=>{
-            this.r = other.r;
-            this.g = other.g;
-            this.b = other.b, this.a = other.a;
-            return this;
-        };
         this.equals = (other)=>this.r == other.r && this.g == other.g && this.b == other.b && this.a == other.a;
         /**
      * Converts the color to its #RRGGBBAA hexadecimal string representation.
@@ -1936,5 +2253,5 @@ class $31caad46b2dacdff$export$2e2bcd8739ae039 extends (0, $3f8760cc7c29435c$exp
 
 
 
-export {$05bad183ec6d4f44$export$2e2bcd8739ae039 as Game, $46a097085382b218$export$2e2bcd8739ae039 as Body, $e59215a0bab84dac$export$2e2bcd8739ae039 as CircleCollider, $084fb6562cdf6a86$export$2e2bcd8739ae039 as Collider, $d5bbfaa4a2882b39$export$2e2bcd8739ae039 as CollisionBody, $3f8760cc7c29435c$export$2e2bcd8739ae039 as Node, $31caad46b2dacdff$export$2e2bcd8739ae039 as Sprite, $b31606e820d5109e$export$2e2bcd8739ae039 as Bounds, $65b04c82fca59f60$export$2e2bcd8739ae039 as Color, $a53cef81bd683a5b$export$2e2bcd8739ae039 as Mat3, $8ec4c8ffa911853c$export$2e2bcd8739ae039 as Vec2, $511d31ae5212a454$export$2e2bcd8739ae039 as Camera, $35fd48d1ddd84d0f$export$2e2bcd8739ae039 as Input, $faf0e2bf52520646$export$2e2bcd8739ae039 as Physics, $24207f53032a3f4e$export$389de06130c9495c as makeSnowflake};
+export {$05bad183ec6d4f44$export$2e2bcd8739ae039 as Game, $46a097085382b218$export$2e2bcd8739ae039 as Body, $e59215a0bab84dac$export$2e2bcd8739ae039 as CircleCollider, $084fb6562cdf6a86$export$2e2bcd8739ae039 as Collider, $ab128ccc83fbab1a$export$2e2bcd8739ae039 as LineCollider, $3f8760cc7c29435c$export$2e2bcd8739ae039 as Node, $ffe9b9059661caa3$export$2e2bcd8739ae039 as RigidBody, $31caad46b2dacdff$export$2e2bcd8739ae039 as Sprite, $b31606e820d5109e$export$2e2bcd8739ae039 as Bounds, $65b04c82fca59f60$export$2e2bcd8739ae039 as Color, $a53cef81bd683a5b$export$2e2bcd8739ae039 as Mat3, $8ec4c8ffa911853c$export$2e2bcd8739ae039 as Vec2, $511d31ae5212a454$export$2e2bcd8739ae039 as Camera, $35fd48d1ddd84d0f$export$2e2bcd8739ae039 as Input, $faf0e2bf52520646$export$2e2bcd8739ae039 as Physics, $24207f53032a3f4e$export$389de06130c9495c as makeSnowflake};
 //# sourceMappingURL=Petrallengine.mjs.map
