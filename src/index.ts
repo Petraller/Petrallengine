@@ -147,6 +147,14 @@ if (false) {
 
 // --- COLLIDERS DEMO ---
 if (true) {
+    class MyClickHandler extends P.Node {
+        onUpdate(): void {
+            if (P.Input.isMousePressed(0))
+                console.log(P.Input.canvasToWorld(P.Input.mousePosition));
+        }
+    }
+    P.Game.root.createChild(MyClickHandler);
+
     class MyBody extends P.RigidBody {
         startingPos: P.Vec2 = P.Vec2.multiply(P.Vec2.left, 100);
         acceleration = 1000;
@@ -195,6 +203,7 @@ if (true) {
     b1.keys = ["KeyD", "KeyS", "KeyA", "KeyW"];
     b1.name = "WASDCircle";
     b1.mass = Infinity;
+    b1.scale = new P.Vec2(1, 0.5);
     const n = 4;
     for (let i = 0; i < n; ++i) {
         const c = b1.createChild(MyCollider);
@@ -205,21 +214,27 @@ if (true) {
     b2.keys = ["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"];
     b2.name = "ArrowCircle";
 
-    // const wall1 = P.Game.root.createChild(P.RigidBody).createChild(P.LineCollider);
-    // wall1.parent!.name = "WallL";
-    // wall1.start = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.1));
-    // wall1.end = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.9));
-    // (wall1.parent as P.RigidBody).mass = Infinity;
+    const wall1 = P.Game.root.createChild(P.RigidBody).createChild(P.LineCollider);
+    wall1.parent!.name = "WallL";
+    wall1.globalStart = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.1));
+    wall1.globalEnd = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.9));
+    (wall1.parent as P.RigidBody).mass = Infinity;
+
     // const wall2 = P.Game.root.createChild(P.RigidBody).createChild(P.LineCollider);
     // wall2.parent!.name = "WallD";
-    // wall2.start = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.9));
+    // wall2.globalPosition = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.9));
     // wall2.end = P.Input.normalizedToWorld(new P.Vec2(0.9, 0.9));
+    // (wall2.parent as P.RigidBody).mass = Infinity;
+
     // const wall3 = P.Game.root.createChild(P.RigidBody).createChild(P.LineCollider);
     // wall3.parent!.name = "WallR";
-    // wall3.start = P.Input.normalizedToWorld(new P.Vec2(0.9, 0.9));
+    // wall3.globalPosition = P.Input.normalizedToWorld(new P.Vec2(0.9, 0.9));
     // wall3.end = P.Input.normalizedToWorld(new P.Vec2(0.9, 0.1));
+    // (wall3.parent as P.RigidBody).mass = Infinity;
+
     // const wall4 = P.Game.root.createChild(P.RigidBody).createChild(P.LineCollider);
     // wall4.parent!.name = "WallU";
-    // wall4.start = P.Input.normalizedToWorld(new P.Vec2(0.9, 0.1));
+    // wall4.globalPosition = P.Input.normalizedToWorld(new P.Vec2(0.9, 0.1));
     // wall4.end = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.1));
+    // (wall4.parent as P.RigidBody).mass = Infinity;
 }
