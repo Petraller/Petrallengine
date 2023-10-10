@@ -17,6 +17,8 @@ export type Mask = number;
  * A collider must have a parent PhysicsBody to detect collisions.
  */
 export default abstract class Collider extends Node implements IDebugDrawable {
+    protected static readonly BOUNDS_PADDING = 10;
+
     protected _bounds = Bounds.zero;
     protected _restitution = 1;
 

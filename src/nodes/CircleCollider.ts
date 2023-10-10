@@ -21,8 +21,8 @@ export default class CircleCollider extends Collider {
 
     regenerate() {
         this._bounds = new Bounds(
-            Vec2.subtract(this.globalPosition, new Vec2(this.globalRadius, this.globalRadius)),
-            Vec2.add(this.globalPosition, new Vec2(this.globalRadius, this.globalRadius)));
+            Vec2.subtract(this.globalPosition, new Vec2(this.globalRadius + Collider.BOUNDS_PADDING, this.globalRadius + Collider.BOUNDS_PADDING)),
+            Vec2.add(this.globalPosition, new Vec2(this.globalRadius + Collider.BOUNDS_PADDING, this.globalRadius + Collider.BOUNDS_PADDING)));
     }
 
     onDebugDraw(context: CanvasRenderingContext2D): void {

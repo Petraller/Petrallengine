@@ -11,8 +11,6 @@ import Vec2 from '../structures/Vec2';
  * A node that has a single line segment collider shape.
  */
 export default class LineCollider extends Collider {
-    private static readonly BOUNDS_PADDING = 10;
-
     private _direction: Vec2 = Vec2.multiply(Vec2.right, 100);
 
     /** The offset of the end from the middle of the line segment. */
@@ -58,10 +56,10 @@ export default class LineCollider extends Collider {
 
     regenerate() {
         this._bounds = Bounds.fromVertices([
-            Vec2.subtract(this.globalStart, new Vec2(LineCollider.BOUNDS_PADDING, LineCollider.BOUNDS_PADDING)),
-            Vec2.subtract(this.globalEnd, new Vec2(LineCollider.BOUNDS_PADDING, LineCollider.BOUNDS_PADDING)),
-            Vec2.add(this.globalStart, new Vec2(LineCollider.BOUNDS_PADDING, LineCollider.BOUNDS_PADDING)),
-            Vec2.add(this.globalEnd, new Vec2(LineCollider.BOUNDS_PADDING, LineCollider.BOUNDS_PADDING))
+            Vec2.subtract(this.globalStart, new Vec2(Collider.BOUNDS_PADDING, Collider.BOUNDS_PADDING)),
+            Vec2.subtract(this.globalEnd, new Vec2(Collider.BOUNDS_PADDING, Collider.BOUNDS_PADDING)),
+            Vec2.add(this.globalStart, new Vec2(Collider.BOUNDS_PADDING, Collider.BOUNDS_PADDING)),
+            Vec2.add(this.globalEnd, new Vec2(Collider.BOUNDS_PADDING, Collider.BOUNDS_PADDING))
         ]);
     }
 

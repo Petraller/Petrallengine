@@ -146,15 +146,7 @@ if (false) {
 }
 
 // --- COLLIDERS DEMO ---
-if (true) {
-    class MyClickHandler extends P.Node {
-        onUpdate(): void {
-            if (P.Input.isMousePressed(0))
-                console.log(P.Input.canvasToWorld(P.Input.mousePosition));
-        }
-    }
-    P.Game.root.createChild(MyClickHandler);
-
+if (false) {
     class MyBody extends P.RigidBody {
         startingPos: P.Vec2 = P.Vec2.multiply(P.Vec2.left, 100);
         acceleration = 1000;
@@ -247,4 +239,53 @@ if (true) {
     wall4.globalEnd = P.Input.normalizedToWorld(new P.Vec2(0.1, 0.1));
     wall4.restitution = 0;
     (wall4.parent as P.RigidBody).mass = Infinity;
+}
+
+// --- POOL DEMO ---
+if (true) {
+    class MyBall extends P.RigidBody {
+        acceleration = 1000;
+        onUpdate(): void {
+            if (P.Input.isKeyPressed("Space")) {
+                this.velocity = P.Vec2.rotate(new P.Vec2(800, 0), Math.random() * 10 - 5);
+            }
+        }
+    }
+
+    const firstBallPosition = P.Input.normalizedToWorld(new P.Vec2(0.65, 0.5))
+    const ballRadius = 20;
+    const ballSpacing = ballRadius * 2 + 100 * Number.EPSILON;
+
+    {
+        const cue = P.Game.root.createChild(MyBall);
+        cue.globalPosition = P.Input.normalizedToWorld(new P.Vec2(0.25, 0.5));
+        cue.mass = 2;
+        const collider = cue.createChild(P.CircleCollider);
+        collider.restitution = 0.9;
+        collider.radius = ballRadius * 0.9;
+    }
+
+    for (let i = 1; i <= 5; ++i) {
+        const ballHOffset = P.Vec2.multiply(P.Vec2.rotate(P.Vec2.right, 30), (i - 1) * ballSpacing);
+        for (let j = 0; j < i; ++j) {
+            const ballVOffset = P.Vec2.multiply(P.Vec2.up, j * ballSpacing);
+            const ball = P.Game.root.createChild(P.RigidBody);
+            ball.name = "Ball";
+            ball.globalPosition = P.Vec2.add(firstBallPosition, P.Vec2.add(ballHOffset, ballVOffset));
+            const collider = ball.createChild(P.CircleCollider);
+            collider.restitution = 0.9;
+            collider.radius = ballRadius;
+        }
+    }
+
+    for (const v of [
+        [[0, 0], [0, 1]], [[0, 1], [1, 1]], [[1, 1], [1, 0]], [[1, 0], [0, 0]],
+    ]) {
+        const wall = P.Game.root.createChild(P.RigidBody);
+        wall.mass = Infinity;
+        const collider = wall.createChild(P.LineCollider);
+        collider.restitution = 0.9;
+        collider.globalStart = P.Input.normalizedToWorld(new P.Vec2(v[0][0], v[0][1]));
+        collider.globalEnd = P.Input.normalizedToWorld(new P.Vec2(v[1][0], v[1][1]));
+    }
 }
