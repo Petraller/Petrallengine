@@ -315,6 +315,8 @@ export default class Physics {
 
                 // Penetration response
                 if (col.penetrationDepth > 0) {
+                    b1cache.pos = Vec2.add(b1cache.pos, Vec2.multiply(col.contactNormal, col.penetrationDepth * w[0]));
+                    b2cache.pos = Vec2.add(b2cache.pos, Vec2.multiply(col.contactNormal, -col.penetrationDepth * w[1]));
                     b1cache.vel = Vec2.add(b1cache.vel, Vec2.multiply(col.contactNormal, Physics.PENETRATION_IMPULSE_STRENGTH * col.penetrationDepth * w[0]));
                     b2cache.vel = Vec2.add(b2cache.vel, Vec2.multiply(col.contactNormal, -Physics.PENETRATION_IMPULSE_STRENGTH * col.penetrationDepth * w[1]));
                 }
