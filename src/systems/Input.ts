@@ -48,11 +48,13 @@ export default class Input {
                 Input.keyStates.add(c);
                 Input.keyTransits.add(c);
             }
+            ev.preventDefault();
         };
         window.onkeyup = (ev) => {
             const c = ev.code;
             Input.keyStates.delete(c);
             Input.keyTransits.add(c);
+            ev.preventDefault();
         };
     }
 
