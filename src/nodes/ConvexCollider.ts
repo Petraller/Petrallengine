@@ -6,7 +6,7 @@ import Collider from './Collider';
 import Vec2 from '../structures/Vec2';
 
 /**
- * Base class for convex polygon colliders
+ * Base class for convex polygon colliders.
  */
 export default abstract class ConvexCollider extends Collider {
     protected _vertices: Vec2[] = [];
