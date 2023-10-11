@@ -38,6 +38,8 @@ export default class Node {
     children: Node[] = [];
     /** Whether this node has started. */
     isStarted: boolean = false;
+    /** Whether this node is marked for destruction. */
+    isDestroyed: boolean = false;
 
     /**
      * Avoid calling `new Node`, call `Petrallengine.root.createChild` instead.
@@ -163,11 +165,7 @@ export default class Node {
      * Destroys this node and all children nodes.
      */
     destroy() {
-        for (let child of this.children) {
-            child.destroy();
-        }
-        this.onDestroy?.call(this);
-        this.parent = null;
+        this.isDestroyed = true;
     }
 
     /**

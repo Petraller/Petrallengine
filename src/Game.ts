@@ -115,6 +115,39 @@ export default class Game {
             }
             update(Game.rootNode);
 
+            // Deferred destroy
+            function destroy(node: Node) {
+                if (node.isDestroyed) {
+                    // Callback
+                    node.onDestroy?.call(node);
+
+                    // Deregister from physics system
+                    if (node instanceof Body) {
+                        Physics.deregisterBody(node);
+                    }
+                    if (node instanceof Collider) {
+                        Physics.deregisterCollider(node);
+                    }
+
+                    // Mark children
+                    for (let child of node.children) {
+                        child.isDestroyed = true;
+                    }
+
+                    // Unlink from parent
+                    if (node.parent) {
+                        node.parent.children.splice(node.parent.children.indexOf(node), 1);
+                        node.parent = null;
+                    }
+                }
+
+                // Iterate children
+                for (let child of node.children) {
+                    destroy(child);
+                }
+            }
+            destroy(Game.rootNode);
+
             // Physics step
             physics.tick();
 

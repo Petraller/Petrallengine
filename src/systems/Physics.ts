@@ -355,6 +355,14 @@ export default class Physics {
         Physics.bodyColliders.set(body.id, new Set<Snowflake>);
     }
 
+    static deregisterBody(body: Body) {
+        for (const col of Physics.bodyColliders.get(body.id) ?? []) {
+            Physics.colliderBodies.delete(col);
+        }
+        Physics.bodies.delete(body.id);
+        Physics.bodyColliders.delete(body.id);
+    }
+
     static registerCollider(collider: Collider, owner: Body) {
         if (Physics.colliders.has(collider.id) || Physics.colliderBodies.has(collider.id)) {
             console.error(`Collider #${owner.id} already registered in physics system`);
@@ -371,6 +379,12 @@ export default class Physics {
         Physics.colliders.set(collider.id, collider);
         Physics.colliderBodies.set(collider.id, owner.id);
         Physics.bodyColliders.get(owner.id)?.add(collider.id);
+    }
+
+    static deregisterCollider(collider: Collider) {
+        Physics.bodyColliders.get(Physics.colliderBodies.get(collider.id) ?? "")?.delete(collider.id);
+        Physics.colliders.delete(collider.id);
+        Physics.colliderBodies.delete(collider.id);
     }
 
     private static circleLineSegmentIntersection(c1: CircleInput, c2: LineSegmentInput) {
