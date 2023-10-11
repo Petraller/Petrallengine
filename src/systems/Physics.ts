@@ -160,12 +160,30 @@ export default class Physics {
             const ci = colliders[i];
             ci.globalTransform;
             ci.regenerate();
-            const bi = Physics.bodies.get(Physics.colliderBodies.get(ci.id)!)!;
+            const biid = Physics.colliderBodies.get(ci.id);
+            if (biid === undefined) {
+                Physics.colliders.delete(ci.id);
+                continue;
+            }
+            const bi = Physics.bodies.get(biid);
+            if (bi === undefined) {
+                Physics.colliderBodies.delete(ci.id);
+                continue;
+            }
             for (let j = i + 1; j < colliders.length; j++) {
                 const cj = colliders[j];
-                ci.globalTransform;
+                cj.globalTransform;
                 cj.regenerate();
-                const bj = Physics.bodies.get(Physics.colliderBodies.get(cj.id)!)!;
+                const bjid = Physics.colliderBodies.get(cj.id);
+                if (bjid === undefined) {
+                    Physics.colliders.delete(cj.id);
+                    continue;
+                }
+                const bj = Physics.bodies.get(bjid);
+                if (bj === undefined) {
+                    Physics.colliderBodies.delete(cj.id);
+                    continue;
+                }
 
                 // Same body
                 if (bi.id === bj.id) {
@@ -258,8 +276,11 @@ export default class Physics {
             if (bodyPairsCalled.has(pair)) {
                 continue;
             }
-            const [b1, b2] = [Physics.bodies.get(b1id)!, Physics.bodies.get(b2id)!];
             Physics.pairsCollided.delete(pair);
+            if (!Physics.bodies.has(b1id) || !Physics.bodies.get(b2id)) {
+                continue;
+            }
+            const [b1, b2] = [Physics.bodies.get(b1id)!, Physics.bodies.get(b2id)!];
             b1.onCollisionExit?.call(b1, b2);
             b2.onCollisionExit?.call(b2, b1);
         }
