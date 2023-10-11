@@ -987,6 +987,9 @@ class $b31606e820d5109e$export$2e2bcd8739ae039 {
 
 
 class $084fb6562cdf6a86$export$2e2bcd8739ae039 extends (0, $3f8760cc7c29435c$export$2e2bcd8739ae039) {
+    static #_ = (()=>{
+        this.BOUNDS_PADDING = 10;
+    })();
     /** The globally positioned bounds of this collider. */ get bounds() {
         return this._bounds.copy();
     }
@@ -1102,11 +1105,13 @@ class $35fd48d1ddd84d0f$export$2e2bcd8739ae039 {
                 $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyStates.add(c);
                 $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.add(c);
             }
+            ev.preventDefault();
         };
         window.onkeyup = (ev)=>{
             const c = ev.code;
             $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyStates.delete(c);
             $35fd48d1ddd84d0f$export$2e2bcd8739ae039.keyTransits.add(c);
+            ev.preventDefault();
         };
     }
     /**
@@ -1229,7 +1234,7 @@ class $e59215a0bab84dac$export$2e2bcd8739ae039 extends (0, $084fb6562cdf6a86$exp
         return (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).dot((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).half, this.globalScale) * this._radius;
     }
     regenerate() {
-        this._bounds = new (0, $b31606e820d5109e$export$2e2bcd8739ae039)((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.globalPosition, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(this.globalRadius, this.globalRadius)), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(this.globalPosition, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(this.globalRadius, this.globalRadius)));
+        this._bounds = new (0, $b31606e820d5109e$export$2e2bcd8739ae039)((0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.globalPosition, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(this.globalRadius + (0, $084fb6562cdf6a86$export$2e2bcd8739ae039).BOUNDS_PADDING, this.globalRadius + (0, $084fb6562cdf6a86$export$2e2bcd8739ae039).BOUNDS_PADDING)), (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(this.globalPosition, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)(this.globalRadius + (0, $084fb6562cdf6a86$export$2e2bcd8739ae039).BOUNDS_PADDING, this.globalRadius + (0, $084fb6562cdf6a86$export$2e2bcd8739ae039).BOUNDS_PADDING)));
     }
     onDebugDraw(context) {
         // Draw vertices
@@ -1286,9 +1291,6 @@ class $2f54bffac7b55ad5$export$2e2bcd8739ae039 extends (0, $084fb6562cdf6a86$exp
 
 
 class $ab128ccc83fbab1a$export$2e2bcd8739ae039 extends (0, $084fb6562cdf6a86$export$2e2bcd8739ae039) {
-    static #_ = (()=>{
-        this.BOUNDS_PADDING = 10;
-    })();
     /** The offset of the end from the middle of the line segment. */ get direction() {
         return this._direction.copy();
     }
@@ -1332,10 +1334,10 @@ class $ab128ccc83fbab1a$export$2e2bcd8739ae039 extends (0, $084fb6562cdf6a86$exp
     }
     regenerate() {
         this._bounds = (0, $b31606e820d5109e$export$2e2bcd8739ae039).fromVertices([
-            (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.globalStart, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)($ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING, $ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING)),
-            (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.globalEnd, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)($ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING, $ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING)),
-            (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(this.globalStart, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)($ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING, $ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING)),
-            (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(this.globalEnd, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)($ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING, $ab128ccc83fbab1a$export$2e2bcd8739ae039.BOUNDS_PADDING))
+            (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.globalStart, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)((0, $084fb6562cdf6a86$export$2e2bcd8739ae039).BOUNDS_PADDING, (0, $084fb6562cdf6a86$export$2e2bcd8739ae039).BOUNDS_PADDING)),
+            (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).subtract(this.globalEnd, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)((0, $084fb6562cdf6a86$export$2e2bcd8739ae039).BOUNDS_PADDING, (0, $084fb6562cdf6a86$export$2e2bcd8739ae039).BOUNDS_PADDING)),
+            (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(this.globalStart, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)((0, $084fb6562cdf6a86$export$2e2bcd8739ae039).BOUNDS_PADDING, (0, $084fb6562cdf6a86$export$2e2bcd8739ae039).BOUNDS_PADDING)),
+            (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(this.globalEnd, new (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039)((0, $084fb6562cdf6a86$export$2e2bcd8739ae039).BOUNDS_PADDING, (0, $084fb6562cdf6a86$export$2e2bcd8739ae039).BOUNDS_PADDING))
         ]);
     }
     onDebugDraw(context) {
@@ -1360,18 +1362,36 @@ class $ab128ccc83fbab1a$export$2e2bcd8739ae039 extends (0, $084fb6562cdf6a86$exp
  * @author Petraller <me@petraller.com>
  */ 
 
+
 var $ffe9b9059661caa3$export$e5420644cab0dad8;
 (function(EForceType) {
     EForceType[EForceType["Impulse"] = 0] = "Impulse";
-    EForceType[EForceType["Constant"] = 1] = "Constant";
+    EForceType[EForceType["Force"] = 1] = "Force";
 })($ffe9b9059661caa3$export$e5420644cab0dad8 || ($ffe9b9059661caa3$export$e5420644cab0dad8 = {}));
 class $ffe9b9059661caa3$export$2e2bcd8739ae039 extends (0, $46a097085382b218$export$2e2bcd8739ae039) {
-    addForce(force) {}
+    /** The mass. */ get mass() {
+        return this._mass;
+    }
+    set mass(value) {
+        this._mass = Math.max(value, Number.EPSILON);
+    }
+    addForce(force, type = $ffe9b9059661caa3$export$e5420644cab0dad8.Impulse) {
+        let a;
+        switch(type){
+            case $ffe9b9059661caa3$export$e5420644cab0dad8.Impulse:
+                a = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(force, 1 / this.mass);
+                break;
+            case $ffe9b9059661caa3$export$e5420644cab0dad8.Force:
+                a = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(force, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime / this.mass);
+                break;
+        }
+        this.velocity = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(this.velocity, a);
+    }
     constructor(...args){
         super(...args);
-        this.mass = 1;
-        this._force = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
-        this._gravity = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).down;
+        this._mass = 1;
+        /** The linear drag. */ this.drag = 0;
+        /** The force of gravity. */ this.gravity = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).zero;
     }
 }
 
@@ -1403,7 +1423,7 @@ function $faf0e2bf52520646$var$breakSnowflakePair(pair) {
 }
 class $faf0e2bf52520646$export$2e2bcd8739ae039 {
     static #_ = (()=>{
-        this.PENETRATION_IMPULSE_STRENGTH = 10;
+        this.PENETRATION_IMPULSE_STRENGTH = 100;
     })();
     static #_1 = (()=>{
         this.singleton = null;
@@ -1433,6 +1453,14 @@ class $faf0e2bf52520646$export$2e2bcd8739ae039 {
         $faf0e2bf52520646$export$2e2bcd8739ae039.singleton = this;
     }
     tick() {
+        // --- DYNAMICS ---
+        for (const [_, body] of $faf0e2bf52520646$export$2e2bcd8739ae039.bodies){
+            if (!(body instanceof (0, $ffe9b9059661caa3$export$2e2bcd8739ae039))) continue;
+            // Gravity
+            body.velocity = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(body.velocity, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(body.gravity, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime / body.mass));
+            // Drag
+            body.velocity = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).divide(body.velocity, body.drag + 1);
+        }
         let collisions = []; // all collisions this iteration
         let bodyCollisionCount = new Map(); // number of collisions per body this iteration
         let bodyPairsCalled = new Set(); // pairs of bodies triggered this iteration
@@ -1594,11 +1622,11 @@ class $faf0e2bf52520646$export$2e2bcd8739ae039 {
                     b2cache.vel = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b2cache.vel, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(col.contactNormal, -$faf0e2bf52520646$export$2e2bcd8739ae039.PENETRATION_IMPULSE_STRENGTH * col.penetrationDepth * w[1]));
                 }
                 // Normal response
-                b1cache.pos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b1cache.pos, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(col.contactNormal, (1 + col.penetrationDepth) * w[0]));
-                b2cache.pos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b2cache.pos, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(col.contactNormal, -(1 + col.penetrationDepth) * w[1]));
+                b1cache.pos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b1cache.pos, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(col.contactNormal, (1 + col.penetrationDepth) * w[0] * (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime));
+                b2cache.pos = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(b2cache.pos, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(col.contactNormal, -(1 + col.penetrationDepth) * w[1] * (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime));
             }
         }
-        // --- DYNAMICS ---
+        // --- PHYSICS RESOLUTION ---
         for (const [body, next] of cached){
             body.velocity = next.vel;
             body.globalPosition = (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).add(next.pos, (0, $8ec4c8ffa911853c$export$2e2bcd8739ae039).multiply(next.vel, (0, $05bad183ec6d4f44$export$2e2bcd8739ae039).deltaTime));

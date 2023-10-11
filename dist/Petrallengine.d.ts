@@ -603,6 +603,7 @@ type Mask = number;
  * A collider must have a parent PhysicsBody to detect collisions.
  */
 export abstract class Collider extends Node implements IDebugDrawable {
+    protected static readonly BOUNDS_PADDING = 10;
     protected _bounds: Bounds;
     protected _restitution: number;
     /** The layers this body is part of. */
@@ -775,14 +776,22 @@ export class LineCollider extends Collider {
     regenerate(): void;
     onDebugDraw(context: CanvasRenderingContext2D): void;
 }
+enum EForceType {
+    Impulse = 0,
+    Force = 1
+}
 /**
  * A node that responds to physics and collisions.
 */
 export class RigidBody extends Body {
-    mass: number;
-    _force: Vec2;
-    _gravity: Vec2;
-    addForce(force: Vec2): void;
+    /** The linear drag. */
+    drag: number;
+    /** The force of gravity. */
+    gravity: Vec2;
+    /** The mass. */
+    get mass(): number;
+    set mass(value: number);
+    addForce(force: Vec2, type?: EForceType): void;
 }
 /**
  * Static class for physics and collisions.
