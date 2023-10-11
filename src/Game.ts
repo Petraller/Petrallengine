@@ -26,9 +26,9 @@ export default class Game {
     /** The scheduled interval between frame updates in seconds. */
     static readonly FRAME_TIME = 1 / Game.FRAME_RATE;
     /** Debug draw flags. */
-    static readonly DEBUG_DRAWS = {
-        colliders: true,
-        boundingBoxes: true,
+    static debugDraw = {
+        general: false,
+        physics: false,
     };
 
     private static _deltaTime = Game.FRAME_TIME;
@@ -87,6 +87,7 @@ export default class Game {
                     node.onStart?.call(node);
                     node.isStarted = true;
 
+                    // Register in physics system
                     if (node instanceof Body) {
                         Physics.registerBody(node);
                     }
@@ -182,18 +183,22 @@ export default class Game {
                     debugDraw(child);
                 }
             }
-            debugDraw(Game.rootNode);
+            if (Game.debugDraw.general) {
+                debugDraw(Game.rootNode);
+            }
 
-            // Physics general debug draw
-            for (let contact of physics.debugContacts) {
-                context.strokeStyle = "#ff0000";
-                context.beginPath();
-                context.arc(contact[0].x, contact[0].y, 4, 0, 360);
-                context.stroke();
+            // Physics debug draw
+            if (Game.debugDraw.physics) {
+                for (let contact of physics.debugContacts) {
+                    context.strokeStyle = "#ff0000";
+                    context.beginPath();
+                    context.arc(contact[0].x, contact[0].y, 4, 0, 360);
+                    context.stroke();
 
-                physics.debugContacts.set(contact[0], contact[1] - this.deltaTime);
-                if (contact[1] < 0)
-                    physics.debugContacts.delete(contact[0]);
+                    physics.debugContacts.set(contact[0], contact[1] - this.deltaTime);
+                    if (contact[1] < 0)
+                        physics.debugContacts.delete(contact[0]);
+                }
             }
 
             // Clear transition flags
