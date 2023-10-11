@@ -675,6 +675,7 @@ class $3f8760cc7c29435c$export$2e2bcd8739ae039 {
         /** The name of this node. */ this.name = "New Node";
         /** The children nodes of this node. */ this.children = [];
         /** Whether this node has started. */ this.isStarted = false;
+        /** Whether this node is marked for destruction. */ this.isDestroyed = false;
         if (!flag) {
             console.warn(`Avoid calling \`new Node\`, call \`Petrallengine.root.createChild\` instead`);
             console.trace(`\`new Node\` call occured here:`);
@@ -789,9 +790,7 @@ class $3f8760cc7c29435c$export$2e2bcd8739ae039 {
     /**
      * Destroys this node and all children nodes.
      */ destroy() {
-        for (let child of this.children)child.destroy();
-        this.onDestroy?.call(this);
-        this.parent = null;
+        this.isDestroyed = true;
     }
     /**
      * Finds a descendant node by its name.
@@ -1501,12 +1500,30 @@ class $faf0e2bf52520646$export$2e2bcd8739ae039 {
             const ci = colliders[i];
             ci.globalTransform;
             ci.regenerate();
-            const bi = $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get($faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.get(ci.id));
+            const biid = $faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.get(ci.id);
+            if (biid === undefined) {
+                $faf0e2bf52520646$export$2e2bcd8739ae039.colliders.delete(ci.id);
+                continue;
+            }
+            const bi = $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get(biid);
+            if (bi === undefined) {
+                $faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.delete(ci.id);
+                continue;
+            }
             for(let j = i + 1; j < colliders.length; j++){
                 const cj = colliders[j];
-                ci.globalTransform;
+                cj.globalTransform;
                 cj.regenerate();
-                const bj = $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get($faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.get(cj.id));
+                const bjid = $faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.get(cj.id);
+                if (bjid === undefined) {
+                    $faf0e2bf52520646$export$2e2bcd8739ae039.colliders.delete(cj.id);
+                    continue;
+                }
+                const bj = $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get(bjid);
+                if (bj === undefined) {
+                    $faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.delete(cj.id);
+                    continue;
+                }
                 // Same body
                 if (bi.id === bj.id) continue;
                 // --- BROAD PHASE ---
@@ -1560,11 +1577,12 @@ class $faf0e2bf52520646$export$2e2bcd8739ae039 {
         for (const pair of $faf0e2bf52520646$export$2e2bcd8739ae039.pairsCollided.values()){
             const [b1id, b2id] = $faf0e2bf52520646$var$breakSnowflakePair(pair);
             if (bodyPairsCalled.has(pair)) continue;
+            $faf0e2bf52520646$export$2e2bcd8739ae039.pairsCollided.delete(pair);
+            if (!$faf0e2bf52520646$export$2e2bcd8739ae039.bodies.has(b1id) || !$faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get(b2id)) continue;
             const [b1, b2] = [
                 $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get(b1id),
                 $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.get(b2id)
             ];
-            $faf0e2bf52520646$export$2e2bcd8739ae039.pairsCollided.delete(pair);
             b1.onCollisionExit?.call(b1, b2);
             b2.onCollisionExit?.call(b2, b1);
         }
@@ -1640,6 +1658,11 @@ class $faf0e2bf52520646$export$2e2bcd8739ae039 {
         $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.set(body.id, body);
         $faf0e2bf52520646$export$2e2bcd8739ae039.bodyColliders.set(body.id, new Set);
     }
+    static deregisterBody(body) {
+        for (const col of $faf0e2bf52520646$export$2e2bcd8739ae039.bodyColliders.get(body.id) ?? [])$faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.delete(col);
+        $faf0e2bf52520646$export$2e2bcd8739ae039.bodies.delete(body.id);
+        $faf0e2bf52520646$export$2e2bcd8739ae039.bodyColliders.delete(body.id);
+    }
     static registerCollider(collider, owner) {
         if ($faf0e2bf52520646$export$2e2bcd8739ae039.colliders.has(collider.id) || $faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.has(collider.id)) {
             console.error(`Collider #${owner.id} already registered in physics system`);
@@ -1656,6 +1679,11 @@ class $faf0e2bf52520646$export$2e2bcd8739ae039 {
         $faf0e2bf52520646$export$2e2bcd8739ae039.colliders.set(collider.id, collider);
         $faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.set(collider.id, owner.id);
         $faf0e2bf52520646$export$2e2bcd8739ae039.bodyColliders.get(owner.id)?.add(collider.id);
+    }
+    static deregisterCollider(collider) {
+        $faf0e2bf52520646$export$2e2bcd8739ae039.bodyColliders.get($faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.get(collider.id) ?? "")?.delete(collider.id);
+        $faf0e2bf52520646$export$2e2bcd8739ae039.colliders.delete(collider.id);
+        $faf0e2bf52520646$export$2e2bcd8739ae039.colliderBodies.delete(collider.id);
     }
     static circleLineSegmentIntersection(c1, c2) {
         let output = {
@@ -1829,10 +1857,10 @@ class $faf0e2bf52520646$export$2e2bcd8739ae039 {
 
 class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
     static #_ = (()=>{
-        /** The build number. */ this.BUILD = 1;
+        /** The build number. */ this.BUILD = 2;
     })();
     static #_1 = (()=>{
-        /** The version. */ this.VERSION = "0.0.1";
+        /** The version. */ this.VERSION = "0.0.2";
     })();
     static #_2 = (()=>{
         /** The number of scheduled frame updates per second. */ this.FRAME_RATE = 60;
@@ -1841,9 +1869,9 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
         /** The scheduled interval between frame updates in seconds. */ this.FRAME_TIME = 1 / $05bad183ec6d4f44$export$2e2bcd8739ae039.FRAME_RATE;
     })();
     static #_4 = (()=>{
-        /** Debug draw flags. */ this.DEBUG_DRAWS = {
-            colliders: true,
-            boundingBoxes: true
+        /** Debug draw flags. */ this.debugDraw = {
+            general: false,
+            physics: false
         };
     })();
     static #_5 = (()=>{
@@ -1893,6 +1921,7 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
                 if (!node.isStarted) {
                     node.onStart?.call(node);
                     node.isStarted = true;
+                    // Register in physics system
                     if (node instanceof (0, $46a097085382b218$export$2e2bcd8739ae039)) (0, $faf0e2bf52520646$export$2e2bcd8739ae039).registerBody(node);
                     if (node instanceof (0, $084fb6562cdf6a86$export$2e2bcd8739ae039)) {
                         let curr = node.parent;
@@ -1912,6 +1941,26 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
                 for (let child of node.children)update(child);
             }
             update($05bad183ec6d4f44$export$2e2bcd8739ae039.rootNode);
+            // Deferred destroy
+            function destroy(node) {
+                if (node.isDestroyed) {
+                    // Callback
+                    node.onDestroy?.call(node);
+                    // Deregister from physics system
+                    if (node instanceof (0, $46a097085382b218$export$2e2bcd8739ae039)) (0, $faf0e2bf52520646$export$2e2bcd8739ae039).deregisterBody(node);
+                    if (node instanceof (0, $084fb6562cdf6a86$export$2e2bcd8739ae039)) (0, $faf0e2bf52520646$export$2e2bcd8739ae039).deregisterCollider(node);
+                    // Mark children
+                    for (let child of node.children)child.isDestroyed = true;
+                    // Unlink from parent
+                    if (node.parent) {
+                        node.parent.children.splice(node.parent.children.indexOf(node), 1);
+                        node.parent = null;
+                    }
+                }
+                // Iterate children
+                for (let child of node.children)destroy(child);
+            }
+            destroy($05bad183ec6d4f44$export$2e2bcd8739ae039.rootNode);
             // Physics step
             physics.tick();
             // Reset
@@ -1955,9 +2004,9 @@ class $05bad183ec6d4f44$export$2e2bcd8739ae039 {
                 // Iterate children
                 for (let child of node.children)debugDraw(child);
             }
-            debugDraw($05bad183ec6d4f44$export$2e2bcd8739ae039.rootNode);
-            // Physics general debug draw
-            for (let contact of physics.debugContacts){
+            if ($05bad183ec6d4f44$export$2e2bcd8739ae039.debugDraw.general) debugDraw($05bad183ec6d4f44$export$2e2bcd8739ae039.rootNode);
+            // Physics debug draw
+            if ($05bad183ec6d4f44$export$2e2bcd8739ae039.debugDraw.physics) for (let contact of physics.debugContacts){
                 context.strokeStyle = "#ff0000";
                 context.beginPath();
                 context.arc(contact[0].x, contact[0].y, 4, 0, 360);
@@ -2281,5 +2330,5 @@ class $31caad46b2dacdff$export$2e2bcd8739ae039 extends (0, $3f8760cc7c29435c$exp
 
 
 
-export {$05bad183ec6d4f44$export$2e2bcd8739ae039 as Game, $46a097085382b218$export$2e2bcd8739ae039 as Body, $e59215a0bab84dac$export$2e2bcd8739ae039 as CircleCollider, $084fb6562cdf6a86$export$2e2bcd8739ae039 as Collider, $ab128ccc83fbab1a$export$2e2bcd8739ae039 as LineCollider, $3f8760cc7c29435c$export$2e2bcd8739ae039 as Node, $ffe9b9059661caa3$export$2e2bcd8739ae039 as RigidBody, $31caad46b2dacdff$export$2e2bcd8739ae039 as Sprite, $b31606e820d5109e$export$2e2bcd8739ae039 as Bounds, $65b04c82fca59f60$export$2e2bcd8739ae039 as Color, $a53cef81bd683a5b$export$2e2bcd8739ae039 as Mat3, $8ec4c8ffa911853c$export$2e2bcd8739ae039 as Vec2, $511d31ae5212a454$export$2e2bcd8739ae039 as Camera, $35fd48d1ddd84d0f$export$2e2bcd8739ae039 as Input, $faf0e2bf52520646$export$2e2bcd8739ae039 as Physics, $24207f53032a3f4e$export$389de06130c9495c as makeSnowflake};
+export {$05bad183ec6d4f44$export$2e2bcd8739ae039 as Game, $46a097085382b218$export$2e2bcd8739ae039 as Body, $e59215a0bab84dac$export$2e2bcd8739ae039 as CircleCollider, $084fb6562cdf6a86$export$2e2bcd8739ae039 as Collider, $ab128ccc83fbab1a$export$2e2bcd8739ae039 as LineCollider, $3f8760cc7c29435c$export$2e2bcd8739ae039 as Node, $ffe9b9059661caa3$export$2e2bcd8739ae039 as RigidBody, $ffe9b9059661caa3$export$e5420644cab0dad8 as EForceType, $31caad46b2dacdff$export$2e2bcd8739ae039 as Sprite, $b31606e820d5109e$export$2e2bcd8739ae039 as Bounds, $65b04c82fca59f60$export$2e2bcd8739ae039 as Color, $a53cef81bd683a5b$export$2e2bcd8739ae039 as Mat3, $8ec4c8ffa911853c$export$2e2bcd8739ae039 as Vec2, $511d31ae5212a454$export$2e2bcd8739ae039 as Camera, $35fd48d1ddd84d0f$export$2e2bcd8739ae039 as Input, $faf0e2bf52520646$export$2e2bcd8739ae039 as Physics, $24207f53032a3f4e$export$389de06130c9495c as makeSnowflake};
 //# sourceMappingURL=Petrallengine.mjs.map

@@ -381,7 +381,7 @@ export class Vec2 implements ICopyable, IEquatable {
      */
     static lerpComponents: (v1: Vec2, v2: Vec2, t: Vec2) => Vec2;
 }
-type Constructor<T> = {
+export type Constructor<T> = {
     new (...args: any[]): T;
 };
 /**
@@ -404,6 +404,8 @@ export class Node {
     children: Node[];
     /** Whether this node has started. */
     isStarted: boolean;
+    /** Whether this node is marked for destruction. */
+    isDestroyed: boolean;
     /**
      * Avoid calling `new Node`, call `Petrallengine.root.createChild` instead.
      */
@@ -596,7 +598,7 @@ export class Bounds implements ICopyable, IEquatable {
 /**
  * 32-bit bitmask used for collisions.
  */
-type Mask = number;
+export type Mask = number;
 /**
  * Base class for all collider nodes.
  *
@@ -776,7 +778,7 @@ export class LineCollider extends Collider {
     regenerate(): void;
     onDebugDraw(context: CanvasRenderingContext2D): void;
 }
-enum EForceType {
+export enum EForceType {
     Impulse = 0,
     Force = 1
 }
@@ -801,7 +803,9 @@ export class Physics {
     constructor();
     tick(): void;
     static registerBody(body: Body): void;
+    static deregisterBody(body: Body): void;
     static registerCollider(collider: Collider, owner: Body): void;
+    static deregisterCollider(collider: Collider): void;
 }
 /**
  * Static class for Petrallengine.
@@ -810,17 +814,17 @@ export class Physics {
  */
 export class Game {
     /** The build number. */
-    static readonly BUILD = 1;
+    static readonly BUILD = 2;
     /** The version. */
-    static readonly VERSION = "0.0.1";
+    static readonly VERSION = "0.0.2";
     /** The number of scheduled frame updates per second. */
     static readonly FRAME_RATE = 60;
     /** The scheduled interval between frame updates in seconds. */
     static readonly FRAME_TIME: number;
     /** Debug draw flags. */
-    static readonly DEBUG_DRAWS: {
-        colliders: boolean;
-        boundingBoxes: boolean;
+    static debugDraw: {
+        general: boolean;
+        physics: boolean;
     };
     /** The root node of the whole game. */
     static get root(): Node;
