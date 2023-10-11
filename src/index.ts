@@ -146,11 +146,10 @@ if (false) {
 }
 
 // --- COLLIDERS DEMO ---
-if (false) {
+if (true) {
     class MyBody extends P.RigidBody {
         startingPos: P.Vec2 = P.Vec2.multiply(P.Vec2.left, 100);
-        acceleration = 1000;
-        drag = 0.98;
+        force = 100;
         keys: [string, string, string, string] = ["KeyD", "KeyS", "KeyA", "KeyW"];
         reset(): void {
             this.position = this.startingPos.copy();
@@ -162,7 +161,7 @@ if (false) {
         onUpdate(): void {
             for (let k = 0; k < this.keys.length; ++k) {
                 if (P.Input.isKey(this.keys[k])) {
-                    this.velocity = P.Vec2.add(this.velocity, P.Vec2.multiply(P.Vec2.rotate(P.Vec2.right, k * 90), this.acceleration * P.Game.deltaTime));
+                    this.addForce(P.Vec2.multiply(P.Vec2.rotate(P.Vec2.right, k * 90), this.force));
                 }
             }
             if (P.Input.isKey("KeyQ")) {
@@ -171,7 +170,6 @@ if (false) {
             if (P.Input.isKey("KeyE")) {
                 this.rotation++;
             }
-            this.velocity = P.Vec2.multiply(this.velocity, this.drag);
             if (P.Input.isKeyPressed("Space"))
                 this.reset();
         }
@@ -201,6 +199,7 @@ if (false) {
     b1.keys = ["KeyD", "KeyS", "KeyA", "KeyW"];
     b1.name = "WASDCircle";
     b1.scale = new P.Vec2(1, 0.5);
+    b1.gravity = new P.Vec2(0, 980);
     const n = 4;
     for (let i = 0; i < n; ++i) {
         const c = b1.createChild(MyCollider);
@@ -242,7 +241,7 @@ if (false) {
 }
 
 // --- POOL DEMO ---
-if (true) {
+if (false) {
     class MyBall extends P.RigidBody {
         acceleration = 1000;
         onUpdate(): void {

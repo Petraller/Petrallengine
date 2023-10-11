@@ -78,7 +78,7 @@ function breakSnowflakePair(pair: SnowflakePair): [Snowflake, Snowflake] {
  * Static class for physics and collisions.
  */
 export default class Physics {
-    private static readonly PENETRATION_IMPULSE_STRENGTH = 10;
+    private static readonly PENETRATION_IMPULSE_STRENGTH = 100;
     private static singleton: Physics | null = null;
     private static bodies: Map<Snowflake, Body> = new Map<Snowflake, Body>();
     private static colliders: Map<Snowflake, Collider> = new Map<Snowflake, Collider>();
@@ -98,6 +98,19 @@ export default class Physics {
     }
 
     tick() {
+        // --- DYNAMICS ---
+
+        for (const [_, body] of Physics.bodies) {
+            if (!(body instanceof RigidBody))
+                continue;
+
+            // Gravity
+            body.velocity = Vec2.add(body.velocity, Vec2.multiply(body.gravity, Game.deltaTime / body.mass));
+
+            // Drag
+            body.velocity = Vec2.divide(body.velocity, body.drag + 1);
+        }
+
         // --- COLLISION DETECTION ---
 
         type Collision = [Collider, Collider, CollisionOutput];
@@ -320,12 +333,12 @@ export default class Physics {
                 }
 
                 // Normal response
-                b1cache.pos = Vec2.add(b1cache.pos, Vec2.multiply(col.contactNormal, (1 + col.penetrationDepth) * w[0]));
-                b2cache.pos = Vec2.add(b2cache.pos, Vec2.multiply(col.contactNormal, -(1 + col.penetrationDepth) * w[1]));
+                b1cache.pos = Vec2.add(b1cache.pos, Vec2.multiply(col.contactNormal, (1 + col.penetrationDepth) * w[0] * Game.deltaTime));
+                b2cache.pos = Vec2.add(b2cache.pos, Vec2.multiply(col.contactNormal, -(1 + col.penetrationDepth) * w[1] * Game.deltaTime));
             }
         }
 
-        // --- DYNAMICS ---
+        // --- PHYSICS RESOLUTION ---
 
         for (const [body, next] of cached) {
             body.velocity = next.vel;

@@ -4,21 +4,39 @@
 
 import Body from './Body';
 import Vec2 from '../structures/Vec2';
+import Game from '../Game';
 
 export enum EForceType {
     Impulse,
-    Constant,
+    Force,
 }
 
 /**
  * A node that responds to physics and collisions.
 */
 export default class RigidBody extends Body {
-    mass: number = 1;
+    private _mass: number = 1;
 
-    _force: Vec2 = Vec2.zero;
-    _gravity: Vec2 = Vec2.down;
+    /** The linear drag. */
+    drag: number = 0;
 
-    addForce(force: Vec2) {
+    /** The force of gravity. */
+    gravity: Vec2 = Vec2.zero;
+
+    /** The mass. */
+    get mass() { return this._mass; }
+    set mass(value: number) { this._mass = Math.max(value, Number.EPSILON); }
+
+    addForce(force: Vec2, type: EForceType = EForceType.Impulse) {
+        let a: Vec2;
+        switch (type) {
+            case EForceType.Impulse:
+                a = Vec2.multiply(force, 1 / this.mass);
+                break;
+            case EForceType.Force:
+                a = Vec2.multiply(force, Game.deltaTime / this.mass);
+                break;
+        }
+        this.velocity = Vec2.add(this.velocity, a);
     }
 }
