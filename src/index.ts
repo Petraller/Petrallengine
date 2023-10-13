@@ -322,9 +322,9 @@ if (true) {
         }
     }
 
-    for (let i = 0; i < 128; ++i) {
+    for (let i = 0; i < 64; ++i) {
         const mySprite = P.Game.root.createChild(MySprite);
-        mySprite.image = "assets/sprites/ship_A.png";
+        mySprite.image = Math.random() > 0.5 ? "assets/sprites/effect_purple.png" : "assets/sprites/ship_J.png";
         mySprite.position = new P.Vec2(Math.lerp(-200, 200, Math.random()), Math.lerp(-150, 150, Math.random()));
     }
 }
