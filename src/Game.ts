@@ -80,7 +80,7 @@ export default class Game {
 
             // Update all
             function update(node: Node) {
-                if (!node.isEnabled)
+                if (!node.isEnabled || node.isDestroyed)
                     return;
 
                 if (!node.isStarted) {
@@ -131,7 +131,7 @@ export default class Game {
 
                     // Mark children
                     for (let child of node.children) {
-                        child.isDestroyed = true;
+                        child.destroy();
                     }
 
                     // Unlink from parent
@@ -142,7 +142,8 @@ export default class Game {
                 }
 
                 // Iterate children
-                for (let child of node.children) {
+                const children = node.children.slice();
+                for (let child of children) {
                     destroy(child);
                 }
             }
