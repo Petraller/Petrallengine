@@ -146,7 +146,7 @@ if (false) {
 }
 
 // --- COLLIDERS DEMO ---
-if (true) {
+if (false) {
     class MyBody extends P.RigidBody {
         startingPos: P.Vec2 = P.Vec2.multiply(P.Vec2.left, 100);
         force = 100;
@@ -286,5 +286,45 @@ if (false) {
         collider.restitution = 0.9;
         collider.globalStart = P.Input.normalizedToWorld(new P.Vec2(v[0][0], v[0][1]));
         collider.globalEnd = P.Input.normalizedToWorld(new P.Vec2(v[1][0], v[1][1]));
+    }
+}
+
+// --- SPRITE DEMO ---
+if (true) {
+    class MySprite extends P.Sprite {
+        onUpdate(): void {
+            let color = this.color;
+            if (P.Input.isKey("KeyQ")) {
+                color.r += 1 / 255;
+            }
+            if (P.Input.isKey("KeyA")) {
+                color.r -= 1 / 255;
+            }
+            if (P.Input.isKey("KeyW")) {
+                color.g += 1 / 255;
+            }
+            if (P.Input.isKey("KeyS")) {
+                color.g -= 1 / 255;
+            }
+            if (P.Input.isKey("KeyE")) {
+                color.b += 1 / 255;
+            }
+            if (P.Input.isKey("KeyD")) {
+                color.b -= 1 / 255;
+            }
+            if (P.Input.isKey("KeyR")) {
+                color.a += 1 / 255;
+            }
+            if (P.Input.isKey("KeyF")) {
+                color.a -= 1 / 255;
+            }
+            this.color = color.copy();
+        }
+    }
+
+    for (let i = 0; i < 128; ++i) {
+        const mySprite = P.Game.root.createChild(MySprite);
+        mySprite.image = "assets/sprites/ship_A.png";
+        mySprite.position = new P.Vec2(Math.lerp(-200, 200, Math.random()), Math.lerp(-150, 150, Math.random()));
     }
 }

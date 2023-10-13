@@ -31,7 +31,7 @@ export default class Color implements ICopyable, IEquatable {
 
     /**
      * Converts the color to its #RRGGBBAA hexadecimal string representation.
-     * @param hasAlpha Whether to include the alpha channel.
+     * @param hasAlpha Whether to include the alpha channel (default: false).
      * @returns The hexadecimal string representation.
      */
     toHexString = (hasAlpha: boolean = false) => {
