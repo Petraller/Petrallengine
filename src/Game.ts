@@ -18,9 +18,9 @@ import Physics from './systems/Physics';
  */
 export default class Game {
     /** The build number. */
-    static readonly BUILD = 2;
+    static readonly BUILD = 3;
     /** The version. */
-    static readonly VERSION = "0.0.2";
+    static readonly VERSION = "0.0.3";
     /** The number of scheduled frame updates per second. */
     static readonly FRAME_RATE = 60;
     /** The scheduled interval between frame updates in seconds. */
