@@ -9,13 +9,10 @@
   },
   "scripts": {
     "clean": "rm ./dist/*.*",
-    "build": "parcel build",
+    "build": "(rm -r ./dist/ || true) && rollup -c rollup.config.js",
     "dev": "(rm -r .parcel-cache/ || true) && parcel ./src/index.html --dist-dir dev"
   },
   "type": "module",
-  "source": "./src/Petrallengine.ts",
-  "module": "./dist/Petrallengine.mjs",
-  "types": "./dist/Petrallengine.d.ts",
   "devDependencies": {
     "@parcel/packager-ts": "^2.9.3",
     "@parcel/transformer-typescript-types": "^2.9.3",
