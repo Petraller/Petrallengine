@@ -16,10 +16,10 @@ export default class Color implements ICopyable, IEquatable {
     private _a: number = 1;
 
     constructor(r: number, g: number, b: number, a?: number) {
-        this._r = Math.clamp(r, 0, 1);
-        this._g = Math.clamp(g, 0, 1);
-        this._b = Math.clamp(b, 0, 1);
-        this._a = Math.clamp(a ?? 1, 0, 1);
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.a = a ?? 1;
     }
 
     copy = () => new Color(this.r, this.g, this.b, this.a);
@@ -27,15 +27,19 @@ export default class Color implements ICopyable, IEquatable {
 
     /** The red component. */
     get r() { return this._r; }
+    set r(value: number) { this._r = Math.clamp(value, 0, 1); }
 
     /** The green component. */
     get g() { return this._g; }
+    set g(value: number) { this._g = Math.clamp(value, 0, 1); }
 
     /** The blue component. */
     get b() { return this._b; }
+    set b(value: number) { this._b = Math.clamp(value, 0, 1); }
 
     /** The alpha component. */
     get a() { return this._a; }
+    set a(value: number) { this._a = Math.clamp(value, 0, 1); }
 
     /** The tuple representation of this color. */
     toTuple = (): [number, number, number, number] => [this.r, this.g, this.b, this.a];
