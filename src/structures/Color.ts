@@ -71,12 +71,12 @@ export default class Color implements ICopyable, IEquatable {
             h = Math.mod((this.g - this.b) / delta, 6);
         }
         else if (cmax === this.g) {
-            h = (this.g - this.b) / delta + 2;
+            h = (this.b - this.r) / delta + 2;
         }
         else {
-            h = (this.g - this.b) / delta + 4;
+            h = (this.r - this.g) / delta + 4;
         }
-        return { h, s, v };
+        return { h: h / 6, s, v };
     }
 
     /**
@@ -93,12 +93,12 @@ export default class Color implements ICopyable, IEquatable {
             h = Math.mod((this.g - this.b) / delta, 6);
         }
         else if (cmax === this.g) {
-            h = (this.g - this.b) / delta + 2;
+            h = (this.b - this.r) / delta + 2;
         }
         else {
-            h = (this.g - this.b) / delta + 4;
+            h = (this.r - this.g) / delta + 4;
         }
-        return { h, s, l };
+        return { h: h / 6, s, l };
     }
 
     /** Black. */
