@@ -46,6 +46,9 @@ export default class Vec2 implements ICopyable, IEquatable {
     /** The value of the maximum component of this vector. */
     get maxComponent() { return this.x > this.y ? this.x : this.y; }
 
+    /** The tuple representation of this vector. */
+    toTuple = (): [number, number] => [this.x, this.y];
+
     /** The zero vector. */
     static get zero() { return new Vec2(0, 0); }
     /** The half vector. */
@@ -171,14 +174,14 @@ export default class Vec2 implements ICopyable, IEquatable {
     }
 
     /**
-     * Converts an arbitrary object with x and y properties to a vector.
+     * Converts an arbitrary object with `x` and `y` properties to a vector.
      * @param obj The object.
      * @returns The vector.
      */
     static fromObjXY = (obj: { x: number, y: number }) => new Vec2(obj.x, obj.y);
 
     /**
-     * Converts an arbitrary object with width and height properties to a vector.
+     * Converts an arbitrary object with `width` and `height` properties to a vector.
      * @param obj The object.
      * @returns The vector.
      */
