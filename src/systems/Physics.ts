@@ -3,7 +3,6 @@
  */
 
 import { Snowflake } from '../Snowflake';
-import Game from '../Game';
 import Body from '../nodes/Body';
 import CircleCollider from '../nodes/CircleCollider';
 import Collider from '../nodes/Collider';
@@ -97,7 +96,7 @@ export default class Physics {
         Physics.singleton = this;
     }
 
-    tick() {
+    tick(deltaTime: number) {
         // --- DYNAMICS ---
 
         for (const [_, body] of Physics.bodies) {
@@ -105,7 +104,7 @@ export default class Physics {
                 continue;
 
             // Gravity
-            body.velocity = Vec2.add(body.velocity, Vec2.multiply(body.gravity, Game.deltaTime / body.mass));
+            body.velocity = Vec2.add(body.velocity, Vec2.multiply(body.gravity, deltaTime / body.mass));
 
             // Drag
             body.velocity = Vec2.divide(body.velocity, body.drag + 1);
@@ -198,8 +197,8 @@ export default class Physics {
                 }
 
                 // Extend bounds
-                const bndi = Bounds.extend(ci.bounds, Vec2.multiply(bi.velocity, Game.deltaTime));
-                const bndj = Bounds.extend(cj.bounds, Vec2.multiply(bj.velocity, Game.deltaTime));
+                const bndi = Bounds.extend(ci.bounds, Vec2.multiply(bi.velocity, deltaTime));
+                const bndj = Bounds.extend(cj.bounds, Vec2.multiply(bj.velocity, deltaTime));
 
                 // X limits
                 if (bndj.min.x > bndi.max.x) {
@@ -222,11 +221,11 @@ export default class Physics {
                     // Circle-circle
                     const col = Physics.circleCircleIntersection({
                         position: ci.globalPosition,
-                        velocity: Vec2.multiply(bi.velocity, Game.deltaTime),
+                        velocity: Vec2.multiply(bi.velocity, deltaTime),
                         radius: ci.globalRadius
                     }, {
                         position: cj.globalPosition,
-                        velocity: Vec2.multiply(bj.velocity, Game.deltaTime),
+                        velocity: Vec2.multiply(bj.velocity, deltaTime),
                         radius: cj.globalRadius
                     });
                     if (col.penetrationDepth > 0 || col.willIntersect) {
@@ -243,11 +242,11 @@ export default class Physics {
                     const bline = (cline == ci) ? bi : bj;
                     const col = Physics.circleLineSegmentIntersection({
                         position: ccircle.globalPosition,
-                        velocity: Vec2.multiply(bcircle.velocity, Game.deltaTime),
+                        velocity: Vec2.multiply(bcircle.velocity, deltaTime),
                         radius: ccircle.globalRadius
                     }, {
                         position: cline.globalPosition,
-                        velocity: Vec2.multiply(bline.velocity, Game.deltaTime),
+                        velocity: Vec2.multiply(bline.velocity, deltaTime),
                         direction: cline.globalDirection
                     });
                     if (col.penetrationDepth > 0 || col.willIntersect) {
@@ -322,12 +321,12 @@ export default class Physics {
 
                     // Magnitude of velocity in direction of normal
                     const [a1, a2] = [
-                        Vec2.dot(Vec2.multiply(b1.velocity, Game.deltaTime), col.contactNormal),
-                        Vec2.dot(Vec2.multiply(b2.velocity, Game.deltaTime), col.contactNormal)];
+                        Vec2.dot(Vec2.multiply(b1.velocity, deltaTime), col.contactNormal),
+                        Vec2.dot(Vec2.multiply(b2.velocity, deltaTime), col.contactNormal)];
 
                     // Get calculated reflected velocities and position
-                    const reflVel1 = Vec2.multiply(Vec2.add(Vec2.multiply(b1.velocity, Game.deltaTime), Vec2.multiply(col.contactNormal, 2 * (a2 - a1) * w[0])), restitution);
-                    const reflVel2 = Vec2.multiply(Vec2.add(Vec2.multiply(b2.velocity, Game.deltaTime), Vec2.multiply(col.contactNormal, 2 * (a1 - a2) * w[1])), restitution);
+                    const reflVel1 = Vec2.multiply(Vec2.add(Vec2.multiply(b1.velocity, deltaTime), Vec2.multiply(col.contactNormal, 2 * (a2 - a1) * w[0])), restitution);
+                    const reflVel2 = Vec2.multiply(Vec2.add(Vec2.multiply(b2.velocity, deltaTime), Vec2.multiply(col.contactNormal, 2 * (a1 - a2) * w[1])), restitution);
                     const reflPos1 = Vec2.add(col.intersectPos1, Vec2.multiply(reflVel1, (1 - col.intersectTime)));
                     const reflPos2 = Vec2.add(col.intersectPos2, Vec2.multiply(reflVel2, (1 - col.intersectTime)));
 
@@ -338,8 +337,8 @@ export default class Physics {
                     // Accumulate deltas
                     let dp1 = Vec2.subtract(Vec2.subtract(reflPos1, c1Off), b1cache.pos);
                     let dp2 = Vec2.subtract(Vec2.subtract(reflPos2, c2Off), b2cache.pos);
-                    let dv1 = Vec2.subtract(Vec2.divide(reflVel1, Game.deltaTime), b1cache.vel);
-                    let dv2 = Vec2.subtract(Vec2.divide(reflVel2, Game.deltaTime), b2cache.vel);
+                    let dv1 = Vec2.subtract(Vec2.divide(reflVel1, deltaTime), b1cache.vel);
+                    let dv2 = Vec2.subtract(Vec2.divide(reflVel2, deltaTime), b2cache.vel);
 
                     b1cache.pos = Vec2.add(b1cache.pos, dp1);
                     b2cache.pos = Vec2.add(b2cache.pos, dp2);
@@ -354,8 +353,8 @@ export default class Physics {
                 }
 
                 // Normal response
-                b1cache.pos = Vec2.add(b1cache.pos, Vec2.multiply(col.contactNormal, (1 + col.penetrationDepth) * w[0] * Game.deltaTime));
-                b2cache.pos = Vec2.add(b2cache.pos, Vec2.multiply(col.contactNormal, -(1 + col.penetrationDepth) * w[1] * Game.deltaTime));
+                b1cache.pos = Vec2.add(b1cache.pos, Vec2.multiply(col.contactNormal, (1 + col.penetrationDepth) * w[0] * deltaTime));
+                b2cache.pos = Vec2.add(b2cache.pos, Vec2.multiply(col.contactNormal, -(1 + col.penetrationDepth) * w[1] * deltaTime));
             }
         }
 
@@ -363,7 +362,7 @@ export default class Physics {
 
         for (const [body, next] of cached) {
             body.velocity = next.vel;
-            body.globalPosition = Vec2.add(next.pos, Vec2.multiply(next.vel, Game.deltaTime));
+            body.globalPosition = Vec2.add(next.pos, Vec2.multiply(next.vel, deltaTime));
         }
     }
 

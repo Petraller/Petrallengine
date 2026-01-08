@@ -150,7 +150,7 @@ export default class Game {
             destroy(Game.rootNode);
 
             // Physics step
-            physics.tick();
+            physics.tick(Game.deltaTime);
 
             // Reset
             context.reset();
