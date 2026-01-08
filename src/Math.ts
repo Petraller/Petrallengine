@@ -13,6 +13,8 @@ interface Math {
      */
     lerp(x: number, y: number, t: number): number;
 
+    slerp(x:number, y:number, t:number):number;
+
     /**
      * Clamps a value between two values.
      * @param x The value to clamp.
@@ -34,5 +36,6 @@ interface Math {
 }
 
 Math.lerp = (x: number, y: number, t: number) => x * (1 - t) + y * t;
+Math.slerp = (x: number, y: number, t: number) => x * (1 - Math.sin(t * Math.PI / 2)) + y * Math.sin(t * Math.PI / 2);
 Math.clamp = (x: number, min: number, max: number) => Math.min(Math.max(x, min), max);
 Math.mod = (x: number, y: number) => (x >= 0) ? (x % Math.abs(y)) : (Math.abs(y) - (-x % Math.abs((y))) % Math.abs(y));

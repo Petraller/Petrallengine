@@ -67,14 +67,16 @@ export default class Color implements ICopyable, IEquatable {
         const cmin = Math.min(this.r, this.g, this.b);
         const delta = cmax - cmin;
         let [h, s, v] = [0, cmax === 0 ? 0 : delta / cmax, cmax];
-        if (cmax === this.r) {
-            h = Math.mod((this.g - this.b) / delta, 6);
-        }
-        else if (cmax === this.g) {
-            h = (this.b - this.r) / delta + 2;
-        }
-        else {
-            h = (this.r - this.g) / delta + 4;
+        if (delta > 0) {
+            if (cmax === this.r) {
+                h = Math.mod((this.g - this.b) / delta, 6);
+            }
+            else if (cmax === this.g) {
+                h = (this.b - this.r) / delta + 2;
+            }
+            else {
+                h = (this.r - this.g) / delta + 4;
+            }
         }
         return { h: h / 6, s, v };
     }
@@ -89,14 +91,16 @@ export default class Color implements ICopyable, IEquatable {
         const delta = cmax - cmin;
         let [h, s, l] = [0, 0, (cmax + cmin) / 2];
         s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
-        if (cmax === this.r) {
-            h = Math.mod((this.g - this.b) / delta, 6);
-        }
-        else if (cmax === this.g) {
-            h = (this.b - this.r) / delta + 2;
-        }
-        else {
-            h = (this.r - this.g) / delta + 4;
+        if (delta > 0) {
+            if (cmax === this.r) {
+                h = Math.mod((this.g - this.b) / delta, 6);
+            }
+            else if (cmax === this.g) {
+                h = (this.b - this.r) / delta + 2;
+            }
+            else {
+                h = (this.r - this.g) / delta + 4;
+            }
         }
         return { h: h / 6, s, l };
     }
@@ -131,27 +135,61 @@ export default class Color implements ICopyable, IEquatable {
      */
     static lerp(c1: Color, c2: Color, t: number) {
         return new Color(
-            c1.r * (1 - t) + c2.r * t,
-            c1.g * (1 - t) + c2.g * t,
-            c1.b * (1 - t) + c2.b * t,
-            c1.a * (1 - t) + c2.a * t);
+            Math.lerp(c1.r, c2.r, t),
+            Math.lerp(c1.g, c2.g, t),
+            Math.lerp(c1.b, c2.b, t),
+            Math.lerp(c1.a, c2.a, t));
     }
 
     /**
      * Spherically linearly interpolates from one color to another.
+     * 
+     * Generally will result in less dark colors compared to `lerp`.
      * @param c1 The first color.
      * @param c2 The second color.
      * @param t The amount to interpolate by.
      * @returns The interpolated color.
      */
     static slerp(c1: Color, c2: Color, t: number) {
-        const func = (t: number) => Math.sin(t * Math.PI / 2)
-        const [u, v] = [func(1 - t), func(t)];
         return new Color(
-            c1.r * u + c2.r * v,
-            c1.g * u + c2.g * v,
-            c1.b * u + c2.b * v,
-            c1.a * u + c2.a * v);
+            Math.slerp(c1.r, c2.r, t),
+            Math.slerp(c1.g, c2.g, t),
+            Math.slerp(c1.b, c2.b, t),
+            Math.slerp(c1.a, c2.a, t));
+    }
+
+    /**
+     * Linearly interpolates from one color to another using HSV.
+     * @param c1 The first color.
+     * @param c2 The second color.
+     * @param t The amount to interpolate by.
+     * @returns The interpolated color.
+     */
+    static hueLerp(c1: Color, c2: Color, t: number) {
+        const hsv1 = c1.toHSV();
+        const hsv2 = c2.toHSV();
+        return Color.fromHSV(
+            Math.abs(hsv1.h - hsv2.h) < 0.5 ? Math.lerp(hsv1.h, hsv2.h, t) : (hsv1.h > hsv2.h) ? Math.lerp(hsv1.h - 1, hsv2.h, t) : Math.lerp(hsv1.h, hsv2.h - 1, t),
+            Math.lerp(hsv1.s, hsv2.s, t),
+            Math.lerp(hsv1.v, hsv2.v, t));
+    }
+
+    /**
+     * Spherically linearly interpolates from one color to another using HSV.
+     * 
+     * Generally will result in less dark colors compared to `hueLerp`.
+     * @param c1 The first color.
+     * @param c2 The second color.
+     * @param t The amount to interpolate by.
+     * @returns The interpolated color.
+     */
+    static hueSlerp(c1: Color, c2: Color, t: number) {
+        const hsv1 = c1.toHSV();
+        const hsv2 = c2.toHSV();
+        return Color.fromHSV(
+            Math.abs(hsv1.h - hsv2.h) < 0.5 ? Math.lerp(hsv1.h, hsv2.h, t) : (hsv1.h > hsv2.h) ? Math.lerp(hsv1.h - 1, hsv2.h, t) : Math.lerp(hsv1.h, hsv2.h - 1, t),
+            Math.slerp(hsv1.s, hsv2.s, t),
+            Math.slerp(hsv1.v, hsv2.v, t));
     }
 
     /**
@@ -176,7 +214,7 @@ export default class Color implements ICopyable, IEquatable {
      * @returns The color.
      */
     static fromHSV = (h: number, s: number, v: number) => {
-        [h, s, v] = [Math.clamp(h, 0, 1), Math.clamp(s, 0, 1), Math.clamp(v, 0, 1)];
+        [h, s, v] = [Math.mod(h, 1), Math.clamp(s, 0, 1), Math.clamp(v, 0, 1)];
         h = h * 360;
         const c = s * v;
         const x = c * (1 - Math.abs((h / 60) % 2 - 1));
@@ -211,7 +249,7 @@ export default class Color implements ICopyable, IEquatable {
      * @returns The color.
      */
     static fromHSL = (h: number, s: number, l: number) => {
-        [h, s, l] = [Math.clamp(h, 0, 1), Math.clamp(s, 0, 1), Math.clamp(l, 0, 1)];
+        [h, s, l] = [Math.mod(h, 1), Math.clamp(s, 0, 1), Math.clamp(l, 0, 1)];
         h = h * 360;
         const c = s * (1 - Math.abs(2 * l - 1));
         const x = c * (1 - Math.abs((h / 60) % 2 - 1));
