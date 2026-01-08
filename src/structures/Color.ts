@@ -10,24 +10,35 @@ import IEquatable from './IEquatable';
  * Representation of a RGBA color.
  */
 export default class Color implements ICopyable, IEquatable {
-    /** The red component. */
-    r: number = 0;
-    /** The green component. */
-    g: number = 0;
-    /** The blue component. */
-    b: number = 0;
-    /** The alpha component. */
-    a: number = 1;
+    private _r: number = 0;
+    private _g: number = 0;
+    private _b: number = 0;
+    private _a: number = 1;
 
     constructor(r: number, g: number, b: number, a?: number) {
-        this.r = Math.clamp(r, 0, 1);
-        this.g = Math.clamp(g, 0, 1);
-        this.b = Math.clamp(b, 0, 1);
-        this.a = Math.clamp(a ?? 1, 0, 1);
+        this._r = Math.clamp(r, 0, 1);
+        this._g = Math.clamp(g, 0, 1);
+        this._b = Math.clamp(b, 0, 1);
+        this._a = Math.clamp(a ?? 1, 0, 1);
     }
 
     copy = () => new Color(this.r, this.g, this.b, this.a);
     equals = (other: Color) => this.r == other.r && this.g == other.g && this.b == other.b && this.a == other.a;
+
+    /** The red component. */
+    get r() { return this._r; }
+
+    /** The green component. */
+    get g() { return this._g; }
+
+    /** The blue component. */
+    get b() { return this._b; }
+
+    /** The alpha component. */
+    get a() { return this._a; }
+
+    /** The tuple representation of this color. */
+    toTuple = (): [number, number, number, number] => [this.r, this.g, this.b, this.a];
 
     /**
      * Converts the color to its #RRGGBBAA hexadecimal string representation.
@@ -62,6 +73,28 @@ export default class Color implements ICopyable, IEquatable {
             h = (this.g - this.b) / delta + 4;
         }
         return { h, s, v };
+    }
+
+    /**
+     * Converts the color to its HSL representation.
+     * @returns The HSL representation.
+     */
+    toHSL = () => {
+        const cmax = Math.max(this.r, this.g, this.b);
+        const cmin = Math.min(this.r, this.g, this.b);
+        const delta = cmax - cmin;
+        let [h, s, l] = [0, 0, (cmax + cmin) / 2];
+        s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+        if (cmax === this.r) {
+            h = Math.mod((this.g - this.b) / delta, 6);
+        }
+        else if (cmax === this.g) {
+            h = (this.g - this.b) / delta + 2;
+        }
+        else {
+            h = (this.g - this.b) / delta + 4;
+        }
+        return { h, s, l };
     }
 
     /** Black. */
@@ -139,10 +172,46 @@ export default class Color implements ICopyable, IEquatable {
      * @returns The color.
      */
     static fromHSV = (h: number, s: number, v: number) => {
+        [h, s, v] = [Math.clamp(h, 0, 1), Math.clamp(s, 0, 1), Math.clamp(v, 0, 1)];
         h = h * 360;
         const c = s * v;
         const x = c * (1 - Math.abs((h / 60) % 2 - 1));
         const m = v - c;
+        let [r, g, b] = [0, 0, 0];
+        if (h < 60) {
+            [r, g, b] = [c, x, 0];
+        }
+        else if (h < 120) {
+            [r, g, b] = [x, c, 0];
+        }
+        else if (h < 180) {
+            [r, g, b] = [0, c, x];
+        }
+        else if (h < 240) {
+            [r, g, b] = [0, x, c];
+        }
+        else if (h < 300) {
+            [r, g, b] = [x, 0, c];
+        }
+        else {
+            [r, g, b] = [c, 0, x];
+        }
+        return new Color(r + m, g + m, b + m);
+    }
+
+    /**
+     * Creates a color from its HSL representation.
+     * @param h The hue.
+     * @param s The saturation.
+     * @param l The lightness.
+     * @returns The color.
+     */
+    static fromHSL = (h: number, s: number, l: number) => {
+        [h, s, l] = [Math.clamp(h, 0, 1), Math.clamp(s, 0, 1), Math.clamp(l, 0, 1)];
+        h = h * 360;
+        const c = s * (1 - Math.abs(2 * l - 1));
+        const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+        const m = l - c / 2;
         let [r, g, b] = [0, 0, 0];
         if (h < 60) {
             [r, g, b] = [c, x, 0];
