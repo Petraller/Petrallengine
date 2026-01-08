@@ -16,7 +16,7 @@ export default class Path implements ICopyable {
     points: Vec2[] = [];
 
     constructor(points: Vec2[]) {
-        this.points = points.slice();
+        this.points = points.map(e => e.copy());
     }
 
     copy = () => new Path(this.points);
@@ -56,6 +56,8 @@ export default class Path implements ICopyable {
 
     /**
      * Determines if a point exists inside this path.
+     * 
+     * Assumes that the path is convex.
      * @param point The point.
      * @returns Whether the point exists inside this path.
      */
