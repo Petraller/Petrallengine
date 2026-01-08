@@ -161,7 +161,7 @@ if (false) {
         onUpdate(): void {
             for (let k = 0; k < this.keys.length; ++k) {
                 if (P.Input.isKey(this.keys[k])) {
-                    this.addForce(P.Vec2.multiply(P.Vec2.rotate(P.Vec2.right, k * 90), this.force));
+                    this.addImpulse(P.Vec2.multiply(P.Vec2.rotate(P.Vec2.right, k * 90), this.force));
                 }
             }
             if (P.Input.isKey("KeyQ")) {

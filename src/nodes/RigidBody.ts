@@ -4,12 +4,6 @@
 
 import Body from './Body';
 import Vec2 from '../structures/Vec2';
-import Game from '../Game';
-
-export enum EForceType {
-    Impulse,
-    Force,
-}
 
 /**
  * A node that responds to physics and collisions.
@@ -27,16 +21,7 @@ export default class RigidBody extends Body {
     get mass() { return this._mass; }
     set mass(value: number) { this._mass = Math.max(value, Number.EPSILON); }
 
-    addForce(force: Vec2, type: EForceType = EForceType.Impulse) {
-        let a: Vec2;
-        switch (type) {
-            case EForceType.Impulse:
-                a = Vec2.multiply(force, 1 / this.mass);
-                break;
-            case EForceType.Force:
-                a = Vec2.multiply(force, Game.deltaTime / this.mass);
-                break;
-        }
-        this.velocity = Vec2.add(this.velocity, a);
+    addImpulse(impulse: Vec2) {
+        this.velocity = Vec2.add(this.velocity, Vec2.multiply(impulse, 1 / this.mass));
     }
 }

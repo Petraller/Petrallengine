@@ -12,7 +12,7 @@ export { type default as IDebugDrawable } from "./nodes/IDebugDrawable";
 export { type default as IDrawable } from "./nodes/IDrawable";
 export { default as LineCollider } from "./nodes/LineCollider";
 export { default as Node, type Constructor as Constructor } from "./nodes/Node";
-export { default as RigidBody, EForceType as EForceType } from "./nodes/RigidBody";
+export { default as RigidBody } from "./nodes/RigidBody";
 export { default as Sprite } from "./nodes/Sprite";
 
 export { default as Bounds } from "./structures/Bounds";
