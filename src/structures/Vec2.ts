@@ -185,13 +185,6 @@ export default class Vec2 implements ICopyable, IEquatable {
     static fromObjWH = (obj: { width: number, height: number }) => new Vec2(obj.width, obj.height);
 
     /**
-     * Converts a 3-tuple to a vector, omitting the last element of the tuple.
-     * @param obj The 3-tuple.
-     * @returns The vector.
-     */
-    static from3Tuple = (obj: [number, number, number]) => new Vec2(obj[0], obj[1]);
-
-    /**
      * Linearly interpolates from one vector to another.
      * @param v1 The first vector.
      * @param v2 The second vector.

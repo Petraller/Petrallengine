@@ -41,11 +41,11 @@ export default class Mat3 implements ICopyable, IEquatable {
     }
 
     /** The translation component of the matrix. */
-    get translation() { return Vec2.from3Tuple(this.getColumn(2)); }
+    get translation() { return new Vec2(...this.getColumn(2).slice(0, 2) as [number, number]); }
     set translation(value: Vec2) { this.set(0, 2, value.x).set(1, 2, value.y); }
 
     /** The non-negative scale component of the matrix. */
-    get scale() { return new Vec2(Vec2.from3Tuple(this.getColumn(0)).length, Vec2.from3Tuple(this.getColumn(1)).length); }
+    get scale() { return new Vec2(new Vec2(...this.getColumn(0).slice(0, 2) as [number, number]).length, new Vec2(...this.getColumn(1).slice(0, 2) as [number, number]).length); }
 
     /**
      * Retrieves an element of the matrix.
