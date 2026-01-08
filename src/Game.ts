@@ -14,7 +14,7 @@ import Physics from './systems/Physics';
 /**
  * Static class for Petrallengine.
  * 
- * Call `Petrallengine.create(MY_CANVAS_ELEMENT)` to start building your 2D browser application.
+ * Call `Game.create(MY_CANVAS_ELEMENT)` to start building your 2D browser application.
  */
 export default class Game {
     /** The build number. */
@@ -229,8 +229,8 @@ export default class Game {
                     context.arc(contact[0].x, contact[0].y, 4, 0, 360);
                     context.stroke();
 
-                    physics.debugContacts.set(contact[0], contact[1] - this.deltaTime);
-                    if (contact[1] < 0)
+                    physics.debugContacts.set(contact[0], contact[1] + this.deltaTime);
+                    if (contact[1] > 0.1)
                         physics.debugContacts.delete(contact[0]);
                 }
             }

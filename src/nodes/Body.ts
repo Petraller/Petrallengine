@@ -2,6 +2,7 @@
  * @author Petraller <me@petraller.com>
  */
 
+import IDebugDrawable from './IDebugDrawable';
 import Node from './Node';
 import Vec2 from '../structures/Vec2';
 
@@ -13,7 +14,7 @@ import Vec2 from '../structures/Vec2';
  * - onCollisionUpdate
  * - onCollisionExit
  */
-export default class Body extends Node {
+export default class Body extends Node implements IDebugDrawable {
     private _velocity: Vec2 = Vec2.zero;
 
     /** The velocity of this body. */
@@ -37,4 +38,13 @@ export default class Body extends Node {
      * @param other The colliding body.
      */
     onCollisionExit?(other: Body): void;
+
+    onDebugDraw(context: CanvasRenderingContext2D): void {
+        // Draw vel
+        context.strokeStyle = "#ff00ff";
+        context.beginPath();
+        context.moveTo(...this.globalPosition.toTuple());
+        context.lineTo(...Vec2.add(this.globalPosition, Vec2.multiply(this.velocity, 0.1)).toTuple());
+        context.stroke();
+    }
 }

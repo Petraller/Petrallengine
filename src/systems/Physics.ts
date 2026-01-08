@@ -144,7 +144,7 @@ export default class Physics {
 
             // DEBUG
             if (col.willIntersect) {
-                this.debugContacts.set(col.contactPos, 0.1);
+                this.debugContacts.set(col.contactPos, 0);
             }
         }
 
